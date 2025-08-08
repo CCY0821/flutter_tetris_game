@@ -14,9 +14,7 @@ class TetrisApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Colors.black,
-        body: Center(
-          child: GameBoard(),
-        ),
+        body: GameBoard(),
       ),
     );
   }
