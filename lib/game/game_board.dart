@@ -21,6 +21,7 @@ class _GameBoardState extends State<GameBoard> {
   Timer? gameTimer;
   int score = 0;
   bool isGameOver = false;
+  bool isPaused = false;
 
   @override
   void initState() {
@@ -40,12 +41,15 @@ class _GameBoardState extends State<GameBoard> {
     _initBoard();
     score = 0;
     isGameOver = false;
+    isPaused = false;
     _spawnTetromino();
     gameTimer?.cancel();
     gameTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
-      setState(() {
-        _drop();
-      });
+      if (!isPaused && !isGameOver) {
+        setState(() {
+          _drop();
+        });
+      }
     });
   }
 
@@ -57,22 +61,29 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   void _handleKey(RawKeyEvent event) {
-    if (event is RawKeyDownEvent && !isGameOver) {
-      final key = event.logicalKey.keyLabel;
+    if (event is RawKeyDownEvent) {
+      final key = event.logicalKey.keyLabel.toLowerCase();
+
       setState(() {
-        switch (key) {
-          case 'Arrow Left':
-            _moveLeft();
-            break;
-          case 'Arrow Right':
-            _moveRight();
-            break;
-          case 'Arrow Down':
-            _moveDown();
-            break;
-          case ' ':
-            _rotate();
-            break;
+        if (key == 'p' && !isGameOver) {
+          isPaused = !isPaused;
+        } else if (key == 'r') {
+          _startGame();
+        } else if (!isPaused && !isGameOver) {
+          switch (key) {
+            case 'arrow left':
+              _moveLeft();
+              break;
+            case 'arrow right':
+              _moveRight();
+              break;
+            case 'arrow down':
+              _moveDown();
+              break;
+            case ' ':
+              _rotate();
+              break;
+          }
         }
       });
     }
@@ -83,7 +94,6 @@ class _GameBoardState extends State<GameBoard> {
     if (_canMove(newTetro)) {
       currentTetromino = newTetro;
     } else {
-      // Game Over 判斷：一開始就不能放
       setState(() {
         isGameOver = true;
         gameTimer?.cancel();
@@ -195,51 +205,67 @@ class _GameBoardState extends State<GameBoard> {
         Positioned(
           right: 10,
           top: 10,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              'Score: $score',
-              style: const TextStyle(
-                fontSize: 18,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+          child: Column(
+            children: [
+              _statusBox('Score: $score'),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () => setState(() => isPaused = !isPaused),
+                child: Text(isPaused ? 'Resume' : 'Pause'),
               ),
-            ),
+              const SizedBox(height: 4),
+              ElevatedButton(
+                onPressed: _startGame,
+                child: const Text('Restart'),
+              ),
+            ],
           ),
         ),
 
-        // Game Over 覆蓋層
+        // 遊戲暫停
+        if (isPaused && !isGameOver)
+          _centerOverlay(text: 'PAUSED', color: Colors.amber),
+
+        // 遊戲結束
         if (isGameOver)
-          Positioned.fill(
-            child: Container(
-              color: Colors.black87,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'GAME OVER',
-                      style: TextStyle(
-                        color: Colors.redAccent,
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _startGame,
-                      child: const Text('Restart'),
-                    ),
-                  ],
-                ),
-              ),
+          _centerOverlay(text: 'GAME OVER', color: Colors.redAccent),
+      ],
+    );
+  }
+
+  Widget _statusBox(String text) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 18,
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _centerOverlay({required String text, required Color color}) {
+    return Positioned.fill(
+      child: Container(
+        color: Colors.black87,
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
             ),
           ),
-      ],
+        ),
+      ),
     );
   }
 }
