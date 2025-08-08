@@ -384,3 +384,4 @@ class _BoardPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
+// 測試 commit 是否成功
