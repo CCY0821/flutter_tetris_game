@@ -23,8 +23,9 @@ class _BoardPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.grey
-      ..style = PaintingStyle.stroke;
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
 
     for (int y = 0; y < boardHeight; y++) {
       for (int x = 0; x < boardWidth; x++) {
