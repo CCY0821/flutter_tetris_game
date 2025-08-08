@@ -26,10 +26,8 @@ class _GameBoardState extends State<GameBoard> {
     _initBoard();
     _spawnTetromino();
 
-    // 鍵盤事件監聽（支援 web）
     RawKeyboard.instance.addListener(_handleKey);
 
-    // 掉落 timer
     gameTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
       setState(() {
         _drop();
@@ -47,7 +45,6 @@ class _GameBoardState extends State<GameBoard> {
   void _handleKey(RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       final key = event.logicalKey.keyLabel;
-
       setState(() {
         switch (key) {
           case 'Arrow Left':
@@ -98,6 +95,18 @@ class _GameBoardState extends State<GameBoard> {
         board[y][x] = currentTetromino!.color;
       }
     }
+    _clearFullRows();
+  }
+
+  /// 清除所有填滿的行，並將上方下移
+  void _clearFullRows() {
+    setState(() {
+      board.removeWhere((row) => row.every((cell) => cell != null));
+      int removed = rowCount - board.length;
+      for (int i = 0; i < removed; i++) {
+        board.insert(0, List.generate(colCount, (_) => null));
+      }
+    });
   }
 
   void _drop() {
@@ -174,7 +183,7 @@ class _BoardPainter extends CustomPainter {
           Offset(x * cellSize, 0), Offset(x * cellSize, size.height), paint);
     }
 
-    // 畫鎖定方塊
+    // 畫鎖定的方塊
     for (int y = 0; y < board.length; y++) {
       for (int x = 0; x < board[y].length; x++) {
         if (board[y][x] != null) {
@@ -187,7 +196,7 @@ class _BoardPainter extends CustomPainter {
       }
     }
 
-    // 畫目前下落的方塊
+    // 畫目前方塊
     if (tetromino != null) {
       paint.color = tetromino!.color;
       for (final p in tetromino!.shape) {
