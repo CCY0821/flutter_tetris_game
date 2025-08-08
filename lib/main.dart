@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'game/game_board.dart';
 
 void main() {
-  runApp(const TetrisApp());
+  runApp(const MyApp());
 }
 
-class TetrisApp extends StatelessWidget {
-  const TetrisApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,9 @@ class TetrisApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Colors.black,
-        body: GameBoard(),
+        body: Center(
+          child: GameBoard(),
+        ),
       ),
     );
   }

@@ -1,37 +1,47 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '../core/constants.dart';
-
-enum TetrominoType { I, O }
 
 class Tetromino {
-  final TetrominoType type;
-  List<Point<int>> position;
+  final List<Offset> shape;
   final Color color;
+  int x; // 左上角在棋盤上的位置
+  int y;
 
-  Tetromino._(this.type, this.position, this.color);
+  Tetromino(this.shape, this.color, this.x, this.y);
 
-  factory Tetromino.random() {
-    final type = TetrominoType.values[_random.nextInt(TetrominoType.values.length)];
-    switch (type) {
-      case TetrominoType.I:
-        return Tetromino._(
-          TetrominoType.I,
-          [for (var i = 0; i < 4; i++) Point(i, 0)],
-          Colors.cyan,
-        );
-      case TetrominoType.O:
-        return Tetromino._(
-          TetrominoType.O,
-          [Point(0, 0), Point(1, 0), Point(0, 1), Point(1, 1)],
-          Colors.yellow,
-        );
-    }
-  }
+  static final List<List<Offset>> shapes = [
+    // I
+    [Offset(0, 0), Offset(1, 0), Offset(2, 0), Offset(3, 0)],
+    // O
+    [Offset(0, 0), Offset(1, 0), Offset(0, 1), Offset(1, 1)],
+    // T
+    [Offset(0, 0), Offset(-1, 0), Offset(1, 0), Offset(0, 1)],
+    // S
+    [Offset(0, 0), Offset(1, 0), Offset(0, 1), Offset(-1, 1)],
+    // Z
+    [Offset(0, 0), Offset(-1, 0), Offset(0, 1), Offset(1, 1)],
+    // L
+    [Offset(0, 0), Offset(0, 1), Offset(0, 2), Offset(1, 2)],
+    // J
+    [Offset(0, 0), Offset(0, 1), Offset(0, 2), Offset(-1, 2)],
+  ];
 
-  void moveDown() {
-    position = position.map((p) => Point(p.x, p.y + 1)).toList();
+  static final List<Color> colors = [
+    Colors.cyan,
+    Colors.yellow,
+    Colors.purple,
+    Colors.green,
+    Colors.red,
+    Colors.orange,
+    Colors.blue,
+  ];
+
+  factory Tetromino.random(int boardWidth) {
+    final rand = Random();
+    final index = rand.nextInt(shapes.length);
+    final shape = shapes[index];
+    final color = colors[index];
+    final startX = boardWidth ~/ 2;
+    return Tetromino(shape, color, startX, 0);
   }
 }
-
-final _random = Random();

@@ -1,7 +1,7 @@
-import 'dart:async';
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter/material.dart';
-import '../core/constants.dart';
+import 'package:flutter/services.dart';
 import '../models/tetromino.dart';
 
 class GameBoard extends StatefulWidget {
@@ -12,91 +12,200 @@ class GameBoard extends StatefulWidget {
 }
 
 class _GameBoardState extends State<GameBoard> {
-  Tetromino? currentBlock;
+  static const int rowCount = 20;
+  static const int colCount = 10;
+  static const double cellSize = 20;
+
+  late List<List<Color?>> board;
+  Tetromino? currentTetromino;
   Timer? gameTimer;
 
   @override
   void initState() {
     super.initState();
-    spawnNewBlock();
-    startGameLoop();
-  }
+    _initBoard();
+    _spawnTetromino();
 
-  void spawnNewBlock() {
-    setState(() {
-      currentBlock = Tetromino.random();
-    });
-  }
+    // 鍵盤事件監聽（支援 web）
+    RawKeyboard.instance.addListener(_handleKey);
 
-  void startGameLoop() {
+    // 掉落 timer
     gameTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
-      if (currentBlock == null) return;
       setState(() {
-        currentBlock!.moveDown();
+        _drop();
       });
     });
   }
 
   @override
   void dispose() {
+    RawKeyboard.instance.removeListener(_handleKey);
     gameTimer?.cancel();
     super.dispose();
   }
 
+  void _handleKey(RawKeyEvent event) {
+    if (event is RawKeyDownEvent) {
+      final key = event.logicalKey.keyLabel;
+
+      setState(() {
+        switch (key) {
+          case 'Arrow Left':
+            _moveLeft();
+            break;
+          case 'Arrow Right':
+            _moveRight();
+            break;
+          case 'Arrow Down':
+            _moveDown();
+            break;
+          case ' ':
+            _rotate();
+            break;
+        }
+      });
+    }
+  }
+
+  void _initBoard() {
+    board = List.generate(
+      rowCount,
+      (_) => List.generate(colCount, (_) => null),
+    );
+  }
+
+  void _spawnTetromino() {
+    currentTetromino = Tetromino.random(colCount);
+  }
+
+  bool _canMove(Tetromino tetro,
+      {int dx = 0, int dy = 0, List<Offset>? overrideShape}) {
+    for (final point in overrideShape ?? tetro.shape) {
+      final x = tetro.x + point.dx.toInt() + dx;
+      final y = tetro.y + point.dy.toInt() + dy;
+
+      if (x < 0 || x >= colCount || y >= rowCount) return false;
+      if (y >= 0 && board[y][x] != null) return false;
+    }
+    return true;
+  }
+
+  void _lockTetromino() {
+    for (final point in currentTetromino!.shape) {
+      final x = currentTetromino!.x + point.dx.toInt();
+      final y = currentTetromino!.y + point.dy.toInt();
+      if (x >= 0 && x < colCount && y >= 0 && y < rowCount) {
+        board[y][x] = currentTetromino!.color;
+      }
+    }
+  }
+
+  void _drop() {
+    if (currentTetromino == null) return;
+
+    if (_canMove(currentTetromino!, dy: 1)) {
+      currentTetromino!.y++;
+    } else {
+      _lockTetromino();
+      _spawnTetromino();
+    }
+  }
+
+  void _moveLeft() {
+    if (_canMove(currentTetromino!, dx: -1)) {
+      currentTetromino!.x--;
+    }
+  }
+
+  void _moveRight() {
+    if (_canMove(currentTetromino!, dx: 1)) {
+      currentTetromino!.x++;
+    }
+  }
+
+  void _moveDown() {
+    if (_canMove(currentTetromino!, dy: 1)) {
+      currentTetromino!.y++;
+    }
+  }
+
+  void _rotate() {
+    final rotatedShape =
+        currentTetromino!.shape.map((p) => Offset(-p.dy, p.dx)).toList();
+
+    if (_canMove(currentTetromino!, overrideShape: rotatedShape)) {
+      currentTetromino!.shape
+        ..clear()
+        ..addAll(rotatedShape);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: boardWidth * blockSize,
-        height: boardHeight * blockSize,
-        color: Colors.blueGrey[900],
-        child: CustomPaint(
-          painter: _BoardPainter(currentBlock),
-        ),
+    return SizedBox(
+      width: colCount * cellSize,
+      height: rowCount * cellSize,
+      child: CustomPaint(
+        painter: _BoardPainter(board, currentTetromino),
       ),
     );
   }
 }
 
 class _BoardPainter extends CustomPainter {
-  final Tetromino? block;
+  final List<List<Color?>> board;
+  final Tetromino? tetromino;
 
-  _BoardPainter(this.block);
+  _BoardPainter(this.board, this.tetromino);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.grey[700]!
-      ..style = PaintingStyle.stroke;
+    final paint = Paint();
+    const cellSize = _GameBoardState.cellSize;
 
     // 畫格線
-    for (int y = 0; y < boardHeight; y++) {
-      for (int x = 0; x < boardWidth; x++) {
-        final rect = Rect.fromLTWH(
-          x * blockSize,
-          y * blockSize,
-          blockSize,
-          blockSize,
-        );
-        canvas.drawRect(rect, paint);
+    paint.color = Colors.grey[800]!;
+    for (int y = 0; y <= _GameBoardState.rowCount; y++) {
+      canvas.drawLine(
+          Offset(0, y * cellSize), Offset(size.width, y * cellSize), paint);
+    }
+    for (int x = 0; x <= _GameBoardState.colCount; x++) {
+      canvas.drawLine(
+          Offset(x * cellSize, 0), Offset(x * cellSize, size.height), paint);
+    }
+
+    // 畫鎖定方塊
+    for (int y = 0; y < board.length; y++) {
+      for (int x = 0; x < board[y].length; x++) {
+        if (board[y][x] != null) {
+          paint.color = board[y][x]!;
+          canvas.drawRect(
+            Rect.fromLTWH(x * cellSize, y * cellSize, cellSize, cellSize),
+            paint,
+          );
+        }
       }
     }
 
-    // 畫方塊
-    if (block != null) {
-      final blockPaint = Paint()
-        ..color = block!.color
-        ..style = PaintingStyle.fill;
-
-      for (var p in block!.position) {
-        canvas.drawRect(
-          Rect.fromLTWH(p.x * blockSize, p.y * blockSize, blockSize, blockSize),
-          blockPaint,
-        );
+    // 畫目前下落的方塊
+    if (tetromino != null) {
+      paint.color = tetromino!.color;
+      for (final p in tetromino!.shape) {
+        final x = tetromino!.x + p.dx.toInt();
+        final y = tetromino!.y + p.dy.toInt();
+        if (y >= 0 &&
+            y < board.length &&
+            x >= 0 &&
+            x < board[0].length) {
+          canvas.drawRect(
+            Rect.fromLTWH(x * cellSize, y * cellSize, cellSize, cellSize),
+            paint,
+          );
+        }
       }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _BoardPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
