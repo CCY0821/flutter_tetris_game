@@ -19,6 +19,7 @@ class _GameBoardState extends State<GameBoard> {
   late List<List<Color?>> board;
   Tetromino? currentTetromino;
   Timer? gameTimer;
+  int score = 0;
 
   @override
   void initState() {
@@ -98,14 +99,33 @@ class _GameBoardState extends State<GameBoard> {
     _clearFullRows();
   }
 
-  /// 清除所有填滿的行，並將上方下移
+  /// 消除滿行並加分
   void _clearFullRows() {
-    setState(() {
-      board.removeWhere((row) => row.every((cell) => cell != null));
-      int removed = rowCount - board.length;
-      for (int i = 0; i < removed; i++) {
-        board.insert(0, List.generate(colCount, (_) => null));
+    List<List<Color?>> newBoard = [];
+    int clearedRows = 0;
+
+    for (int y = 0; y < board.length; y++) {
+      if (board[y].every((cell) => cell != null)) {
+        clearedRows++;
+      } else {
+        newBoard.add(board[y]);
       }
+    }
+
+    // 加分邏輯：每行100 + Combo加成（每多一行多加50）
+    if (clearedRows > 0) {
+      int base = 100;
+      int bonus = clearedRows > 1 ? (clearedRows - 1) * 50 : 0;
+      score += clearedRows * base + bonus;
+    }
+
+    // 補回上方空白列
+    for (int i = 0; i < clearedRows; i++) {
+      newBoard.insert(0, List.generate(colCount, (_) => null));
+    }
+
+    setState(() {
+      board = newBoard;
     });
   }
 
@@ -151,12 +171,35 @@ class _GameBoardState extends State<GameBoard> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: colCount * cellSize,
-      height: rowCount * cellSize,
-      child: CustomPaint(
-        painter: _BoardPainter(board, currentTetromino),
-      ),
+    return Stack(
+      children: [
+        SizedBox(
+          width: colCount * cellSize,
+          height: rowCount * cellSize,
+          child: CustomPaint(
+            painter: _BoardPainter(board, currentTetromino),
+          ),
+        ),
+        Positioned(
+          right: 10,
+          top: 10,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              'Score: $score',
+              style: const TextStyle(
+                fontSize: 18,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
