@@ -20,20 +20,13 @@ class _GameBoardState extends State<GameBoard> {
   Tetromino? currentTetromino;
   Timer? gameTimer;
   int score = 0;
+  bool isGameOver = false;
 
   @override
   void initState() {
     super.initState();
-    _initBoard();
-    _spawnTetromino();
-
+    _startGame();
     RawKeyboard.instance.addListener(_handleKey);
-
-    gameTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
-      setState(() {
-        _drop();
-      });
-    });
   }
 
   @override
@@ -43,8 +36,28 @@ class _GameBoardState extends State<GameBoard> {
     super.dispose();
   }
 
+  void _startGame() {
+    _initBoard();
+    score = 0;
+    isGameOver = false;
+    _spawnTetromino();
+    gameTimer?.cancel();
+    gameTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+      setState(() {
+        _drop();
+      });
+    });
+  }
+
+  void _initBoard() {
+    board = List.generate(
+      rowCount,
+      (_) => List.generate(colCount, (_) => null),
+    );
+  }
+
   void _handleKey(RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
+    if (event is RawKeyDownEvent && !isGameOver) {
       final key = event.logicalKey.keyLabel;
       setState(() {
         switch (key) {
@@ -65,15 +78,17 @@ class _GameBoardState extends State<GameBoard> {
     }
   }
 
-  void _initBoard() {
-    board = List.generate(
-      rowCount,
-      (_) => List.generate(colCount, (_) => null),
-    );
-  }
-
   void _spawnTetromino() {
-    currentTetromino = Tetromino.random(colCount);
+    final newTetro = Tetromino.random(colCount);
+    if (_canMove(newTetro)) {
+      currentTetromino = newTetro;
+    } else {
+      // Game Over 判斷：一開始就不能放
+      setState(() {
+        isGameOver = true;
+        gameTimer?.cancel();
+      });
+    }
   }
 
   bool _canMove(Tetromino tetro,
@@ -99,7 +114,6 @@ class _GameBoardState extends State<GameBoard> {
     _clearFullRows();
   }
 
-  /// 消除滿行並加分
   void _clearFullRows() {
     List<List<Color?>> newBoard = [];
     int clearedRows = 0;
@@ -112,21 +126,17 @@ class _GameBoardState extends State<GameBoard> {
       }
     }
 
-    // 加分邏輯：每行100 + Combo加成（每多一行多加50）
     if (clearedRows > 0) {
       int base = 100;
-      int bonus = clearedRows > 1 ? (clearedRows - 1) * 50 : 0;
+      int bonus = (clearedRows - 1) * 50;
       score += clearedRows * base + bonus;
     }
 
-    // 補回上方空白列
     for (int i = 0; i < clearedRows; i++) {
       newBoard.insert(0, List.generate(colCount, (_) => null));
     }
 
-    setState(() {
-      board = newBoard;
-    });
+    board = newBoard;
   }
 
   void _drop() {
@@ -159,13 +169,13 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   void _rotate() {
-    final rotatedShape =
+    final rotated =
         currentTetromino!.shape.map((p) => Offset(-p.dy, p.dx)).toList();
 
-    if (_canMove(currentTetromino!, overrideShape: rotatedShape)) {
+    if (_canMove(currentTetromino!, overrideShape: rotated)) {
       currentTetromino!.shape
         ..clear()
-        ..addAll(rotatedShape);
+        ..addAll(rotated);
     }
   }
 
@@ -180,6 +190,8 @@ class _GameBoardState extends State<GameBoard> {
             painter: _BoardPainter(board, currentTetromino),
           ),
         ),
+
+        // 分數顯示
         Positioned(
           right: 10,
           top: 10,
@@ -199,6 +211,34 @@ class _GameBoardState extends State<GameBoard> {
             ),
           ),
         ),
+
+        // Game Over 覆蓋層
+        if (isGameOver)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black87,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'GAME OVER',
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _startGame,
+                      child: const Text('Restart'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -215,18 +255,22 @@ class _BoardPainter extends CustomPainter {
     final paint = Paint();
     const cellSize = _GameBoardState.cellSize;
 
-    // 畫格線
     paint.color = Colors.grey[800]!;
     for (int y = 0; y <= _GameBoardState.rowCount; y++) {
       canvas.drawLine(
-          Offset(0, y * cellSize), Offset(size.width, y * cellSize), paint);
+        Offset(0, y * cellSize),
+        Offset(size.width, y * cellSize),
+        paint,
+      );
     }
     for (int x = 0; x <= _GameBoardState.colCount; x++) {
       canvas.drawLine(
-          Offset(x * cellSize, 0), Offset(x * cellSize, size.height), paint);
+        Offset(x * cellSize, 0),
+        Offset(x * cellSize, size.height),
+        paint,
+      );
     }
 
-    // 畫鎖定的方塊
     for (int y = 0; y < board.length; y++) {
       for (int x = 0; x < board[y].length; x++) {
         if (board[y][x] != null) {
@@ -239,7 +283,6 @@ class _BoardPainter extends CustomPainter {
       }
     }
 
-    // 畫目前方塊
     if (tetromino != null) {
       paint.color = tetromino!.color;
       for (final p in tetromino!.shape) {
