@@ -18,6 +18,7 @@ class _GameBoardState extends State<GameBoard> {
 
   late List<List<Color?>> board;
   Tetromino? currentTetromino;
+  Tetromino? nextTetromino;
   Timer? gameTimer;
   int score = 0;
   bool isGameOver = false;
@@ -42,7 +43,8 @@ class _GameBoardState extends State<GameBoard> {
     score = 0;
     isGameOver = false;
     isPaused = false;
-    _spawnTetromino();
+    currentTetromino = Tetromino.random(colCount);
+    nextTetromino = Tetromino.random(colCount);
     gameTimer?.cancel();
     gameTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
       if (!isPaused && !isGameOver) {
@@ -90,9 +92,13 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   void _spawnTetromino() {
-    final newTetro = Tetromino.random(colCount);
+    final newTetro = nextTetromino!;
+    newTetro.x = colCount ~/ 2;
+    newTetro.y = 0;
+
     if (_canMove(newTetro)) {
       currentTetromino = newTetro;
+      nextTetromino = Tetromino.random(colCount);
     } else {
       setState(() {
         isGameOver = true;
@@ -191,67 +197,115 @@ class _GameBoardState extends State<GameBoard> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Row(
       children: [
-        SizedBox(
-          width: colCount * cellSize,
-          height: rowCount * cellSize,
-          child: CustomPaint(
-            painter: _BoardPainter(board, currentTetromino),
-          ),
+        // 左側主遊戲區
+        Stack(
+          children: [
+            SizedBox(
+              width: colCount * cellSize,
+              height: rowCount * cellSize,
+              child: CustomPaint(
+                painter: _BoardPainter(board, currentTetromino),
+              ),
+            ),
+
+            // 暫停或 Game Over 蓋板
+            if (isPaused && !isGameOver)
+              _overlayText('PAUSED', Colors.amber),
+            if (isGameOver) _overlayText('GAME OVER', Colors.redAccent),
+          ],
         ),
 
-        // 分數顯示
-        Positioned(
-          right: 10,
-          top: 10,
-          child: Column(
-            children: [
-              _statusBox('Score: $score'),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () => setState(() => isPaused = !isPaused),
-                child: Text(isPaused ? 'Resume' : 'Pause'),
-              ),
-              const SizedBox(height: 4),
-              ElevatedButton(
-                onPressed: _startGame,
-                child: const Text('Restart'),
-              ),
-            ],
-          ),
+        const SizedBox(width: 16),
+
+        // 右側控制區
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _infoBox('Score: $score'),
+            const SizedBox(height: 16),
+            _infoBox('Next'),
+            const SizedBox(height: 8),
+            _nextBlockPreview(),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => setState(() => isPaused = !isPaused),
+              child: Text(isPaused ? 'Resume (P)' : 'Pause (P)'),
+            ),
+            ElevatedButton(
+              onPressed: _startGame,
+              child: const Text('Restart (R)'),
+            ),
+          ],
         ),
-
-        // 遊戲暫停
-        if (isPaused && !isGameOver)
-          _centerOverlay(text: 'PAUSED', color: Colors.amber),
-
-        // 遊戲結束
-        if (isGameOver)
-          _centerOverlay(text: 'GAME OVER', color: Colors.redAccent),
       ],
     );
   }
 
-  Widget _statusBox(String text) {
+  Widget _nextBlockPreview() {
+  const previewSize = 8;
+  const offsetX = 2; // 中央偏移
+  const offsetY = 2;
+
+  final preview = List.generate(
+    previewSize,
+    (_) => List.generate(previewSize, (_) => null as Color?),
+  );
+
+  if (nextTetromino != null) {
+    for (final p in nextTetromino!.shape) {
+      int px = p.dx.toInt() + offsetX;
+      int py = p.dy.toInt() + offsetY;
+      if (py >= 0 &&
+          py < previewSize &&
+          px >= 0 &&
+          px < previewSize) {
+        preview[py][px] = nextTetromino!.color;
+      }
+    }
+  }
+
+  return Container(
+    padding: const EdgeInsets.all(4),
+    decoration: BoxDecoration(
+      color: Colors.black,
+      border: Border.all(color: Colors.white),
+    ),
+    child: Column(
+      children: preview
+          .map((row) => Row(
+                children: row
+                    .map(
+                      (c) => Container(
+                        width: cellSize,
+                        height: cellSize,
+                        margin: const EdgeInsets.all(1),
+                        color: c ?? Colors.transparent,
+                      ),
+                    )
+                    .toList(),
+              ))
+          .toList(),
+    ),
+  );
+}
+
+  Widget _infoBox(String text) {
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.black.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 18,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-        ),
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
     );
   }
 
-  Widget _centerOverlay({required String text, required Color color}) {
+  Widget _overlayText(String text, Color color) {
     return Positioned.fill(
       child: Container(
         color: Colors.black87,
