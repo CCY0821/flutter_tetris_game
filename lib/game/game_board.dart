@@ -33,8 +33,14 @@ class _GameBoardState extends State<GameBoard> {
       onStateChange: () => setState(() {}),
       onGameStart: _startGame,
     );
-    _startGame();
+    _initializeGame();
     RawKeyboard.instance.addListener(_handleKey);
+  }
+
+  void _initializeGame() async {
+    gameState.initBoard(); // 先初始化遊戲板
+    await gameState.initializeAudio();
+    await _startGame();
   }
 
   @override
@@ -45,8 +51,8 @@ class _GameBoardState extends State<GameBoard> {
     super.dispose();
   }
 
-  void _startGame() {
-    gameState.startGame();
+  Future<void> _startGame() async {
+    await gameState.startGame();
     gameTimer?.cancel();
     gameTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
       if (!gameState.isPaused && !gameState.isGameOver) {
@@ -110,6 +116,8 @@ class _GameBoardState extends State<GameBoard> {
               onPressed: _startGame,
               child: const Text('Restart (R)'),
             ),
+            const SizedBox(height: 16),
+            GameUIComponents.audioControlButton(),
           ],
         ),
       ],

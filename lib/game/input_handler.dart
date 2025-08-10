@@ -6,7 +6,7 @@ class InputHandler {
   final GameState gameState;
   final GameLogic gameLogic;
   final VoidCallback onStateChange;
-  final VoidCallback onGameStart;
+  final Future<void> Function() onGameStart;
 
   InputHandler({
     required this.gameState,
@@ -21,6 +21,12 @@ class InputHandler {
 
       if (key == 'p' && !gameState.isGameOver) {
         gameState.isPaused = !gameState.isPaused;
+        // 控制背景音樂暫停/恢復
+        if (gameState.isPaused) {
+          gameState.audioService.pauseBackgroundMusic();
+        } else {
+          gameState.audioService.resumeBackgroundMusic();
+        }
         onStateChange();
       } else if (key == 'r') {
         onGameStart();

@@ -51,6 +51,9 @@ class GameLogic {
       int base = 100;
       int bonus = (clearedRows - 1) * 50;
       gameState.score += clearedRows * base + bonus;
+      
+      // 播放消除音效
+      gameState.audioService.playSoundEffect('line_clear');
     }
 
     for (int i = 0; i < clearedRows; i++) {
@@ -66,6 +69,8 @@ class GameLogic {
     if (canMove(gameState.currentTetromino!, dy: 1)) {
       gameState.currentTetromino!.y++;
     } else {
+      // 播放方塊落地音效
+      gameState.audioService.playSoundEffect('piece_drop');
       lockTetromino();
       spawnTetromino();
     }
@@ -81,6 +86,10 @@ class GameLogic {
       gameState.nextTetromino = Tetromino.random(GameState.colCount);
     } else {
       gameState.isGameOver = true;
+      // 播放遊戲結束音效
+      gameState.audioService.playSoundEffect('game_over');
+      // 停止背景音樂
+      gameState.audioService.stopBackgroundMusic();
     }
   }
 
@@ -111,6 +120,8 @@ class GameLogic {
       gameState.currentTetromino!.shape
         ..clear()
         ..addAll(rotated);
+      // 播放旋轉音效
+      gameState.audioService.playSoundEffect('piece_rotate');
     }
   }
 }
