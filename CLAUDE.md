@@ -40,6 +40,7 @@ flutter build apk
 - Maintain existing code style and patterns
 - Test changes when possible before committing
 - Focus on game mechanics, UI, and user experience improvements
+- When adding new features or refactoring code, maintain existing functionality as the top priority
 
 ## Testing
 Before making commits, ensure:

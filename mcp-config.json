@@ -1,0 +1,45 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/test",
+        "--config=playwright.config.js"
+      ],
+      "env": {
+        "NODE_ENV": "test"
+      }
+    }
+  },
+  "testConfiguration": {
+    "baseURL": "http://localhost:8080",
+    "testDir": "./tests",
+    "timeout": 30000,
+    "retries": 2,
+    "browsers": ["chromium", "firefox", "webkit"],
+    "screenshots": {
+      "mode": "only-on-failure",
+      "fullPage": true
+    },
+    "video": {
+      "mode": "retain-on-failure"
+    }
+  },
+  "flutterApp": {
+    "name": "flutter_tetris_game",
+    "url": "http://localhost:8080",
+    "selectors": {
+      "gameCanvas": "flt-canvas",
+      "gameContainer": "flt-glass-pane",
+      "mainApp": "flutter-view"
+    },
+    "controls": {
+      "left": "ArrowLeft",
+      "right": "ArrowRight", 
+      "down": "ArrowDown",
+      "rotate": "ArrowUp",
+      "pause": "Space",
+      "restart": "r"
+    }
+  }
+}
