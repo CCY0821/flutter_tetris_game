@@ -17,6 +17,12 @@ class GameState {
   bool isGameOver = false;
   bool isPaused = false;
 
+  // 速度系統相關
+  static const int baseSpeed = 500; // 起始速度 (毫秒)
+  static const int maxSpeed = 300;  // 最高速度 (毫秒)
+  static const int speedIncrease = 20; // 每階段加速 (毫秒)
+  static const int scorePerLevel = 1000; // 每級所需分數
+
   void initBoard() {
     board = List.generate(
       rowCount,
@@ -35,9 +41,32 @@ class GameState {
     isPaused = false;
     currentTetromino = Tetromino.random(colCount);
     nextTetromino = Tetromino.random(colCount);
-    
+
     // 不自動播放背景音樂，等待用戶互動
     // await audioService.playBackgroundMusic();
+  }
+
+  // 獲取當前遊戲速度 (毫秒)
+  int get dropSpeed {
+    int level = score ~/ scorePerLevel;
+    int currentSpeed = baseSpeed - (level * speedIncrease);
+    return currentSpeed < maxSpeed ? maxSpeed : currentSpeed;
+  }
+
+  // 獲取當前速度等級
+  int get speedLevel {
+    return (score ~/ scorePerLevel) + 1;
+  }
+
+  // 獲取下一個速度等級所需分數
+  int get nextLevelScore {
+    int currentLevel = score ~/ scorePerLevel;
+    return (currentLevel + 1) * scorePerLevel;
+  }
+
+  // 獲取到下一個等級還需要的分數
+  int get scoreToNextLevel {
+    return nextLevelScore - score;
   }
 
   Future<void> dispose() async {

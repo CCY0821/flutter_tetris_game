@@ -21,6 +21,7 @@ class _GameBoardState extends State<GameBoard> {
   late GameLogic gameLogic;
   late InputHandler inputHandler;
   Timer? gameTimer;
+  int _currentSpeed = 500; // 追蹤當前速度
 
   @override
   void initState() {
@@ -53,18 +54,31 @@ class _GameBoardState extends State<GameBoard> {
 
   Future<void> _startGame() async {
     await gameState.startGame();
+    _currentSpeed = gameState.dropSpeed;
+    _startGameTimer();
+    setState(() {});
+  }
+
+  void _startGameTimer() {
     gameTimer?.cancel();
-    gameTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+    gameTimer = Timer.periodic(Duration(milliseconds: _currentSpeed), (_) {
       if (!gameState.isPaused && !gameState.isGameOver) {
         setState(() {
           gameLogic.drop();
+          
+          // 檢查速度是否需要更新
+          int newSpeed = gameState.dropSpeed;
+          if (newSpeed != _currentSpeed) {
+            _currentSpeed = newSpeed;
+            _startGameTimer(); // 重新啟動計時器使用新速度
+          }
+          
           if (gameState.isGameOver) {
             gameTimer?.cancel();
           }
         });
       }
     });
-    setState(() {});
   }
 
   void _handleKey(RawKeyEvent event) {
@@ -107,6 +121,10 @@ class _GameBoardState extends State<GameBoard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               GameUIComponents.infoBox('Score: ${gameState.score}'),
+              const SizedBox(height: 8),
+              GameUIComponents.infoBox('Level: ${gameState.speedLevel}'),
+              const SizedBox(height: 8),
+              GameUIComponents.infoBox('Speed: ${gameState.dropSpeed}ms'),
               const SizedBox(height: 16),
               GameUIComponents.infoBox('Next'),
               const SizedBox(height: 8),
