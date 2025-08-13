@@ -265,4 +265,55 @@ class GameUIComponents {
       },
     );
   }
+
+  /// Ghost piece 控制按鈕
+  static Widget ghostPieceControlButton(bool isEnabled, VoidCallback onToggle) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: GameTheme.panelGradient,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: GameTheme.boardBorder,
+          width: 1,
+        ),
+        boxShadow: GameTheme.cardShadow,
+      ),
+      child: Column(
+        children: [
+          Text(
+            'GHOST',
+            style: GameTheme.accentStyle.copyWith(fontSize: 12),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: isEnabled
+                  ? GameTheme.buttonPrimary.withOpacity(0.8)
+                  : GameTheme.gridLine,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              onPressed: onToggle,
+              icon: Icon(
+                isEnabled ? Icons.visibility : Icons.visibility_off,
+                color: Colors.white,
+                size: 20,
+              ),
+              tooltip: isEnabled ? '隱藏Ghost Piece (G)' : '顯示Ghost Piece (G)',
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            isEnabled ? 'ON' : 'OFF',
+            style: TextStyle(
+              fontSize: 10,
+              color: isEnabled ? GameTheme.highlight : GameTheme.textSecondary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

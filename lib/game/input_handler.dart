@@ -30,6 +30,9 @@ class InputHandler {
         onStateChange();
       } else if (key == 'r') {
         onGameStart();
+      } else if (key == 'g') {
+        gameState.toggleGhostPiece();
+        onStateChange();
       } else if (!gameState.isPaused && !gameState.isGameOver) {
         switch (key) {
           case 'arrow left':

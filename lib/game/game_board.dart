@@ -132,7 +132,12 @@ class _GameBoardState extends State<GameBoard> {
                             height: GameState.rowCount * cellSize,
                             child: CustomPaint(
                               painter: BoardPainter(
-                                  gameState.board, gameState.currentTetromino),
+                                gameState.board,
+                                gameState.currentTetromino,
+                                ghostPiece: gameLogic.shouldShowGhostPiece()
+                                    ? gameLogic.calculateGhostPiece()
+                                    : null,
+                              ),
                             ),
                           ),
 
@@ -234,6 +239,14 @@ class _GameBoardState extends State<GameBoard> {
 
                     // 音頻控制
                     GameUIComponents.audioControlButton(),
+
+                    const SizedBox(height: 12),
+
+                    // Ghost piece 控制
+                    GameUIComponents.ghostPieceControlButton(
+                      gameState.isGhostPieceEnabled,
+                      () => setState(() => gameState.toggleGhostPiece()),
+                    ),
 
                     const SizedBox(height: 16),
 

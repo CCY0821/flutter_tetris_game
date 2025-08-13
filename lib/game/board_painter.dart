@@ -6,9 +6,10 @@ import 'game_state.dart';
 class BoardPainter extends CustomPainter {
   final List<List<Color?>> board;
   final Tetromino? tetromino;
+  final Tetromino? ghostPiece;
   static const double cellSize = 20;
 
-  BoardPainter(this.board, this.tetromino);
+  BoardPainter(this.board, this.tetromino, {this.ghostPiece});
 
   void _drawBlock(Canvas canvas, double x, double y, Color blockColor,
       {bool isActive = false}) {
@@ -46,6 +47,43 @@ class BoardPainter extends CustomPainter {
         const Radius.circular(1),
       ),
       shadowPaint,
+    );
+  }
+
+  void _drawGhostBlock(Canvas canvas, double x, double y, Color blockColor) {
+    final paint = Paint();
+    final rect = Rect.fromLTWH(x * cellSize, y * cellSize, cellSize, cellSize);
+
+    // Ghost piece 使用半透明邊框樣式
+    paint.color = blockColor.withOpacity(0.3);
+    paint.style = PaintingStyle.fill;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(2)),
+      paint,
+    );
+
+    // 繪製邊框
+    final borderPaint = Paint()
+      ..color = blockColor.withOpacity(0.6)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(2)),
+      borderPaint,
+    );
+
+    // 添加虛線效果（可選）
+    final dashPaint = Paint()
+      ..color = blockColor.withOpacity(0.8)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    // 繪製內部虛線
+    final innerRect = rect.deflate(3);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(innerRect, const Radius.circular(1)),
+      dashPaint,
     );
   }
 
@@ -91,6 +129,27 @@ class BoardPainter extends CustomPainter {
           // 將緩衝區座標轉換為可見區域座標
           final visibleY = y - GameState.bufferRowCount;
           _drawBlock(canvas, x.toDouble(), visibleY.toDouble(), board[y][x]!);
+        }
+      }
+    }
+
+    // 先繪製Ghost piece（在當前方塊之下）
+    if (ghostPiece != null) {
+      for (final p in ghostPiece!.shape) {
+        final x = ghostPiece!.x + p.dx.toInt();
+        final y = ghostPiece!.y + p.dy.toInt();
+
+        // 檢查是否在有效範圍內
+        if (x >= 0 &&
+            x < GameState.colCount &&
+            y >= 0 &&
+            y < GameState.totalRowCount) {
+          // 只繪製在可見區域內的部分
+          if (y >= GameState.bufferRowCount) {
+            final visibleY = y - GameState.bufferRowCount;
+            _drawGhostBlock(
+                canvas, x.toDouble(), visibleY.toDouble(), ghostPiece!.color);
+          }
         }
       }
     }

@@ -27,6 +27,9 @@ class GameState {
   bool isGameOver = false;
   bool isPaused = false;
 
+  // Ghost piece 設定
+  bool isGhostPieceEnabled = true;
+
   // 速度系統相關
   static const int baseSpeed = 500; // 起始速度 (毫秒)
   static const int maxSpeed = 300; // 最高速度 (毫秒)
@@ -104,6 +107,11 @@ class GameState {
   // 獲取到下一個等級還需要的分數
   int get scoreToNextLevel {
     return nextLevelScore - score;
+  }
+
+  /// 切換Ghost piece顯示狀態
+  void toggleGhostPiece() {
+    isGhostPieceEnabled = !isGhostPieceEnabled;
   }
 
   Future<void> dispose() async {

@@ -222,4 +222,33 @@ class GameLogic {
     }
     return 'Normal Rotation';
   }
+
+  /// 計算Ghost piece的落地位置
+  /// 返回當前方塊如果直接下落會到達的最終位置
+  Tetromino? calculateGhostPiece() {
+    if (gameState.currentTetromino == null) return null;
+
+    // 創建當前方塊的副本作為Ghost piece
+    final ghostPiece = gameState.currentTetromino!.copy();
+
+    // 不斷向下移動直到無法移動為止
+    while (canMove(ghostPiece, dy: 1)) {
+      ghostPiece.y++;
+    }
+
+    // 如果Ghost piece和當前方塊位置相同，則不顯示Ghost piece
+    if (ghostPiece.y == gameState.currentTetromino!.y) {
+      return null;
+    }
+
+    return ghostPiece;
+  }
+
+  /// 檢查Ghost piece是否應該顯示
+  bool shouldShowGhostPiece() {
+    return gameState.isGhostPieceEnabled &&
+        !gameState.isPaused &&
+        !gameState.isGameOver &&
+        gameState.currentTetromino != null;
+  }
 }
