@@ -4,7 +4,10 @@
       "Bash(flutter format:*)",
       "Bash(dart format:*)",
       "Bash(flutter build:*)",
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "Bash(git push:*)",
+      "Bash(flutter run:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

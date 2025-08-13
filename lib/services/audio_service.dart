@@ -7,7 +7,7 @@ class AudioService {
 
   final AudioPlayer _backgroundMusicPlayer = AudioPlayer();
   final AudioPlayer _sfxPlayer = AudioPlayer();
-  
+
   bool _isMusicEnabled = true;
   bool _isSfxEnabled = true;
   double _musicVolume = 0.5;
@@ -28,7 +28,7 @@ class AudioService {
   // 播放背景音樂
   Future<void> playBackgroundMusic() async {
     if (!_isMusicEnabled) return;
-    
+
     try {
       print('Attempting to play background music...');
       print('Music enabled: $_isMusicEnabled');
@@ -65,7 +65,7 @@ class AudioService {
   // 播放音效
   Future<void> playSoundEffect(String soundName) async {
     if (!_isSfxEnabled) return;
-    
+
     try {
       await _sfxPlayer.play(AssetSource('audio/$soundName.mp3'));
     } catch (e) {
