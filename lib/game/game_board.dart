@@ -6,6 +6,7 @@ import 'game_logic.dart';
 import 'input_handler.dart';
 import 'game_ui_components.dart';
 import 'board_painter.dart';
+import 'touch_controls.dart';
 
 class GameBoard extends StatefulWidget {
   const GameBoard({super.key});
@@ -88,11 +89,15 @@ class _GameBoardState extends State<GameBoard> {
   @override
   Widget build(BuildContext context) {
     return IntrinsicHeight(
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
+          // 主遊戲區域
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
           // 左側主遊戲區
           Stack(
             children: [
@@ -142,6 +147,17 @@ class _GameBoardState extends State<GameBoard> {
               const SizedBox(height: 16),
               GameUIComponents.audioControlButton(),
             ],
+          ),
+            ],
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // 觸控按鈕區域
+          TouchControls(
+            gameLogic: gameLogic,
+            gameState: gameState,
+            onStateChange: () => setState(() {}),
           ),
         ],
       ),
