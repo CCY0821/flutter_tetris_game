@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import '../models/tetromino.dart';
 import 'game_state.dart';
+import 'srs_system.dart';
 
 class GameLogic {
   final GameState gameState;
+
+  // SRS 相關狀態
+  bool lastRotationWasWallKick = false;
+  String lastKickType = '';
 
   GameLogic(this.gameState);
 
@@ -78,8 +83,11 @@ class GameLogic {
 
   void spawnTetromino() {
     final newTetro = gameState.nextTetromino!;
+
+    // 使用新的 Tetromino 系統重新設置位置
     newTetro.x = GameState.colCount ~/ 2;
-    newTetro.y = 0;
+    newTetro.y = newTetro.isI ? -1 : 0; // I 型方塊起始位置稍高
+    newTetro.rotation = 0;
 
     if (canMove(newTetro)) {
       gameState.currentTetromino = newTetro;
@@ -111,17 +119,94 @@ class GameLogic {
     }
   }
 
+  /// SRS 旋轉系統 - 順時針旋轉
   void rotate() {
-    final rotated = gameState.currentTetromino!.shape
-        .map((p) => Offset(-p.dy, p.dx))
-        .toList();
+    rotatePiece(clockwise: true);
+  }
 
-    if (canMove(gameState.currentTetromino!, overrideShape: rotated)) {
-      gameState.currentTetromino!.shape
-        ..clear()
-        ..addAll(rotated);
-      // 播放旋轉音效
-      gameState.audioService.playSoundEffect('piece_rotate');
+  /// SRS 旋轉系統 - 逆時針旋轉
+  void rotateCounterClockwise() {
+    rotatePiece(clockwise: false);
+  }
+
+  /// 使用 SRS 系統執行旋轉
+  void rotatePiece({bool clockwise = true}) {
+    if (gameState.currentTetromino == null) return;
+
+    final currentPiece = gameState.currentTetromino!;
+
+    // 嘗試 SRS 旋轉
+    final result = SRSSystem.attemptRotation(
+      currentPiece,
+      gameState.board,
+      clockwise,
+    );
+
+    if (result.success) {
+      // 更新方塊狀態
+      currentPiece.updateState(
+        newX: result.newX,
+        newY: result.newY,
+        newRotation: result.newRotation,
+        newShape: result.newShape,
+      );
+
+      // 記錄壁踢資訊
+      lastRotationWasWallKick = result.usedWallKick;
+      lastKickType = result.kickDescription;
+
+      // 播放適當的音效
+      if (result.usedWallKick) {
+        gameState.audioService.playSoundEffect('wall_kick'); // 如果有的話
+      } else {
+        gameState.audioService.playSoundEffect('piece_rotate');
+      }
+
+      // 檢查 T-Spin
+      if (currentPiece.isT && result.usedWallKick) {
+        _checkTSpin(currentPiece);
+      }
     }
+  }
+
+  /// 檢查 T-Spin（簡化版本）
+  void _checkTSpin(Tetromino tPiece) {
+    // 這是一個簡化的 T-Spin 檢測
+    // 實際的 T-Spin 規則更複雜，需要檢查角落填充情況
+    int filledCorners = 0;
+    final corners = [
+      Offset(tPiece.x - 1, tPiece.y - 1), // 左上
+      Offset(tPiece.x + 1, tPiece.y - 1), // 右上
+      Offset(tPiece.x - 1, tPiece.y + 1), // 左下
+      Offset(tPiece.x + 1, tPiece.y + 1), // 右下
+    ];
+
+    for (final corner in corners) {
+      final x = corner.dx.toInt();
+      final y = corner.dy.toInt();
+
+      if (x < 0 ||
+          x >= GameState.colCount ||
+          y < 0 ||
+          y >= GameState.rowCount) {
+        filledCorners++; // 邊界算作填充
+      } else if (gameState.board[y][x] != null) {
+        filledCorners++;
+      }
+    }
+
+    // 如果三個或更多角落被填充，則可能是 T-Spin
+    if (filledCorners >= 3) {
+      // 可以在這裡添加 T-Spin 獎勵分數或特效
+      // gameState.score += 400; // T-Spin 獎勵
+    }
+  }
+
+  /// 獲取最後一次旋轉的壁踢資訊
+  String getLastRotationInfo() {
+    if (lastRotationWasWallKick) {
+      return 'Wall Kick: $lastKickType';
+    }
+    return 'Normal Rotation';
   }
 }

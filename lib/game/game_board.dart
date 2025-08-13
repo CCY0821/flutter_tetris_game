@@ -234,6 +234,14 @@ class _GameBoardState extends State<GameBoard> {
 
                     // 音頻控制
                     GameUIComponents.audioControlButton(),
+
+                    const SizedBox(height: 16),
+
+                    // SRS 資訊顯示
+                    GameUIComponents.infoBox(
+                      gameLogic.getLastRotationInfo(),
+                      label: 'ROTATION',
+                    ),
                   ],
                 ),
               ),

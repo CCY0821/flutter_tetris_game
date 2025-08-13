@@ -1,47 +1,138 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 
+/// 俄羅斯方塊類型枚舉
+enum TetrominoType { I, O, T, S, Z, L, J }
+
+/// 俄羅斯方塊類別，支援SRS旋轉系統
 class Tetromino {
-  final List<Offset> shape;
+  final TetrominoType type;
   final Color color;
-  int x; // 左上角在棋盤上的位置
+  List<Offset> shape;
+  int x; // 中心點在棋盤上的位置
   int y;
+  int rotation; // 旋轉狀態 (0-3)
 
-  Tetromino(this.shape, this.color, this.x, this.y);
+  Tetromino({
+    required this.type,
+    required this.color,
+    required this.shape,
+    required this.x,
+    required this.y,
+    this.rotation = 0,
+  });
 
-  static final List<List<Offset>> shapes = [
-    // I
-    [Offset(0, 0), Offset(1, 0), Offset(2, 0), Offset(3, 0)],
-    // O
-    [Offset(0, 0), Offset(1, 0), Offset(0, 1), Offset(1, 1)],
-    // T
-    [Offset(0, 0), Offset(-1, 0), Offset(1, 0), Offset(0, 1)],
-    // S
-    [Offset(0, 0), Offset(1, 0), Offset(0, 1), Offset(-1, 1)],
-    // Z
-    [Offset(0, 0), Offset(-1, 0), Offset(0, 1), Offset(1, 1)],
-    // L
-    [Offset(0, 0), Offset(0, 1), Offset(0, 2), Offset(1, 2)],
-    // J
-    [Offset(0, 0), Offset(0, 1), Offset(0, 2), Offset(-1, 2)],
-  ];
+  /// 方塊類型與顏色對應表
+  static const Map<TetrominoType, Color> typeColors = {
+    TetrominoType.I: Color(0xFF00FFFF), // 青色
+    TetrominoType.O: Color(0xFFFFFF00), // 黃色
+    TetrominoType.T: Color(0xFF800080), // 紫色
+    TetrominoType.S: Color(0xFF00FF00), // 綠色
+    TetrominoType.Z: Color(0xFFFF0000), // 紅色
+    TetrominoType.L: Color(0xFFFF8C00), // 橙色
+    TetrominoType.J: Color(0xFF0000FF), // 藍色
+  };
 
-  static final List<Color> colors = [
-    Colors.cyan,
-    Colors.yellow,
-    Colors.purple,
-    Colors.green,
-    Colors.red,
-    Colors.orange,
-    Colors.blue,
-  ];
+  /// 初始形狀定義（北向，旋轉狀態0）
+  static const Map<TetrominoType, List<Offset>> initialShapes = {
+    TetrominoType.I: [Offset(-1, 0), Offset(0, 0), Offset(1, 0), Offset(2, 0)],
+    TetrominoType.O: [Offset(0, 0), Offset(1, 0), Offset(0, 1), Offset(1, 1)],
+    TetrominoType.T: [Offset(-1, 0), Offset(0, 0), Offset(1, 0), Offset(0, 1)],
+    TetrominoType.S: [Offset(-1, 0), Offset(0, 0), Offset(0, 1), Offset(1, 1)],
+    TetrominoType.Z: [Offset(-1, 1), Offset(0, 1), Offset(0, 0), Offset(1, 0)],
+    TetrominoType.L: [Offset(-1, 0), Offset(0, 0), Offset(1, 0), Offset(1, 1)],
+    TetrominoType.J: [Offset(-1, 0), Offset(0, 0), Offset(1, 0), Offset(-1, 1)],
+  };
 
+  /// 生成隨機方塊
   factory Tetromino.random(int boardWidth) {
     final rand = Random();
-    final index = rand.nextInt(shapes.length);
-    final shape = shapes[index];
-    final color = colors[index];
-    final startX = boardWidth ~/ 2;
-    return Tetromino(shape, color, startX, 0);
+    final types = TetrominoType.values;
+    final type = types[rand.nextInt(types.length)];
+
+    return Tetromino.fromType(type, boardWidth);
+  }
+
+  /// 根據類型創建方塊
+  factory Tetromino.fromType(TetrominoType type, int boardWidth) {
+    final color = typeColors[type]!;
+    final shape = List<Offset>.from(initialShapes[type]!);
+
+    // 計算起始位置
+    int startX;
+    int startY;
+
+    switch (type) {
+      case TetrominoType.I:
+        startX = boardWidth ~/ 2;
+        startY = -1; // I型稍微高一點
+        break;
+      case TetrominoType.O:
+        startX = boardWidth ~/ 2;
+        startY = 0;
+        break;
+      default:
+        startX = boardWidth ~/ 2;
+        startY = 0;
+        break;
+    }
+
+    return Tetromino(
+      type: type,
+      color: color,
+      shape: shape,
+      x: startX,
+      y: startY,
+      rotation: 0,
+    );
+  }
+
+  /// 創建副本
+  Tetromino copy() {
+    return Tetromino(
+      type: type,
+      color: color,
+      shape: List<Offset>.from(shape),
+      x: x,
+      y: y,
+      rotation: rotation,
+    );
+  }
+
+  /// 更新方塊狀態
+  void updateState({
+    int? newX,
+    int? newY,
+    int? newRotation,
+    List<Offset>? newShape,
+  }) {
+    if (newX != null) x = newX;
+    if (newY != null) y = newY;
+    if (newRotation != null) rotation = newRotation;
+    if (newShape != null) shape = List<Offset>.from(newShape);
+  }
+
+  /// 獲取方塊在棋盤上的絕對位置
+  List<Offset> getAbsolutePositions() {
+    return shape
+        .map((offset) => Offset(
+              x + offset.dx,
+              y + offset.dy,
+            ))
+        .toList();
+  }
+
+  /// 檢查是否為T型方塊（用於T-Spin檢測）
+  bool get isT => type == TetrominoType.T;
+
+  /// 檢查是否為I型方塊（用於特殊處理）
+  bool get isI => type == TetrominoType.I;
+
+  /// 檢查是否為O型方塊（不需旋轉）
+  bool get isO => type == TetrominoType.O;
+
+  @override
+  String toString() {
+    return 'Tetromino(type: $type, pos: ($x, $y), rotation: $rotation)';
   }
 }

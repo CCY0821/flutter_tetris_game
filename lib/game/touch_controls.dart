@@ -201,12 +201,24 @@ class _TouchControlsState extends State<TouchControls> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // 旋轉按鈕
-          _buildControlButton(
-            icon: Icons.rotate_right,
-            action: 'rotate',
-            onPressed: widget.gameLogic.rotate,
-            allowRepeat: false,
-            size: 45,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildControlButton(
+                icon: Icons.rotate_left,
+                action: 'rotate_ccw',
+                onPressed: widget.gameLogic.rotateCounterClockwise,
+                allowRepeat: false,
+                size: 40,
+              ),
+              _buildControlButton(
+                icon: Icons.rotate_right,
+                action: 'rotate',
+                onPressed: widget.gameLogic.rotate,
+                allowRepeat: false,
+                size: 45,
+              ),
+            ],
           ),
 
           const SizedBox(height: 6),
