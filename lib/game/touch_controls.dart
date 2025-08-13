@@ -200,7 +200,7 @@ class _TouchControlsState extends State<TouchControls> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 旋轉按鈕
+          // 旋轉按鈕和硬降按鈕
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -217,6 +217,13 @@ class _TouchControlsState extends State<TouchControls> {
                 onPressed: widget.gameLogic.rotate,
                 allowRepeat: false,
                 size: 45,
+              ),
+              _buildControlButton(
+                icon: Icons.vertical_align_bottom,
+                action: 'hard_drop',
+                onPressed: widget.gameLogic.hardDrop,
+                allowRepeat: false,
+                size: 40,
               ),
             ],
           ),

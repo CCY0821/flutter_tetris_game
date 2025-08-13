@@ -316,4 +316,164 @@ class GameUIComponents {
       ),
     );
   }
+
+  /// 控制說明資訊框
+  static Widget controlHelpButton(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: GameTheme.panelGradient,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: GameTheme.boardBorder,
+          width: 1,
+        ),
+        boxShadow: GameTheme.cardShadow,
+      ),
+      child: Column(
+        children: [
+          Text(
+            'CONTROLS',
+            style: GameTheme.accentStyle.copyWith(fontSize: 12),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: GameTheme.buttonPrimary.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              onPressed: () => _showControlHelp(context),
+              icon: const Icon(
+                Icons.help_outline,
+                color: Colors.white,
+                size: 20,
+              ),
+              tooltip: '顯示控制說明 (H)',
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'HELP',
+            style: TextStyle(
+              fontSize: 10,
+              color: GameTheme.highlight,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 顯示控制說明對話框
+  static void _showControlHelp(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: GameTheme.gameBoardBg,
+          title: Text(
+            '🎮 遊戲控制說明',
+            style: GameTheme.titleStyle.copyWith(fontSize: 20),
+          ),
+          content: Container(
+            width: 400,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildControlSection(
+                    '⌨️ 鍵盤控制',
+                    [
+                      '← →  移動方塊',
+                      '↑    順時針旋轉',
+                      '↓    軟降（非鎖定）',
+                      '空白   硬降（瞬間落地並鎖定）',
+                      'Z    逆時針旋轉',
+                      'X    順時針旋轉（備用）',
+                      'P    暫停/恢復',
+                      'R    重新開始',
+                      'G    切換Ghost Piece',
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _buildControlSection(
+                    '🎮 手把控制',
+                    [
+                      '搖桿左/右  移動方塊',
+                      '搖桿上     硬降（瞬間落地）',
+                      '搖桿下     軟降',
+                      '左肩鍵     逆時針旋轉',
+                      '右肩鍵     順時針旋轉',
+                      'A鈕       順時針旋轉',
+                      'B鈕       逆時針旋轉',
+                      'X鈕       硬降',
+                      'Y鈕       暫停',
+                      'Start     暫停/恢復',
+                      'Select    切換Ghost Piece',
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _buildControlSection(
+                    '📱 觸控控制',
+                    [
+                      '點擊方向按鈕移動方塊',
+                      '點擊旋轉按鈕改變方向',
+                      '點擊硬降按鈕瞬間落地',
+                      '長按移動按鈕連續移動',
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: GameTheme.primaryButtonStyle,
+              child: const Text('確定'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// 建立控制說明區塊
+  static Widget _buildControlSection(String title, List<String> controls) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: GameTheme.accentStyle.copyWith(fontSize: 16),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: GameTheme.gridLine.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: GameTheme.boardBorder.withOpacity(0.3),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: controls
+                .map((control) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Text(
+                        control,
+                        style: GameTheme.bodyStyle.copyWith(fontSize: 13),
+                      ),
+                    ))
+                .toList(),
+          ),
+        ),
+      ],
+    );
+  }
 }

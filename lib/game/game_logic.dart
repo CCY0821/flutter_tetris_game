@@ -132,6 +132,29 @@ class GameLogic {
     }
   }
 
+  /// 硬降 (Hard Drop) - 瞬間將方塊降到最底部並鎖定
+  void hardDrop() {
+    if (gameState.currentTetromino == null) return;
+
+    int dropDistance = 0;
+
+    // 計算可以下降的距離
+    while (canMove(gameState.currentTetromino!, dy: 1)) {
+      gameState.currentTetromino!.y++;
+      dropDistance++;
+    }
+
+    // 硬降獲得額外分數（每格2分）
+    gameState.score += dropDistance * 2;
+
+    // 立即鎖定方塊
+    lockTetromino();
+    spawnTetromino();
+
+    // 播放硬降音效
+    gameState.audioService.playSoundEffect('hard_drop');
+  }
+
   /// SRS 旋轉系統 - 順時針旋轉
   void rotate() {
     rotatePiece(clockwise: true);

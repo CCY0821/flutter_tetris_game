@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'game_state.dart';
 import 'game_logic.dart';
 import 'input_handler.dart';
+import 'controller_handler.dart';
 import 'game_ui_components.dart';
 import 'board_painter.dart';
 import 'touch_controls.dart';
@@ -22,6 +23,7 @@ class _GameBoardState extends State<GameBoard> {
   late GameState gameState;
   late GameLogic gameLogic;
   late InputHandler inputHandler;
+  late ControllerHandler controllerHandler;
   Timer? gameTimer;
   int _currentSpeed = 500; // 追蹤當前速度
 
@@ -35,6 +37,12 @@ class _GameBoardState extends State<GameBoard> {
       gameLogic: gameLogic,
       onStateChange: () => setState(() {}),
       onGameStart: _startGame,
+      context: context,
+    );
+    controllerHandler = ControllerHandler(
+      gameState: gameState,
+      gameLogic: gameLogic,
+      onStateChange: () => setState(() {}),
     );
     _initializeGame();
     RawKeyboard.instance.addListener(_handleKey);
@@ -50,6 +58,7 @@ class _GameBoardState extends State<GameBoard> {
   void dispose() {
     RawKeyboard.instance.removeListener(_handleKey);
     gameTimer?.cancel();
+    controllerHandler.dispose();
     gameState.dispose();
     super.dispose();
   }
@@ -84,7 +93,11 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   void _handleKey(RawKeyEvent event) {
+    // 優先處理鍵盤輸入
     inputHandler.handleKey(event);
+
+    // 同時處理手把輸入
+    controllerHandler.handleGamepadInput(event);
   }
 
   @override
@@ -247,6 +260,11 @@ class _GameBoardState extends State<GameBoard> {
                       gameState.isGhostPieceEnabled,
                       () => setState(() => gameState.toggleGhostPiece()),
                     ),
+
+                    const SizedBox(height: 12),
+
+                    // 控制說明
+                    GameUIComponents.controlHelpButton(context),
 
                     const SizedBox(height: 16),
 
