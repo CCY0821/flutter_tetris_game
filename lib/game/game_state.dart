@@ -19,7 +19,7 @@ class GameState {
 
   // 速度系統相關
   static const int baseSpeed = 500; // 起始速度 (毫秒)
-  static const int maxSpeed = 300;  // 最高速度 (毫秒)
+  static const int maxSpeed = 300; // 最高速度 (毫秒)
   static const int speedIncrease = 20; // 每階段加速 (毫秒)
   static const int scorePerLevel = 1000; // 每級所需分數
 

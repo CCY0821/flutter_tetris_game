@@ -51,7 +51,7 @@ class GameLogic {
       int base = 100;
       int bonus = (clearedRows - 1) * 50;
       gameState.score += clearedRows * base + bonus;
-      
+
       // 播放消除音效
       gameState.audioService.playSoundEffect('line_clear');
     }

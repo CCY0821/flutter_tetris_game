@@ -7,6 +7,7 @@ import 'input_handler.dart';
 import 'game_ui_components.dart';
 import 'board_painter.dart';
 import 'touch_controls.dart';
+import '../theme/game_theme.dart';
 
 class GameBoard extends StatefulWidget {
   const GameBoard({super.key});
@@ -66,14 +67,14 @@ class _GameBoardState extends State<GameBoard> {
       if (!gameState.isPaused && !gameState.isGameOver) {
         setState(() {
           gameLogic.drop();
-          
+
           // 檢查速度是否需要更新
           int newSpeed = gameState.dropSpeed;
           if (newSpeed != _currentSpeed) {
             _currentSpeed = newSpeed;
             _startGameTimer(); // 重新啟動計時器使用新速度
           }
-          
+
           if (gameState.isGameOver) {
             gameTimer?.cancel();
           }
@@ -98,66 +99,145 @@ class _GameBoardState extends State<GameBoard> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-          // 左側主遊戲區
-          Stack(
-            children: [
-              SizedBox(
-                width: GameState.colCount * cellSize,
-                height: GameState.rowCount * cellSize,
-                child: CustomPaint(
-                  painter:
-                      BoardPainter(gameState.board, gameState.currentTetromino),
+              // 左側區域（棋盤 + 觸控按鈕）
+              Column(
+                children: [
+                  // 遊戲棋盤
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: GameTheme.boardBorder,
+                        width: 3,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.5),
+                          blurRadius: 16,
+                          offset: const Offset(0, 8),
+                        ),
+                        BoxShadow(
+                          color: GameTheme.accentBlue.withOpacity(0.3),
+                          blurRadius: 32,
+                          offset: const Offset(0, 16),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Stack(
+                        children: [
+                          SizedBox(
+                            width: GameState.colCount * cellSize,
+                            height: GameState.rowCount * cellSize,
+                            child: CustomPaint(
+                              painter: BoardPainter(
+                                  gameState.board, gameState.currentTetromino),
+                            ),
+                          ),
+
+                          // 暫停或 Game Over 蓋板
+                          if (gameState.isPaused && !gameState.isGameOver)
+                            GameUIComponents.overlayText(
+                                'PAUSED', GameTheme.highlight),
+                          if (gameState.isGameOver)
+                            GameUIComponents.overlayText(
+                                'GAME OVER', GameTheme.highlight),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // 觸控按鈕區域
+                  TouchControls(
+                    gameLogic: gameLogic,
+                    gameState: gameState,
+                    onStateChange: () => setState(() {}),
+                  ),
+                ],
+              ),
+
+              const SizedBox(width: 16),
+
+              // 右側控制區
+              Container(
+                width: 180,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // 分數區域
+                    GameUIComponents.infoBox('${gameState.score}',
+                        label: 'SCORE'),
+                    const SizedBox(height: 12),
+
+                    // 遊戲狀態
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GameUIComponents.infoBox(
+                              '${gameState.speedLevel}',
+                              label: 'LEVEL'),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: GameUIComponents.infoBox(
+                              '${gameState.dropSpeed}ms',
+                              label: 'SPEED'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 下一個方塊預覽
+                    GameUIComponents.nextBlockPreview(gameState.nextTetromino),
+                    const SizedBox(height: 16),
+
+                    // 控制按鈕
+                    ElevatedButton(
+                      onPressed: () => setState(
+                          () => gameState.isPaused = !gameState.isPaused),
+                      style: gameState.isPaused
+                          ? GameTheme.secondaryButtonStyle
+                          : GameTheme.primaryButtonStyle,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            gameState.isPaused ? Icons.play_arrow : Icons.pause,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(gameState.isPaused ? 'Resume' : 'Pause'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: _startGame,
+                      style: GameTheme.primaryButtonStyle.copyWith(
+                        backgroundColor:
+                            MaterialStateProperty.all(GameTheme.buttonDanger),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.refresh, size: 18),
+                          const SizedBox(width: 6),
+                          Text('Restart'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 音頻控制
+                    GameUIComponents.audioControlButton(),
+                  ],
                 ),
               ),
-
-              // 暫停或 Game Over 蓋板
-              if (gameState.isPaused && !gameState.isGameOver)
-                GameUIComponents.overlayText('PAUSED', Colors.amber),
-              if (gameState.isGameOver)
-                GameUIComponents.overlayText('GAME OVER', Colors.redAccent),
             ],
-          ),
-
-          const SizedBox(width: 16),
-
-          // 右側控制區
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GameUIComponents.infoBox('Score: ${gameState.score}'),
-              const SizedBox(height: 8),
-              GameUIComponents.infoBox('Level: ${gameState.speedLevel}'),
-              const SizedBox(height: 8),
-              GameUIComponents.infoBox('Speed: ${gameState.dropSpeed}ms'),
-              const SizedBox(height: 16),
-              GameUIComponents.infoBox('Next'),
-              const SizedBox(height: 8),
-              GameUIComponents.nextBlockPreview(gameState.nextTetromino),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () =>
-                    setState(() => gameState.isPaused = !gameState.isPaused),
-                child: Text(gameState.isPaused ? 'Resume (P)' : 'Pause (P)'),
-              ),
-              ElevatedButton(
-                onPressed: _startGame,
-                child: const Text('Restart (R)'),
-              ),
-              const SizedBox(height: 16),
-              GameUIComponents.audioControlButton(),
-            ],
-          ),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // 觸控按鈕區域
-          TouchControls(
-            gameLogic: gameLogic,
-            gameState: gameState,
-            onStateChange: () => setState(() {}),
           ),
         ],
       ),
