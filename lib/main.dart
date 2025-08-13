@@ -14,8 +14,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Colors.black,
-        body: Center(
-          child: GameBoard(),
+        body: SizedBox.expand(
+          child: Center(
+            child: GameBoard(),
+          ),
         ),
       ),
     );

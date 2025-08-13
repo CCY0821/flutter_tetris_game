@@ -73,54 +73,60 @@ class _GameBoardState extends State<GameBoard> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // 左側主遊戲區
-        Stack(
-          children: [
-            SizedBox(
-              width: GameState.colCount * cellSize,
-              height: GameState.rowCount * cellSize,
-              child: CustomPaint(
-                painter:
-                    BoardPainter(gameState.board, gameState.currentTetromino),
+    return IntrinsicHeight(
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 左側主遊戲區
+          Stack(
+            children: [
+              SizedBox(
+                width: GameState.colCount * cellSize,
+                height: GameState.rowCount * cellSize,
+                child: CustomPaint(
+                  painter:
+                      BoardPainter(gameState.board, gameState.currentTetromino),
+                ),
               ),
-            ),
 
-            // 暫停或 Game Over 蓋板
-            if (gameState.isPaused && !gameState.isGameOver)
-              GameUIComponents.overlayText('PAUSED', Colors.amber),
-            if (gameState.isGameOver)
-              GameUIComponents.overlayText('GAME OVER', Colors.redAccent),
-          ],
-        ),
+              // 暫停或 Game Over 蓋板
+              if (gameState.isPaused && !gameState.isGameOver)
+                GameUIComponents.overlayText('PAUSED', Colors.amber),
+              if (gameState.isGameOver)
+                GameUIComponents.overlayText('GAME OVER', Colors.redAccent),
+            ],
+          ),
 
-        const SizedBox(width: 16),
+          const SizedBox(width: 16),
 
-        // 右側控制區
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GameUIComponents.infoBox('Score: ${gameState.score}'),
-            const SizedBox(height: 16),
-            GameUIComponents.infoBox('Next'),
-            const SizedBox(height: 8),
-            GameUIComponents.nextBlockPreview(gameState.nextTetromino),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () =>
-                  setState(() => gameState.isPaused = !gameState.isPaused),
-              child: Text(gameState.isPaused ? 'Resume (P)' : 'Pause (P)'),
-            ),
-            ElevatedButton(
-              onPressed: _startGame,
-              child: const Text('Restart (R)'),
-            ),
-            const SizedBox(height: 16),
-            GameUIComponents.audioControlButton(),
-          ],
-        ),
-      ],
+          // 右側控制區
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GameUIComponents.infoBox('Score: ${gameState.score}'),
+              const SizedBox(height: 16),
+              GameUIComponents.infoBox('Next'),
+              const SizedBox(height: 8),
+              GameUIComponents.nextBlockPreview(gameState.nextTetromino),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () =>
+                    setState(() => gameState.isPaused = !gameState.isPaused),
+                child: Text(gameState.isPaused ? 'Resume (P)' : 'Pause (P)'),
+              ),
+              ElevatedButton(
+                onPressed: _startGame,
+                child: const Text('Restart (R)'),
+              ),
+              const SizedBox(height: 16),
+              GameUIComponents.audioControlButton(),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

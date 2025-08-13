@@ -3,7 +3,8 @@
     "allow": [
       "Bash(flutter format:*)",
       "Bash(dart format:*)",
-      "Bash(flutter build:*)"
+      "Bash(flutter build:*)",
+      "Bash(flutter analyze:*)"
     ],
     "deny": []
   }
