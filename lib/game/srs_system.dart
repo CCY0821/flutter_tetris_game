@@ -237,7 +237,7 @@ class SRSSystem {
       // 檢查邊界
       if (newX < 0 ||
           newX >= GameState.colCount ||
-          newY >= GameState.rowCount) {
+          newY >= GameState.totalRowCount) {
         return false;
       }
 

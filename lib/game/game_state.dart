@@ -4,8 +4,18 @@ import '../models/tetromino.dart';
 import '../services/audio_service.dart';
 
 class GameState {
-  static const int rowCount = 20;
+  // 可見遊戲區域：10寬 x 20高
+  static const int visibleRowCount = 20;
   static const int colCount = 10;
+
+  // 緩衝區：在可見區域上方20行
+  static const int bufferRowCount = 20;
+
+  // 總矩陣大小：10寬 x 40高 (20緩衝 + 20可見)
+  static const int totalRowCount = bufferRowCount + visibleRowCount;
+
+  // 為了向後兼容，保留原rowCount但標註為可見區域
+  static const int rowCount = visibleRowCount;
 
   List<List<Color?>> board = [];
   Tetromino? currentTetromino;
@@ -24,10 +34,37 @@ class GameState {
   static const int scorePerLevel = 1000; // 每級所需分數
 
   void initBoard() {
+    // 創建包含緩衝區的完整矩陣 (40行 x 10列)
     board = List.generate(
-      rowCount,
+      totalRowCount,
       (_) => List.generate(colCount, (_) => null),
     );
+  }
+
+  /// 獲取可見遊戲區域的矩陣 (不包含緩衝區)
+  /// 返回從第20行開始的20行數據
+  List<List<Color?>> get visibleBoard {
+    return board.sublist(bufferRowCount, totalRowCount);
+  }
+
+  /// 檢查指定行是否在緩衝區內
+  bool isInBufferZone(int row) {
+    return row < bufferRowCount;
+  }
+
+  /// 檢查指定行是否在可見區域內
+  bool isInVisibleZone(int row) {
+    return row >= bufferRowCount && row < totalRowCount;
+  }
+
+  /// 將緩衝區座標轉換為可見區域座標
+  int bufferToVisibleRow(int bufferRow) {
+    return bufferRow - bufferRowCount;
+  }
+
+  /// 將可見區域座標轉換為緩衝區座標
+  int visibleToBufferRow(int visibleRow) {
+    return visibleRow + bufferRowCount;
   }
 
   Future<void> initializeAudio() async {

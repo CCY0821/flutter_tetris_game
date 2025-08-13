@@ -18,10 +18,20 @@ class GameLogic {
       final x = tetro.x + point.dx.toInt() + dx;
       final y = tetro.y + point.dy.toInt() + dy;
 
-      if (x < 0 || x >= GameState.colCount || y >= GameState.rowCount) {
+      // 檢查水平邊界
+      if (x < 0 || x >= GameState.colCount) {
         return false;
       }
-      if (y >= 0 && gameState.board[y][x] != null) return false;
+
+      // 檢查垂直邊界（使用總矩陣高度，包含緩衝區）
+      if (y >= GameState.totalRowCount) {
+        return false;
+      }
+
+      // 檢查與已存在方塊的碰撞（允許在緩衝區上方）
+      if (y >= 0 && gameState.board[y][x] != null) {
+        return false;
+      }
     }
     return true;
   }
@@ -33,7 +43,7 @@ class GameLogic {
       if (x >= 0 &&
           x < GameState.colCount &&
           y >= 0 &&
-          y < GameState.rowCount) {
+          y < GameState.totalRowCount) {
         gameState.board[y][x] = gameState.currentTetromino!.color;
       }
     }
@@ -44,11 +54,12 @@ class GameLogic {
     List<List<Color?>> newBoard = [];
     int clearedRows = 0;
 
-    for (int y = 0; y < gameState.board.length; y++) {
+    // 檢查整個矩陣（包含緩衝區）
+    for (int y = 0; y < GameState.totalRowCount; y++) {
       if (gameState.board[y].every((cell) => cell != null)) {
         clearedRows++;
       } else {
-        newBoard.add(gameState.board[y]);
+        newBoard.add(List<Color?>.from(gameState.board[y]));
       }
     }
 
@@ -61,6 +72,7 @@ class GameLogic {
       gameState.audioService.playSoundEffect('line_clear');
     }
 
+    // 在矩陣頂部添加新的空行
     for (int i = 0; i < clearedRows; i++) {
       newBoard.insert(0, List.generate(GameState.colCount, (_) => null));
     }
@@ -84,9 +96,10 @@ class GameLogic {
   void spawnTetromino() {
     final newTetro = gameState.nextTetromino!;
 
-    // 使用新的 Tetromino 系統重新設置位置
+    // 在緩衝區中設置生成位置
     newTetro.x = GameState.colCount ~/ 2;
-    newTetro.y = newTetro.isI ? -1 : 0; // I 型方塊起始位置稍高
+    // 在緩衝區內生成：I型在第18行，其他在第19行
+    newTetro.y = newTetro.isI ? 18 : 19;
     newTetro.rotation = 0;
 
     if (canMove(newTetro)) {

@@ -65,15 +65,15 @@ class Tetromino {
     switch (type) {
       case TetrominoType.I:
         startX = boardWidth ~/ 2;
-        startY = -1; // I型稍微高一點
+        startY = 18; // I型在緩衝區內生成，稍微高一點
         break;
       case TetrominoType.O:
         startX = boardWidth ~/ 2;
-        startY = 0;
+        startY = 19; // 在緩衝區內生成
         break;
       default:
         startX = boardWidth ~/ 2;
-        startY = 0;
+        startY = 19; // 在緩衝區內生成
         break;
     }
 

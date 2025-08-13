@@ -84,11 +84,13 @@ class BoardPainter extends CustomPainter {
       );
     }
 
-    // 繪製已鎖定的方塊
-    for (int y = 0; y < board.length; y++) {
-      for (int x = 0; x < board[y].length; x++) {
+    // 繪製已鎖定的方塊（只繪製可見區域）
+    for (int y = GameState.bufferRowCount; y < GameState.totalRowCount; y++) {
+      for (int x = 0; x < GameState.colCount; x++) {
         if (board[y][x] != null) {
-          _drawBlock(canvas, x.toDouble(), y.toDouble(), board[y][x]!);
+          // 將緩衝區座標轉換為可見區域座標
+          final visibleY = y - GameState.bufferRowCount;
+          _drawBlock(canvas, x.toDouble(), visibleY.toDouble(), board[y][x]!);
         }
       }
     }
@@ -98,9 +100,19 @@ class BoardPainter extends CustomPainter {
       for (final p in tetromino!.shape) {
         final x = tetromino!.x + p.dx.toInt();
         final y = tetromino!.y + p.dy.toInt();
-        if (y >= 0 && y < board.length && x >= 0 && x < board[0].length) {
-          _drawBlock(canvas, x.toDouble(), y.toDouble(), tetromino!.color,
-              isActive: true);
+
+        // 檢查是否在有效範圍內
+        if (x >= 0 &&
+            x < GameState.colCount &&
+            y >= 0 &&
+            y < GameState.totalRowCount) {
+          // 只繪製在可見區域內的部分
+          if (y >= GameState.bufferRowCount) {
+            final visibleY = y - GameState.bufferRowCount;
+            _drawBlock(
+                canvas, x.toDouble(), visibleY.toDouble(), tetromino!.color,
+                isActive: true);
+          }
         }
       }
     }
