@@ -68,6 +68,9 @@ class GameLogic {
       int bonus = (clearedRows - 1) * 50;
       gameState.score += clearedRows * base + bonus;
 
+      // 更新 Marathon 系統的行數計算
+      gameState.updateLinesCleared(clearedRows);
+
       // 播放消除音效
       gameState.audioService.playSoundEffect('line_clear');
     }

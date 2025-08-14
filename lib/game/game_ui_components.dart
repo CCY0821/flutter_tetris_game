@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/tetromino.dart';
 import '../services/audio_service.dart';
 import '../theme/game_theme.dart';
+import 'marathon_system.dart';
+import '../widgets/marathon_info_panel.dart';
 
 class GameUIComponents {
   static const double cellSize = 20;
@@ -474,6 +476,121 @@ class GameUIComponents {
           ),
         ),
       ],
+    );
+  }
+
+  /// 遊戲模式切換按鈕
+  static Widget gameModeToggleButton(
+      bool isMarathonMode, VoidCallback onToggle) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: GameTheme.panelGradient,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: GameTheme.boardBorder,
+          width: 1,
+        ),
+        boxShadow: GameTheme.cardShadow,
+      ),
+      child: Column(
+        children: [
+          Text(
+            'MODE',
+            style: GameTheme.accentStyle.copyWith(fontSize: 12),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: isMarathonMode
+                  ? GameTheme.buttonPrimary.withOpacity(0.8)
+                  : GameTheme.gridLine,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              onPressed: onToggle,
+              icon: Icon(
+                isMarathonMode ? Icons.speed : Icons.score,
+                color: Colors.white,
+                size: 20,
+              ),
+              tooltip: isMarathonMode ? '切換至傳統模式' : '切換至Marathon模式',
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            isMarathonMode ? 'MARATHON' : 'CLASSIC',
+            style: TextStyle(
+              fontSize: 9,
+              color: isMarathonMode
+                  ? GameTheme.highlight
+                  : GameTheme.textSecondary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Marathon 資訊面板
+  static Widget marathonInfoPanel(MarathonSystem marathonSystem,
+      {bool isVisible = true}) {
+    return MarathonInfoPanel(
+      marathonSystem: marathonSystem,
+      isVisible: isVisible,
+    );
+  }
+
+  /// Marathon 迷你資訊（用於主畫面）
+  static Widget marathonMiniInfo(MarathonSystem marathonSystem) {
+    return MarathonMiniInfo(marathonSystem: marathonSystem);
+  }
+
+  /// 速度顯示框（通用）
+  static Widget speedInfoBox(String speedText, String modeText,
+      {String? subtitle}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        gradient: GameTheme.panelGradient,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: GameTheme.boardBorder,
+          width: 1,
+        ),
+        boxShadow: GameTheme.cardShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'SPEED',
+            style: GameTheme.subtitleStyle.copyWith(fontSize: 11),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            speedText,
+            style: GameTheme.accentStyle.copyWith(fontSize: 18),
+          ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: GameTheme.bodyStyle.copyWith(fontSize: 10),
+            ),
+          ],
+          const SizedBox(height: 4),
+          Text(
+            modeText,
+            style: TextStyle(
+              color: GameTheme.highlight,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

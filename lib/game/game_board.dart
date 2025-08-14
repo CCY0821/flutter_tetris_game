@@ -191,23 +191,37 @@ class _GameBoardState extends State<GameBoard> {
                         label: 'SCORE'),
                     const SizedBox(height: 12),
 
-                    // 遊戲狀態
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GameUIComponents.infoBox(
-                              '${gameState.speedLevel}',
-                              label: 'LEVEL'),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: GameUIComponents.infoBox(
-                              '${gameState.dropSpeed}ms',
-                              label: 'SPEED'),
-                        ),
-                      ],
+                    // 遊戲模式切換
+                    GameUIComponents.gameModeToggleButton(
+                      gameState.isMarathonMode,
+                      () => setState(() => gameState.toggleGameMode()),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
+
+                    // Marathon 模式資訊或傳統資訊
+                    if (gameState.isMarathonMode) ...[
+                      GameUIComponents.marathonInfoPanel(
+                          gameState.marathonSystem),
+                      const SizedBox(height: 12),
+                    ] else ...[
+                      // 傳統模式的遊戲狀態
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GameUIComponents.infoBox(
+                                '${gameState.speedLevel}',
+                                label: 'LEVEL'),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: GameUIComponents.infoBox(
+                                '${gameState.dropSpeed}ms',
+                                label: 'SPEED'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                    ],
 
                     // 下一個方塊預覽
                     GameUIComponents.nextBlockPreview(gameState.nextTetromino),
