@@ -48,3 +48,39 @@ Before making commits, ensure:
 2. Code is properly formatted (`flutter format .`)
 3. App builds successfully (`flutter build apk`)
 4. Game functionality works as expected
+
+## Claude x Gemini 協作除錯機制
+當遇到複雜的 bug 無法獨自解決時，使用以下協作流程：
+
+### 設置 Gemini CLI
+1. 確保 Gemini CLI 已安裝：`npm install -g @google/gemini-cli`
+2. 設置身份驗證：
+   - 選項 1：Google 登入（推薦）- 免費額度
+   - 選項 2：API 金鑰 - 從 Google AI Studio 取得
+   - 設置環境變數：`GEMINI_API_KEY=your_api_key`
+
+### 協作除錯流程
+使用協作腳本：`debug_collaboration.js`
+
+```bash
+# 啟動協作除錯
+node debug_collaboration.js "bug描述" "錯誤日志" "程式碼上下文" "堆疊追蹤"
+
+# 範例
+node debug_collaboration.js "遊戲暫停後無法恢復" "Error: setState called after dispose" "lib/game/game_logic.dart" "stack_trace_here"
+```
+
+### 協作觸發條件
+當遇到以下情況時，啟動 Claude x Gemini 協作：
+- 複雜的狀態管理問題
+- Flutter 生命週期相關錯誤
+- 性能瓶頸分析
+- 多平台兼容性問題
+- 音頻播放問題
+- 觸控/手勢衝突
+- 複雜的演算法 bug
+
+### 協作輸出
+- bug-analysis.json：詳細的 bug 資訊
+- debug-session.log：協作會話記錄
+- Gemini 的分析建議和解決方案
