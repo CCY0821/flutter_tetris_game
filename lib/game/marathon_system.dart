@@ -70,7 +70,7 @@ class MarathonSystem {
   }
 
   /// 獲取當前關卡的重力值 (G)
-  /// 使用修正的 Tetris 速度曲線
+  /// 使用遊戲體驗優化的速度曲線
   double getCurrentGravity() {
     if (_gravityCache.containsKey(_currentLevel)) {
       return _gravityCache[_currentLevel]!;
@@ -79,17 +79,17 @@ class MarathonSystem {
     double gravity;
 
     if (_currentLevel <= 8) {
-      // 1-8級：漸進式加速
-      gravity = baseGravity + (_currentLevel - 1) * 0.02;
+      // 1-8級：漸進式加速，從1G開始
+      gravity = 1.0 + (_currentLevel - 1) * 0.3;
     } else if (_currentLevel <= 15) {
       // 9-15級：中速加速
-      gravity = 0.2 + (_currentLevel - 8) * 0.1;
+      gravity = 3.0 + (_currentLevel - 8) * 0.5;
     } else if (_currentLevel <= 18) {
       // 16-18級：快速加速
-      gravity = 0.9 + (_currentLevel - 15) * 1.0;
+      gravity = 6.5 + (_currentLevel - 15) * 1.0;
     } else if (_currentLevel == 19) {
       // 19級：接近最大速度
-      gravity = 10.0;
+      gravity = 15.0;
     } else {
       // 20級以後達到20G
       gravity = maxGravity;
@@ -146,17 +146,17 @@ class MarathonSystem {
   /// 計算特定關卡的重力值（用於預覽）
   double calculateGravityForLevel(int level) {
     if (level <= 8) {
-      // 1-8級：漸進式加速
-      return baseGravity + (level - 1) * 0.02;
+      // 1-8級：漸進式加速，從1G開始
+      return 1.0 + (level - 1) * 0.3;
     } else if (level <= 15) {
       // 9-15級：中速加速
-      return 0.2 + (level - 8) * 0.1;
+      return 3.0 + (level - 8) * 0.5;
     } else if (level <= 18) {
       // 16-18級：快速加速
-      return 0.9 + (level - 15) * 1.0;
+      return 6.5 + (level - 15) * 1.0;
     } else if (level == 19) {
       // 19級：接近最大速度
-      return 10.0;
+      return 15.0;
     } else {
       // 20級以後達到20G
       return maxGravity;

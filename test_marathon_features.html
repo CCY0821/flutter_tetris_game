@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marathon 模式測試指南</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            text-align: center;
+            color: #00ffff;
+            font-size: 2.5em;
+            text-shadow: 0 0 20px #00ffff;
+            margin-bottom: 30px;
+        }
+        .feature-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #00ffff;
+        }
+        .test-steps {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .speed-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .speed-table th, .speed-table td {
+            border: 1px solid #00ffff;
+            padding: 12px;
+            text-align: center;
+        }
+        .speed-table th {
+            background: rgba(0, 255, 255, 0.3);
+            color: white;
+            font-weight: bold;
+        }
+        .game-link {
+            display: block;
+            text-align: center;
+            background: linear-gradient(45deg, #00ffff, #ff0080);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin: 30px auto;
+            max-width: 300px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        .game-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+        .highlight {
+            color: #00ffff;
+            font-weight: bold;
+        }
+        .warning {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .control-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Flutter Tetris - Marathon 模式測試</h1>
+        
+        <div style="background: rgba(0, 255, 0, 0.2); padding: 15px; border-radius: 10px; margin: 20px 0; border: 2px solid #00ff00;">
+            <h3 style="color: #00ff00; margin: 0 0 10px 0;">✅ Bug 已修正！</h3>
+            <p style="margin: 5px 0;">方塊自動下落功能已恢復正常。現在關卡1的掉落速度是合理的1秒間隔。</p>
+            <p style="margin: 5px 0;"><strong>修正內容：</strong>調整了 Marathon 模式的重力值計算，從0.02G提升到1.0G起始值。</p>
+        </div>
+
+        <a href="http://localhost:3000" class="game-link" target="_blank">
+            🚀 開始遊戲測試
+        </a>
+
+        <div class="feature-section">
+            <h2>🏆 Marathon 模式核心功能</h2>
+            <div class="test-steps">
+                <h3>✅ 測試步驟：</h3>
+                <ol>
+                    <li><span class="highlight">啟動遊戲</span> - 點擊上方遊戲連結</li>
+                    <li><span class="highlight">模式切換</span> - 右側面板找到 "MODE" 按鈕，確認已設為 "MARATHON"</li>
+                    <li><span class="highlight">開始遊戲</span> - 點擊 "Resume" 或按空白鍵開始</li>
+                    <li><span class="highlight">觀察面板</span> - 注意右側的 Marathon 資訊面板</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="feature-section">
+            <h2>📊 速度曲線測試重點</h2>
+            <table class="speed-table">
+                <thead>
+                    <tr>
+                        <th>關卡</th>
+                        <th>重力值</th>
+                        <th>掉落間隔</th>
+                        <th>速度描述</th>
+                        <th>測試重點</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: rgba(0, 255, 0, 0.1);">
+                        <td>01</td>
+                        <td>1.0G</td>
+                        <td>1000ms</td>
+                        <td>快速</td>
+                        <td>✅ 正常體驗</td>
+                    </tr>
+                    <tr>
+                        <td>05</td>
+                        <td>2.2G</td>
+                        <td>455ms</td>
+                        <td>快速</td>
+                        <td>舒適節奏</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>4.0G</td>
+                        <td>250ms</td>
+                        <td>快速</td>
+                        <td>需要專注</td>
+                    </tr>
+                    <tr>
+                        <td>15</td>
+                        <td>6.5G</td>
+                        <td>154ms</td>
+                        <td>極速</td>
+                        <td>快速反應</td>
+                    </tr>
+                    <tr>
+                        <td>19</td>
+                        <td>15.0G</td>
+                        <td>67ms</td>
+                        <td>光速</td>
+                        <td>挑戰級別</td>
+                    </tr>
+                    <tr>
+                        <td>20+</td>
+                        <td>20.0G</td>
+                        <td>50ms</td>
+                        <td>光速</td>
+                        <td class="warning">專家級</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="feature-section">
+            <h2>🎯 測試檢查清單</h2>
+            <div class="test-steps">
+                <h3>🔍 UI 檢查項目：</h3>
+                <ul>
+                    <li>✅ Marathon 資訊面板顯示正常</li>
+                    <li>✅ 關卡數字格式正確 (01, 02, 03...)</li>
+                    <li>✅ 進度條隨著行數消除而更新</li>
+                    <li>✅ 重力值和掉落間隔數值準確</li>
+                    <li>✅ 速度描述隨關卡變化</li>
+                    <li>✅ 模式切換按鈕功能正常</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="feature-section">
+            <h2>🎮 遊戲控制</h2>
+            <div class="controls">
+                <div class="control-item">
+                    <strong>移動</strong><br>
+                    ← → 方向鍵
+                </div>
+                <div class="control-item">
+                    <strong>旋轉</strong><br>
+                    ↑ 順時針<br>Z 逆時針
+                </div>
+                <div class="control-item">
+                    <strong>下降</strong><br>
+                    ↓ 軟降<br>空白 硬降
+                </div>
+                <div class="control-item">
+                    <strong>系統</strong><br>
+                    P 暫停<br>R 重開
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-section">
+            <h2>🚨 測試要點</h2>
+            <div class="test-steps">
+                <h3>🎯 關鍵測試項目：</h3>
+                <ol>
+                    <li><span class="highlight">升級機制</span>：每消除 10 行方塊應該升級</li>
+                    <li><span class="highlight">速度變化</span>：升級後掉落速度應該明顯變快</li>
+                    <li><span class="highlight">進度重置</span>：升級後進度條應該歸零</li>
+                    <li><span class="highlight">模式切換</span>：切換至 CLASSIC 模式應該顯示不同界面</li>
+                    <li><span class="highlight">數據準確</span>：重力值和間隔時間應符合表格數據</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="feature-section">
+            <h2>🎊 測試建議</h2>
+            <div class="test-steps">
+                <p><strong>快速測試法：</strong></p>
+                <ul>
+                    <li>使用硬降（空白鍵）快速完成方塊放置</li>
+                    <li>故意製造 4 行同時消除（Tetris）來快速升級</li>
+                    <li>觀察關卡 1→2→3 的速度變化</li>
+                    <li>嘗試切換模式看差異</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; opacity: 0.8;">
+            <p>🎮 <strong>Flutter Tetris Game</strong> with Marathon Mode</p>
+            <p>🚀 Built with Flutter | 💎 Enhanced by Claude Code</p>
+        </div>
+    </div>
+
+    <script>
+        // 自動檢查伺服器狀態
+        fetch('http://localhost:3000')
+            .then(response => {
+                if (response.ok) {
+                    console.log('✅ 遊戲伺服器運行正常');
+                } else {
+                    console.log('⚠️ 伺服器回應異常');
+                }
+            })
+            .catch(error => {
+                console.log('❌ 無法連接到遊戲伺服器:', error);
+                alert('⚠️ 遊戲伺服器似乎未運行，請確認 localhost:3000 可以訪問');
+            });
+    </script>
+</body>
+</html>
