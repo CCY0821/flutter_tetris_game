@@ -64,15 +64,31 @@ class GameLogic {
     }
 
     if (clearedRows > 0) {
-      int base = 100;
-      int bonus = (clearedRows - 1) * 50;
-      gameState.score += clearedRows * base + bonus;
+      // 使用新的官方得分系統
+      final scoringResult = gameState.scoringService.calculateLineScore(
+        linesCleared: clearedRows,
+        currentLevel: gameState.speedLevel,
+        isTSpin: lastRotationWasWallKick && gameState.currentTetromino?.isT == true,
+        tSpinType: _determineTSpinType(),
+        tetromino: gameState.currentTetromino,
+      );
 
+      gameState.score += scoringResult.points;
+      
       // 更新 Marathon 系統的行數計算
       gameState.updateLinesCleared(clearedRows);
 
-      // 播放消除音效
-      gameState.audioService.playSoundEffect('line_clear');
+      // 播放相應音效
+      if (scoringResult.achievements.any((a) => a.contains('T-Spin'))) {
+        gameState.audioService.playSoundEffect('t_spin'); // 如果有的話
+      } else if (clearedRows == 4) {
+        gameState.audioService.playSoundEffect('tetris'); // 如果有的話
+      } else {
+        gameState.audioService.playSoundEffect('line_clear');
+      }
+
+      // 儲存最後一次得分結果供 UI 顯示
+      gameState.lastScoringResult = scoringResult;
     }
 
     // 在矩陣頂部添加新的空行
@@ -132,6 +148,9 @@ class GameLogic {
   void moveDown() {
     if (canMove(gameState.currentTetromino!, dy: 1)) {
       gameState.currentTetromino!.y++;
+      // 軟降得分
+      int softDropPoints = gameState.scoringService.calculateSoftDropScore(1);
+      gameState.score += softDropPoints;
     }
   }
 
@@ -147,8 +166,9 @@ class GameLogic {
       dropDistance++;
     }
 
-    // 硬降獲得額外分數（每格2分）
-    gameState.score += dropDistance * 2;
+    // 硬降獲得額外分數
+    int hardDropPoints = gameState.scoringService.calculateHardDropScore(dropDistance);
+    gameState.score += hardDropPoints;
 
     // 立即鎖定方塊
     lockTetromino();
@@ -210,9 +230,21 @@ class GameLogic {
 
   /// 檢查 T-Spin（簡化版本）
   void _checkTSpin(Tetromino tPiece) {
-    // 這是一個簡化的 T-Spin 檢測
-    // 實際的 T-Spin 規則更複雜，需要檢查角落填充情況
+    // 這個方法現在主要用於標記 T-Spin 狀態
+    // 實際得分計算在 clearFullRows 中處理
+  }
+
+  /// 確定 T-Spin 類型
+  String _determineTSpinType() {
+    if (!lastRotationWasWallKick || gameState.currentTetromino?.isT != true) {
+      return 'normal';
+    }
+
+    // 簡化的 T-Spin 檢測邏輯
+    // 在實際實現中，這裡會有更複雜的角落檢查
+    final tPiece = gameState.currentTetromino!;
     int filledCorners = 0;
+    
     final corners = [
       Offset(tPiece.x - 1, tPiece.y - 1), // 左上
       Offset(tPiece.x + 1, tPiece.y - 1), // 右上
@@ -227,18 +259,15 @@ class GameLogic {
       if (x < 0 ||
           x >= GameState.colCount ||
           y < 0 ||
-          y >= GameState.rowCount) {
+          y >= GameState.totalRowCount) {
         filledCorners++; // 邊界算作填充
-      } else if (gameState.board[y][x] != null) {
+      } else if (y >= 0 && gameState.board[y][x] != null) {
         filledCorners++;
       }
     }
 
-    // 如果三個或更多角落被填充，則可能是 T-Spin
-    if (filledCorners >= 3) {
-      // 可以在這裡添加 T-Spin 獎勵分數或特效
-      // gameState.score += 400; // T-Spin 獎勵
-    }
+    // 簡化判斷：3個以上角落填充為普通 T-Spin，否則為 Mini T-Spin
+    return filledCorners >= 3 ? 'normal' : 'mini';
   }
 
   /// 獲取最後一次旋轉的壁踢資訊

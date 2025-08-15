@@ -1,12 +1,129 @@
 import 'package:flutter/material.dart';
 import '../models/tetromino.dart';
 import '../services/audio_service.dart';
+import '../services/scoring_service.dart';
 import '../theme/game_theme.dart';
 import 'marathon_system.dart';
 import '../widgets/marathon_info_panel.dart';
 
 class GameUIComponents {
   static const double cellSize = 20;
+
+  /// 顯示得分詳細資訊面板
+  static Widget scoringInfoPanel(ScoringResult? scoringResult) {
+    if (scoringResult == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        gradient: GameTheme.panelGradient,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: GameTheme.boardBorder,
+          width: 1,
+        ),
+        boxShadow: GameTheme.cardShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'LAST SCORE',
+                style: GameTheme.accentStyle.copyWith(fontSize: 10),
+              ),
+              Text(
+                '+${scoringResult.points}',
+                style: GameTheme.accentStyle.copyWith(
+                  fontSize: 12,
+                  color: GameTheme.highlight,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          if (scoringResult.achievements.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            ...scoringResult.achievements.map((achievement) => Text(
+                  achievement,
+                  style: GameTheme.accentStyle.copyWith(fontSize: 9, color: Colors.white70),
+                )),
+          ],
+          if (scoringResult.comboCount > 0) ...[
+            const SizedBox(height: 2),
+            Text(
+              'Combo x${scoringResult.comboCount}',
+              style: GameTheme.accentStyle.copyWith(
+                fontSize: 9,
+                color: GameTheme.accentBlue,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// 顯示連續消除（Combo）和 Back-to-Back 狀態
+  static Widget gameStatusIndicators({
+    required int combo,
+    required bool isBackToBackReady,
+  }) {
+    if (combo == 0 && !isBackToBackReady) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        gradient: GameTheme.panelGradient,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: GameTheme.boardBorder,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (combo > 0) ...[
+            Icon(
+              Icons.flash_on,
+              color: GameTheme.accentBlue,
+              size: 16,
+            ),
+            const SizedBox(width: 2),
+            Text(
+              'COMBO ${combo}',
+              style: GameTheme.accentStyle.copyWith(
+                fontSize: 10,
+                color: GameTheme.accentBlue,
+              ),
+            ),
+          ],
+          if (combo > 0 && isBackToBackReady) const SizedBox(width: 8),
+          if (isBackToBackReady) ...[
+            Icon(
+              Icons.repeat,
+              color: GameTheme.highlight,
+              size: 16,
+            ),
+            const SizedBox(width: 2),
+            Text(
+              'B2B',
+              style: GameTheme.accentStyle.copyWith(
+                fontSize: 10,
+                color: GameTheme.highlight,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
   static Widget nextBlockPreview(Tetromino? nextTetromino) {
     const previewSize = 8;

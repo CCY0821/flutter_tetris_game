@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/tetromino.dart';
 import '../services/audio_service.dart';
+import '../services/scoring_service.dart';
 import 'marathon_system.dart';
 
 class GameState {
@@ -23,6 +24,7 @@ class GameState {
   Tetromino? nextTetromino;
   final AudioService audioService = AudioService();
   final MarathonSystem marathonSystem = MarathonSystem();
+  final ScoringService scoringService = ScoringService();
 
   int score = 0;
   bool isGameOver = false;
@@ -30,6 +32,9 @@ class GameState {
 
   // Ghost piece 設定
   bool isGhostPieceEnabled = true;
+
+  // 最後一次得分結果
+  ScoringResult? lastScoringResult;
 
   // 遊戲模式
   bool isMarathonMode = true; // 預設使用 Marathon 模式
@@ -86,8 +91,9 @@ class GameState {
     currentTetromino = Tetromino.random(colCount);
     nextTetromino = Tetromino.random(colCount);
 
-    // 重置 Marathon 系統
+    // 重置 Marathon 系統和得分系統
     marathonSystem.reset();
+    scoringService.reset();
 
     // 不自動播放背景音樂，等待用戶互動
     // await audioService.playBackgroundMusic();

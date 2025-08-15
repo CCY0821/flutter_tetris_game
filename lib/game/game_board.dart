@@ -232,7 +232,18 @@ class _GameBoardState extends State<GameBoard> {
 
                     // 下一個方塊預覽
                     GameUIComponents.nextBlockPreview(gameState.nextTetromino),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
+
+                    // 得分系統狀態指示器
+                    GameUIComponents.gameStatusIndicators(
+                      combo: gameState.scoringService.currentCombo,
+                      isBackToBackReady: gameState.scoringService.isBackToBackReady,
+                    ),
+                    const SizedBox(height: 8),
+
+                    // 最後一次得分結果
+                    GameUIComponents.scoringInfoPanel(gameState.lastScoringResult),
+                    const SizedBox(height: 12),
 
                     // 控制按鈕
                     ElevatedButton(
