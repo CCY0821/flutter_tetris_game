@@ -7,7 +7,16 @@
       "Bash(flutter analyze:*)",
       "Bash(git push:*)",
       "Bash(flutter run:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(node:*)",
+      "Bash(mkdir:*)",
+      "Bash(setx:*)",
+      "WebFetch(domain:tetris.wiki)",
+      "Bash(dart:*)",
+      "Bash(rm:*)",
+      "Bash(python:*)",
+      "Bash(start test_marathon_features.html)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }
