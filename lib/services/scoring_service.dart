@@ -23,9 +23,10 @@ class ScoringService {
   };
 
   // 遊戲狀態追蹤
-  int _comboCount = 0;
+  int _comboCount = -1; // 根據官方規範，combo 從 -1 開始
   bool _lastWasDifficultClear = false; // Back-to-Back 狀態
   int _totalLinesCleared = 0;
+  int _maxCombo = 0; // 最大連擊記錄
   
   // 統計資料
   Map<String, int> _statistics = {
@@ -40,9 +41,10 @@ class ScoringService {
 
   /// 重置得分系統狀態
   void reset() {
-    _comboCount = 0;
+    _comboCount = -1; // 重置為官方標準的 -1
     _lastWasDifficultClear = false;
     _totalLinesCleared = 0;
+    _maxCombo = 0;
     _statistics = {
       'singles': 0,
       'doubles': 0,
@@ -51,6 +53,8 @@ class ScoringService {
       't_spins': 0,
       'combos': 0,
       'back_to_backs': 0,
+      'max_combo': 0,
+      'combo_count': 0,
     };
   }
 
@@ -63,8 +67,8 @@ class ScoringService {
     Tetromino? tetromino,
   }) {
     if (linesCleared == 0) {
-      // 無消行時重置 Combo
-      _comboCount = 0;
+      // 無消行時重置 Combo（根據官方規範重置為 -1）
+      _comboCount = -1;
       return ScoringResult(
         points: 0,
         description: 'No lines cleared',
@@ -122,14 +126,22 @@ class ScoringService {
       _updateLineStatistics(linesCleared);
     }
 
-    // Combo 獎勵計算
+    // Combo 獎勵計算（官方規範：從 -1 開始，每次消行 +1）
     _comboCount++;
-    if (_comboCount > 1) {
-      int comboBonus = 50 * (_comboCount - 1) * currentLevel;
+    
+    // 更新最大連擊記錄
+    if (_comboCount > _maxCombo) {
+      _maxCombo = _comboCount;
+      _statistics['max_combo'] = _maxCombo;
+    }
+    
+    if (_comboCount > 0) {
+      int comboBonus = 50 * _comboCount * currentLevel;
       totalPoints += comboBonus;
       breakdown['combo'] = comboBonus;
-      achievements.add('${_comboCount - 1} Combo');
+      achievements.add('${_comboCount} Combo');
       _statistics['combos'] = (_statistics['combos'] ?? 0) + 1;
+      _statistics['combo_count'] = (_statistics['combo_count'] ?? 0) + _comboCount;
     }
 
     // 更新狀態
@@ -141,8 +153,9 @@ class ScoringService {
       description: achievements.join(', '),
       breakdown: breakdown,
       achievements: achievements,
-      comboCount: _comboCount - 1,
+      comboCount: max(0, _comboCount),
       isBackToBack: _lastWasDifficultClear && isDifficultClear,
+      comboRank: comboRankDescription,
     );
   }
 
@@ -209,7 +222,21 @@ class ScoringService {
   }
 
   /// 當前 Combo 數
-  int get currentCombo => max(0, _comboCount - 1);
+  int get currentCombo => max(0, _comboCount);
+  
+  /// 最大連擊記錄
+  int get maxCombo => _maxCombo;
+  
+  /// 連擊等級描述
+  String get comboRankDescription {
+    if (_comboCount <= 0) return '';
+    if (_comboCount >= 1 && _comboCount <= 3) return 'Nice Combo!';
+    if (_comboCount >= 4 && _comboCount <= 6) return 'Great Combo!';
+    if (_comboCount >= 7 && _comboCount <= 10) return 'Excellent Combo!';
+    if (_comboCount >= 11 && _comboCount <= 15) return 'Amazing Combo!';
+    if (_comboCount >= 16 && _comboCount <= 20) return 'Incredible Combo!';
+    return 'LEGENDARY COMBO!';
+  }
 
   /// 是否處於 Back-to-Back 狀態
   bool get isBackToBackReady => _lastWasDifficultClear;
@@ -225,6 +252,7 @@ class ScoringResult {
   final Map<String, int> breakdown;
   final List<String> achievements;
   final int comboCount;
+  final String comboRank;
   final bool isBackToBack;
 
   ScoringResult({
@@ -233,6 +261,7 @@ class ScoringResult {
     required this.breakdown,
     this.achievements = const [],
     this.comboCount = 0,
+    this.comboRank = '',
     this.isBackToBack = false,
   });
 

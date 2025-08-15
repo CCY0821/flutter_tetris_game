@@ -78,9 +78,15 @@ class GameLogic {
       // 更新 Marathon 系統的行數計算
       gameState.updateLinesCleared(clearedRows);
 
-      // 播放相應音效
+      // 播放相應音效（優先級：T-Spin > 連擊 > Tetris > 一般消行）
       if (scoringResult.achievements.any((a) => a.contains('T-Spin'))) {
         gameState.audioService.playSoundEffect('t_spin'); // 如果有的話
+      } else if (scoringResult.comboCount >= 4) {
+        // 高連擊特殊音效
+        gameState.audioService.playSoundEffect('combo_high'); // 如果有的話
+      } else if (scoringResult.comboCount > 0) {
+        // 一般連擊音效
+        gameState.audioService.playSoundEffect('combo'); // 如果有的話
       } else if (clearedRows == 4) {
         gameState.audioService.playSoundEffect('tetris'); // 如果有的話
       } else {

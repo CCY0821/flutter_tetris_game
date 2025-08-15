@@ -5,6 +5,7 @@ import '../services/scoring_service.dart';
 import '../theme/game_theme.dart';
 import 'marathon_system.dart';
 import '../widgets/marathon_info_panel.dart';
+import '../widgets/combo_stats_panel.dart';
 
 class GameUIComponents {
   static const double cellSize = 20;
@@ -71,6 +72,7 @@ class GameUIComponents {
   static Widget gameStatusIndicators({
     required int combo,
     required bool isBackToBackReady,
+    String comboRank = '',
   }) {
     if (combo == 0 && !isBackToBackReady) {
       return const SizedBox.shrink();
@@ -97,10 +99,11 @@ class GameUIComponents {
             ),
             const SizedBox(width: 2),
             Text(
-              'COMBO ${combo}',
+              'COMBO $combo',
               style: GameTheme.accentStyle.copyWith(
                 fontSize: 10,
-                color: GameTheme.accentBlue,
+                color: _getComboColor(combo),
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
@@ -123,6 +126,76 @@ class GameUIComponents {
         ],
       ),
     );
+  }
+
+  /// 根據連擊數獲取顏色
+  static Color _getComboColor(int combo) {
+    if (combo >= 16) return const Color(0xFFFF1744); // 紅色 - LEGENDARY
+    if (combo >= 11) return const Color(0xFFFF5722); // 橙紅色 - AMAZING
+    if (combo >= 7) return const Color(0xFFFF9800); // 橙色 - EXCELLENT
+    if (combo >= 4) return const Color(0xFFFFC107); // 黃色 - GREAT
+    if (combo >= 1) return const Color(0xFF4CAF50); // 綠色 - NICE
+    return GameTheme.accentBlue;
+  }
+
+  /// 連擊特效動畫指示器
+  static Widget comboEffectIndicator({
+    required int combo,
+    required String comboRank,
+  }) {
+    if (combo == 0) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            _getComboColor(combo).withOpacity(0.8),
+            _getComboColor(combo).withOpacity(0.4),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _getComboColor(combo),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: _getComboColor(combo).withOpacity(0.5),
+            blurRadius: 8,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$combo COMBO',
+            style: GameTheme.accentStyle.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          if (comboRank.isNotEmpty)
+            Text(
+              comboRank.replaceAll('!', ''),
+              style: GameTheme.accentStyle.copyWith(
+                fontSize: 10,
+                color: Colors.white70,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// 連擊統計面板
+  static Widget comboStatsPanel(ScoringService scoringService) {
+    return ComboStatsPanel(scoringService: scoringService);
   }
 
   static Widget nextBlockPreview(Tetromino? nextTetromino) {

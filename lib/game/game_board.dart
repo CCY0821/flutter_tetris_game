@@ -238,7 +238,16 @@ class _GameBoardState extends State<GameBoard> {
                     GameUIComponents.gameStatusIndicators(
                       combo: gameState.scoringService.currentCombo,
                       isBackToBackReady: gameState.scoringService.isBackToBackReady,
+                      comboRank: gameState.scoringService.comboRankDescription,
                     ),
+                    const SizedBox(height: 8),
+
+                    // 連擊特效指示器（高連擊時顯示）
+                    if (gameState.scoringService.currentCombo >= 4)
+                      GameUIComponents.comboEffectIndicator(
+                        combo: gameState.scoringService.currentCombo,
+                        comboRank: gameState.scoringService.comboRankDescription,
+                      ),
                     const SizedBox(height: 8),
 
                     // 最後一次得分結果
@@ -297,6 +306,11 @@ class _GameBoardState extends State<GameBoard> {
 
                     // 控制說明
                     GameUIComponents.controlHelpButton(context),
+
+                    const SizedBox(height: 12),
+
+                    // 連擊統計面板
+                    GameUIComponents.comboStatsPanel(gameState.scoringService),
 
                     const SizedBox(height: 16),
 
