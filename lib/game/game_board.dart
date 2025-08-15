@@ -9,6 +9,7 @@ import 'game_ui_components.dart';
 import 'board_painter.dart';
 import 'touch_controls.dart';
 import '../theme/game_theme.dart';
+import '../widgets/settings_panel.dart';
 
 class GameBoard extends StatefulWidget {
   const GameBoard({super.key});
@@ -107,6 +108,19 @@ class _GameBoardState extends State<GameBoard> {
     controllerHandler.handleGamepadInput(event);
   }
 
+  void _showSettingsPanel() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => SettingsPanel(
+        gameState: gameState,
+        onGameModeToggle: () => setState(() => gameState.toggleGameMode()),
+        onGhostPieceToggle: () => setState(() => gameState.toggleGhostPiece()),
+        onStateChange: () => setState(() {}),
+        gameContext: context,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return IntrinsicHeight(
@@ -198,12 +212,6 @@ class _GameBoardState extends State<GameBoard> {
                         label: 'SCORE'),
                     const SizedBox(height: 12),
 
-                    // 遊戲模式切換
-                    GameUIComponents.gameModeToggleButton(
-                      gameState.isMarathonMode,
-                      () => setState(() => gameState.toggleGameMode()),
-                    ),
-                    const SizedBox(height: 12),
 
                     // Marathon 模式資訊或傳統資訊
                     if (gameState.isMarathonMode) ...[
@@ -254,6 +262,25 @@ class _GameBoardState extends State<GameBoard> {
                     GameUIComponents.scoringInfoPanel(gameState.lastScoringResult),
                     const SizedBox(height: 12),
 
+                    // 設置按鈕
+                    ElevatedButton(
+                      onPressed: () => _showSettingsPanel(),
+                      style: GameTheme.primaryButtonStyle.copyWith(
+                        backgroundColor: MaterialStateProperty.all(
+                          GameTheme.accentBlue.withOpacity(0.8),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.settings, size: 18),
+                          const SizedBox(width: 6),
+                          Text('Settings'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
                     // 控制按鈕
                     ElevatedButton(
                       onPressed: () => setState(
@@ -291,34 +318,10 @@ class _GameBoardState extends State<GameBoard> {
                     ),
                     const SizedBox(height: 16),
 
-                    // 音頻控制
-                    GameUIComponents.audioControlButton(),
-
-                    const SizedBox(height: 12),
-
-                    // Ghost piece 控制
-                    GameUIComponents.ghostPieceControlButton(
-                      gameState.isGhostPieceEnabled,
-                      () => setState(() => gameState.toggleGhostPiece()),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    // 控制說明
-                    GameUIComponents.controlHelpButton(context),
-
-                    const SizedBox(height: 12),
-
                     // 連擊統計面板
                     GameUIComponents.comboStatsPanel(gameState.scoringService),
 
                     const SizedBox(height: 16),
-
-                    // SRS 資訊顯示
-                    GameUIComponents.infoBox(
-                      gameLogic.getLastRotationInfo(),
-                      label: 'ROTATION',
-                    ),
                   ],
                 ),
               ),
