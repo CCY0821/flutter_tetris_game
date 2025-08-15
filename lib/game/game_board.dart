@@ -24,7 +24,7 @@ class _GameBoardState extends State<GameBoard> {
   late GameLogic gameLogic;
   late InputHandler inputHandler;
   late ControllerHandler controllerHandler;
-  Timer? gameTimer;
+  Timer? _dropTimer;
   int _currentSpeed = 500; // 追蹤當前速度
 
   @override
@@ -57,7 +57,7 @@ class _GameBoardState extends State<GameBoard> {
   @override
   void dispose() {
     RawKeyboard.instance.removeListener(_handleKey);
-    gameTimer?.cancel();
+    _dropTimer?.cancel();
     controllerHandler.dispose();
     gameState.dispose();
     super.dispose();
@@ -71,21 +71,28 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   void _startGameTimer() {
-    gameTimer?.cancel();
-    gameTimer = Timer.periodic(Duration(milliseconds: _currentSpeed), (_) {
+    // 確保先取消現有的timer
+    _dropTimer?.cancel();
+    
+    // 驗證速度值的有效性
+    if (_currentSpeed <= 0) {
+      _currentSpeed = 500; // 設置默認值
+    }
+    
+    _dropTimer = Timer.periodic(Duration(milliseconds: _currentSpeed), (_) {
       if (!gameState.isPaused && !gameState.isGameOver) {
         setState(() {
           gameLogic.drop();
 
           // 檢查速度是否需要更新
           int newSpeed = gameState.dropSpeed;
-          if (newSpeed != _currentSpeed) {
+          if (newSpeed != _currentSpeed && newSpeed > 0) {
             _currentSpeed = newSpeed;
             _startGameTimer(); // 重新啟動計時器使用新速度
           }
 
           if (gameState.isGameOver) {
-            gameTimer?.cancel();
+            _dropTimer?.cancel();
           }
         });
       }

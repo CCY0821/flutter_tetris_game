@@ -21,7 +21,6 @@ class GameState {
   List<List<Color?>> board = [];
   Tetromino? currentTetromino;
   Tetromino? nextTetromino;
-  Timer? gameTimer;
   final AudioService audioService = AudioService();
   final MarathonSystem marathonSystem = MarathonSystem();
 
@@ -170,7 +169,6 @@ class GameState {
   }
 
   Future<void> dispose() async {
-    gameTimer?.cancel();
     await audioService.dispose();
   }
 }
