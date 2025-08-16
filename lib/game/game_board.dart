@@ -256,59 +256,70 @@ class _GameBoardState extends State<GameBoard> {
                     GameUIComponents.scoringInfoPanel(gameState.lastScoringResult),
                     const SizedBox(height: 12),
 
-                    // 設置按鈕
-                    ElevatedButton(
-                      onPressed: () => _showSettingsPanel(),
-                      style: GameTheme.primaryButtonStyle.copyWith(
-                        backgroundColor: MaterialStateProperty.all(
-                          GameTheme.accentBlue.withOpacity(0.8),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.settings, size: 18),
-                          const SizedBox(width: 6),
-                          Text('Settings'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // 控制按鈕
-                    ElevatedButton(
-                      onPressed: () => setState(
-                          () => gameState.isPaused = !gameState.isPaused),
-                      style: gameState.isPaused
-                          ? GameTheme.secondaryButtonStyle
-                          : GameTheme.primaryButtonStyle,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            gameState.isPaused ? Icons.play_arrow : Icons.pause,
-                            size: 18,
+                    // 水平並排控制按鈕
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // 設置按鈕
+                        Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 4),
+                            child: ElevatedButton(
+                              onPressed: () => _showSettingsPanel(),
+                              style: GameTheme.primaryButtonStyle.copyWith(
+                                backgroundColor: MaterialStateProperty.all(
+                                  GameTheme.accentBlue.withOpacity(0.8),
+                                ),
+                                padding: MaterialStateProperty.all(
+                                  const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                              ),
+                              child: Icon(Icons.settings, size: 20),
+                            ),
                           ),
-                          const SizedBox(width: 6),
-                          Text(gameState.isPaused ? 'Resume' : 'Pause'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed: _startGame,
-                      style: GameTheme.primaryButtonStyle.copyWith(
-                        backgroundColor:
-                            MaterialStateProperty.all(GameTheme.buttonDanger),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.refresh, size: 18),
-                          const SizedBox(width: 6),
-                          Text('Restart'),
-                        ],
-                      ),
+                        ),
+                        
+                        // 暫停/繼續按鈕
+                        Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 2),
+                            child: ElevatedButton(
+                              onPressed: () => setState(
+                                  () => gameState.isPaused = !gameState.isPaused),
+                              style: (gameState.isPaused
+                                  ? GameTheme.secondaryButtonStyle
+                                  : GameTheme.primaryButtonStyle).copyWith(
+                                padding: MaterialStateProperty.all(
+                                  const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                              ),
+                              child: Icon(
+                                gameState.isPaused ? Icons.play_arrow : Icons.pause,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                        
+                        // 重新開始按鈕
+                        Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.only(left: 4),
+                            child: ElevatedButton(
+                              onPressed: _startGame,
+                              style: GameTheme.primaryButtonStyle.copyWith(
+                                backgroundColor: MaterialStateProperty.all(
+                                  GameTheme.buttonDanger,
+                                ),
+                                padding: MaterialStateProperty.all(
+                                  const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                              ),
+                              child: Icon(Icons.refresh, size: 20),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
 
