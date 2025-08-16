@@ -8,11 +8,11 @@ import '../game/marathon_system.dart';
 import '../services/audio_service.dart';
 
 class GameUIComponents {
-  static const double cellSize = 12;
+  static const double cellSize = 6;
 
   // 合併的 NEXT 和 SCORE 組件
-  static Widget nextAndScorePanel(Tetromino? nextTetromino, int score) {
-    const previewSize = 8;
+  static Widget nextAndScorePanel(Tetromino? nextTetromino, int score, List<Tetromino> nextTetrominos) {
+    const previewSize = 6;
     const offsetX = 2;
     const offsetY = 2;
 
@@ -32,7 +32,7 @@ class GameUIComponents {
     }
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         gradient: GameTheme.panelGradient,
         borderRadius: BorderRadius.circular(12),
@@ -62,7 +62,7 @@ class GameUIComponents {
             ],
           ),
           
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           
           // 分隔線
           Container(
@@ -78,18 +78,20 @@ class GameUIComponents {
             ),
           ),
           
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           
-          // NEXT 方塊預覽
+          // NEXT 方塊預覽區域 - 水平並排設計
           Row(
             children: [
               Text(
                 'NEXT',
                 style: GameTheme.accentStyle.copyWith(fontSize: 12),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
+              
+              // 主要 NEXT 方塊（第一個）
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: GameTheme.gameBoardBg.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(6),
@@ -100,9 +102,9 @@ class GameUIComponents {
                             children: row
                                 .map(
                                   (c) => Container(
-                                    width: cellSize * 0.6,
-                                    height: cellSize * 0.6,
-                                    margin: const EdgeInsets.all(0.5),
+                                    width: cellSize * 0.8,
+                                    height: cellSize * 0.8,
+                                    margin: const EdgeInsets.all(0.4),
                                     decoration: BoxDecoration(
                                       color: c ??
                                           GameTheme.gridLine.withOpacity(0.1),
@@ -112,7 +114,7 @@ class GameUIComponents {
                                           : Border.all(
                                               color: GameTheme.gridLine
                                                   .withOpacity(0.2),
-                                              width: 0.5,
+                                              width: 0.3,
                                             ),
                                     ),
                                   ),
@@ -122,9 +124,66 @@ class GameUIComponents {
                       .toList(),
                 ),
               ),
+              
+              const SizedBox(width: 4),
+              
+              // 下三個方塊預覽（水平排列）
+              ...nextTetrominos.take(3).map((tetromino) => 
+                Container(
+                  margin: const EdgeInsets.only(right: 3),
+                  child: _buildSmallPreview(tetromino),
+                )
+              ).toList(),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  // 建立小型方塊預覽
+  static Widget _buildSmallPreview(Tetromino tetromino) {
+    const smallPreviewSize = 4;
+    const offsetX = 1;
+    const offsetY = 1;
+
+    final preview = List.generate(
+      smallPreviewSize,
+      (_) => List.generate(smallPreviewSize, (_) => null as Color?),
+    );
+
+    for (final p in tetromino.shape) {
+      int px = p.dx.toInt() + offsetX;
+      int py = p.dy.toInt() + offsetY;
+      if (py >= 0 && py < smallPreviewSize && px >= 0 && px < smallPreviewSize) {
+        preview[py][px] = tetromino.color;
+      }
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: GameTheme.gameBoardBg.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Column(
+        children: preview
+            .map((row) => Row(
+                  children: row
+                      .map(
+                        (c) => Container(
+                          width: cellSize * 0.6,
+                          height: cellSize * 0.6,
+                          margin: const EdgeInsets.all(0.25),
+                          decoration: BoxDecoration(
+                            color: c ?? Colors.transparent,
+                            borderRadius: BorderRadius.circular(1),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ))
+            .toList(),
       ),
     );
   }

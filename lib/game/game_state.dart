@@ -22,6 +22,7 @@ class GameState {
   List<List<Color?>> board = [];
   Tetromino? currentTetromino;
   Tetromino? nextTetromino;
+  List<Tetromino> nextTetrominos = []; // 下三個方塊預覽隊列
   final AudioService audioService = AudioService();
   final MarathonSystem marathonSystem = MarathonSystem();
   final ScoringService scoringService = ScoringService();
@@ -90,6 +91,12 @@ class GameState {
     isPaused = false;
     currentTetromino = Tetromino.random(colCount);
     nextTetromino = Tetromino.random(colCount);
+    
+    // 初始化下三個方塊預覽隊列
+    nextTetrominos.clear();
+    for (int i = 0; i < 3; i++) {
+      nextTetrominos.add(Tetromino.random(colCount));
+    }
 
     // 重置 Marathon 系統和得分系統
     marathonSystem.reset();

@@ -208,7 +208,7 @@ class _GameBoardState extends State<GameBoard> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // 合併的 NEXT 和 SCORE 面板
-                    GameUIComponents.nextAndScorePanel(gameState.nextTetromino, gameState.score),
+                    GameUIComponents.nextAndScorePanel(gameState.nextTetromino, gameState.score, gameState.nextTetrominos),
                     const SizedBox(height: 12),
 
                     // Marathon 模式資訊或傳統資訊

@@ -129,7 +129,16 @@ class GameLogic {
 
     if (canMove(newTetro)) {
       gameState.currentTetromino = newTetro;
-      gameState.nextTetromino = Tetromino.random(GameState.colCount);
+      
+      // 從隊列中取出下一個方塊
+      if (gameState.nextTetrominos.isNotEmpty) {
+        gameState.nextTetromino = gameState.nextTetrominos.removeAt(0);
+        // 在隊列末尾添加新的隨機方塊
+        gameState.nextTetrominos.add(Tetromino.random(GameState.colCount));
+      } else {
+        // 如果隊列為空，使用原來的邏輯
+        gameState.nextTetromino = Tetromino.random(GameState.colCount);
+      }
     } else {
       gameState.isGameOver = true;
       // 播放遊戲結束音效
