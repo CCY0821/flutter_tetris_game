@@ -1,78 +1,139 @@
 import 'package:flutter/material.dart';
 import '../models/tetromino.dart';
-import '../services/audio_service.dart';
-import '../services/scoring_service.dart';
 import '../theme/game_theme.dart';
-import 'marathon_system.dart';
-import '../widgets/marathon_info_panel.dart';
+import '../services/scoring_service.dart';
 import '../widgets/combo_stats_panel.dart';
+import '../widgets/marathon_info_panel.dart';
+import '../game/marathon_system.dart';
+import '../services/audio_service.dart';
 
 class GameUIComponents {
-  static const double cellSize = 20;
+  static const double cellSize = 12;
 
-  /// 顯示得分詳細資訊面板
-  static Widget scoringInfoPanel(ScoringResult? scoringResult) {
-    if (scoringResult == null) return const SizedBox.shrink();
+  // 合併的 NEXT 和 SCORE 組件
+  static Widget nextAndScorePanel(Tetromino? nextTetromino, int score) {
+    const previewSize = 8;
+    const offsetX = 2;
+    const offsetY = 2;
+
+    final preview = List.generate(
+      previewSize,
+      (_) => List.generate(previewSize, (_) => null as Color?),
+    );
+
+    if (nextTetromino != null) {
+      for (final p in nextTetromino.shape) {
+        int px = p.dx.toInt() + offsetX;
+        int py = p.dy.toInt() + offsetY;
+        if (py >= 0 && py < previewSize && px >= 0 && px < previewSize) {
+          preview[py][px] = nextTetromino.color;
+        }
+      }
+    }
 
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: GameTheme.panelGradient,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: GameTheme.boardBorder,
-          width: 1,
+          width: 2,
         ),
         boxShadow: GameTheme.cardShadow,
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 分數區域
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'LAST SCORE',
-                style: GameTheme.accentStyle.copyWith(fontSize: 10),
+                'SCORE',
+                style: GameTheme.accentStyle.copyWith(fontSize: 12),
               ),
               Text(
-                '+${scoringResult.points}',
-                style: GameTheme.accentStyle.copyWith(
-                  fontSize: 12,
-                  color: GameTheme.highlight,
-                  fontWeight: FontWeight.bold,
+                '$score',
+                style: GameTheme.titleStyle.copyWith(
+                  fontSize: 16,
+                  color: GameTheme.textAccent,
                 ),
               ),
             ],
           ),
-          if (scoringResult.achievements.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            ...scoringResult.achievements.map((achievement) => Text(
-                  achievement,
-                  style: GameTheme.accentStyle.copyWith(fontSize: 9, color: Colors.white70),
-                )),
-          ],
-          if (scoringResult.comboCount > 0) ...[
-            const SizedBox(height: 2),
-            Text(
-              'Combo x${scoringResult.comboCount}',
-              style: GameTheme.accentStyle.copyWith(
-                fontSize: 9,
-                color: GameTheme.accentBlue,
-                fontWeight: FontWeight.bold,
+          
+          const SizedBox(height: 12),
+          
+          // 分隔線
+          Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  GameTheme.gridLine.withOpacity(0.5),
+                  Colors.transparent,
+                ],
               ),
             ),
-          ],
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // NEXT 方塊預覽
+          Row(
+            children: [
+              Text(
+                'NEXT',
+                style: GameTheme.accentStyle.copyWith(fontSize: 12),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: GameTheme.gameBoardBg.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Column(
+                  children: preview
+                      .map((row) => Row(
+                            children: row
+                                .map(
+                                  (c) => Container(
+                                    width: cellSize * 0.6,
+                                    height: cellSize * 0.6,
+                                    margin: const EdgeInsets.all(0.5),
+                                    decoration: BoxDecoration(
+                                      color: c ??
+                                          GameTheme.gridLine.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(2),
+                                      border: c != null
+                                          ? null
+                                          : Border.all(
+                                              color: GameTheme.gridLine
+                                                  .withOpacity(0.2),
+                                              width: 0.5,
+                                            ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ))
+                      .toList(),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  /// 顯示連續消除（Combo）和 Back-to-Back 狀態
+  // 保留原有的其他組件
   static Widget gameStatusIndicators({
     required int combo,
     required bool isBackToBackReady,
-    String comboRank = '',
+    required String comboRank,
   }) {
     if (combo == 0 && !isBackToBackReady) {
       return const SizedBox.shrink();
@@ -81,10 +142,10 @@ class GameUIComponents {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        gradient: GameTheme.panelGradient,
-        borderRadius: BorderRadius.circular(6),
+        color: Colors.black.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: GameTheme.boardBorder,
+          color: _getComboColor(combo).withOpacity(0.5),
           width: 1,
         ),
       ),
@@ -120,6 +181,7 @@ class GameUIComponents {
               style: GameTheme.accentStyle.copyWith(
                 fontSize: 10,
                 color: GameTheme.highlight,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
@@ -128,33 +190,28 @@ class GameUIComponents {
     );
   }
 
-  /// 根據連擊數獲取顏色
   static Color _getComboColor(int combo) {
-    if (combo >= 16) return const Color(0xFFFF1744); // 紅色 - LEGENDARY
-    if (combo >= 11) return const Color(0xFFFF5722); // 橙紅色 - AMAZING
-    if (combo >= 7) return const Color(0xFFFF9800); // 橙色 - EXCELLENT
-    if (combo >= 4) return const Color(0xFFFFC107); // 黃色 - GREAT
-    if (combo >= 1) return const Color(0xFF4CAF50); // 綠色 - NICE
-    return GameTheme.accentBlue;
+    if (combo >= 10) return const Color(0xFFFF6B6B);
+    if (combo >= 7) return const Color(0xFFFFB347);
+    if (combo >= 4) return const Color(0xFF4ECDC4);
+    if (combo >= 2) return const Color(0xFF95E1D3);
+    return GameTheme.textAccent;
   }
 
-  /// 連擊特效動畫指示器
   static Widget comboEffectIndicator({
     required int combo,
     required String comboRank,
   }) {
-    if (combo == 0) return const SizedBox.shrink();
+    if (combo < 4) return const SizedBox.shrink();
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            _getComboColor(combo).withOpacity(0.8),
-            _getComboColor(combo).withOpacity(0.4),
+            _getComboColor(combo).withOpacity(0.2),
+            _getComboColor(combo).withOpacity(0.1),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
@@ -163,39 +220,72 @@ class GameUIComponents {
         ),
         boxShadow: [
           BoxShadow(
-            color: _getComboColor(combo).withOpacity(0.5),
-            blurRadius: 8,
+            color: _getComboColor(combo).withOpacity(0.3),
+            blurRadius: 12,
             spreadRadius: 2,
           ),
         ],
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.whatshot,
+                color: _getComboColor(combo),
+                size: 20,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '$combo COMBO!',
+                style: GameTheme.titleStyle.copyWith(
+                  fontSize: 14,
+                  color: _getComboColor(combo),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
           Text(
-            '$combo COMBO',
+            comboRank,
             style: GameTheme.accentStyle.copyWith(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+              fontSize: 10,
+              color: _getComboColor(combo),
             ),
           ),
-          if (comboRank.isNotEmpty)
-            Text(
-              comboRank.replaceAll('!', ''),
-              style: GameTheme.accentStyle.copyWith(
-                fontSize: 10,
-                color: Colors.white70,
-              ),
-            ),
         ],
       ),
     );
   }
 
-  /// 連擊統計面板
-  static Widget comboStatsPanel(ScoringService scoringService) {
-    return ComboStatsPanel(scoringService: scoringService);
+  static Widget infoBox(String value, {required String label}) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: GameTheme.panelGradient,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: GameTheme.boardBorder,
+          width: 2,
+        ),
+        boxShadow: GameTheme.cardShadow,
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: GameTheme.accentStyle.copyWith(fontSize: 12),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: GameTheme.titleStyle.copyWith(fontSize: 16),
+          ),
+        ],
+      ),
+    );
   }
 
   static Widget nextBlockPreview(Tetromino? nextTetromino) {
@@ -252,14 +342,16 @@ class GameUIComponents {
                                 height: cellSize * 0.8,
                                 margin: const EdgeInsets.all(0.5),
                                 decoration: BoxDecoration(
-                                  color: c ?? Colors.transparent,
+                                  color: c ??
+                                      GameTheme.gridLine.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(2),
                                   border: c != null
-                                      ? Border.all(
-                                          color: Colors.white.withOpacity(0.2),
+                                      ? null
+                                      : Border.all(
+                                          color: GameTheme.gridLine
+                                              .withOpacity(0.2),
                                           width: 0.5,
-                                        )
-                                      : null,
+                                        ),
                                 ),
                               ),
                             )
@@ -273,216 +365,196 @@ class GameUIComponents {
     );
   }
 
-  static Widget infoBox(String text, {String? label}) {
+  static Widget overlayText(String text, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        gradient: GameTheme.panelGradient,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: GameTheme.boardBorder,
-          width: 1,
+      color: Colors.black.withOpacity(0.8),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color, width: 2),
+          ),
+          child: Text(
+            text,
+            style: GameTheme.titleStyle.copyWith(
+              color: color,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
-        boxShadow: GameTheme.cardShadow,
+      ),
+    );
+  }
+
+  static Widget scoringInfoPanel(dynamic lastResult) {
+    if (lastResult == null) {
+      return const SizedBox.shrink();
+    }
+
+    // 處理 ScoringResult 類型
+    final description = lastResult.description ?? '';
+    final points = lastResult.points ?? 0;
+
+    if (description.isEmpty || points == 0) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: GameTheme.highlight.withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (label != null) ...[
-            Text(
-              label,
-              style: GameTheme.subtitleStyle.copyWith(fontSize: 11),
-            ),
-            const SizedBox(height: 4),
-          ],
           Text(
-            text,
-            style: GameTheme.accentStyle.copyWith(fontSize: 18),
+            'LAST SCORE',
+            style: GameTheme.accentStyle.copyWith(fontSize: 10),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            description,
+            style: const TextStyle(
+              color: Colors.yellow,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Points',
+                style: const TextStyle(color: Colors.white, fontSize: 10),
+              ),
+              Text(
+                '+$points',
+                style: TextStyle(
+                  color: GameTheme.highlight,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  static Widget overlayText(String text, Color color) {
-    return Positioned.fill(
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.black.withOpacity(0.8),
-              Colors.black.withOpacity(0.9),
-              Colors.black.withOpacity(0.8),
-            ],
-          ),
+  static Widget gameModeToggleButton(bool isMarathonMode, VoidCallback onToggle) {
+    return ElevatedButton(
+      onPressed: onToggle,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isMarathonMode 
+            ? GameTheme.buttonSuccess 
+            : GameTheme.buttonSecondary,
+        foregroundColor: GameTheme.textPrimary,
+        elevation: 4,
+        shadowColor: (isMarathonMode 
+            ? GameTheme.buttonSuccess 
+            : GameTheme.buttonSecondary).withOpacity(0.4),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  color.withOpacity(0.1),
-                  color.withOpacity(0.05),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: color.withOpacity(0.5),
-                width: 2,
-              ),
-            ),
-            child: Text(
-              text,
-              style: TextStyle(
-                color: color,
-                fontSize: 42,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withOpacity(0.8),
-                    blurRadius: 8,
-                    offset: const Offset(2, 2),
-                  ),
-                ],
-              ),
-            ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            isMarathonMode ? Icons.speed : Icons.videogame_asset,
+            size: 18,
           ),
-        ),
+          const SizedBox(width: 6),
+          Text(isMarathonMode ? 'Marathon' : 'Classic'),
+        ],
       ),
     );
+  }
+
+  static Widget marathonInfoPanel(MarathonSystem marathonSystem) {
+    return MarathonInfoPanel(marathonSystem: marathonSystem);
+  }
+
+  static Widget comboStatsPanel(ScoringService scoringService) {
+    return ComboStatsPanel(scoringService: scoringService);
   }
 
   static Widget audioControlButton() {
-    final audioService = AudioService();
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            gradient: GameTheme.panelGradient,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: GameTheme.boardBorder,
-              width: 1,
-            ),
-            boxShadow: GameTheme.cardShadow,
-          ),
-          child: Column(
-            children: [
-              Text(
-                'AUDIO',
-                style: GameTheme.accentStyle.copyWith(fontSize: 12),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: audioService.isMusicEnabled
-                          ? GameTheme.buttonPrimary.withOpacity(0.8)
-                          : GameTheme.gridLine,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: IconButton(
-                      onPressed: () async {
-                        await audioService.toggleMusic();
-                        setState(() {});
-                      },
-                      icon: Icon(
-                        audioService.isMusicEnabled
-                            ? Icons.music_note
-                            : Icons.music_off,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      tooltip:
-                          audioService.isMusicEnabled ? '關閉音樂 (M)' : '開啟音樂 (M)',
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: audioService.isSfxEnabled
-                          ? GameTheme.buttonPrimary.withOpacity(0.8)
-                          : GameTheme.gridLine,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        audioService.toggleSfx();
-                        setState(() {});
-                      },
-                      icon: Icon(
-                        audioService.isSfxEnabled
-                            ? Icons.volume_up
-                            : Icons.volume_off,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      tooltip:
-                          audioService.isSfxEnabled ? '關閉音效 (S)' : '開啟音效 (S)',
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () async {
-                  await audioService.playBackgroundMusic();
-                  setState(() {});
-                },
-                style: GameTheme.secondaryButtonStyle.copyWith(
-                  minimumSize: MaterialStateProperty.all(const Size(120, 32)),
-                  padding: MaterialStateProperty.all(
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.play_arrow, size: 16),
-                    const SizedBox(width: 4),
-                    Text('播放', style: TextStyle(fontSize: 12)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  /// Ghost piece 控制按鈕
-  static Widget ghostPieceControlButton(bool isEnabled, VoidCallback onToggle) {
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        gradient: GameTheme.panelGradient,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: GameTheme.boardBorder,
-          width: 1,
-        ),
-        boxShadow: GameTheme.cardShadow,
-      ),
+      width: 20,
       child: Column(
         children: [
-          Text(
-            'GHOST',
-            style: GameTheme.accentStyle.copyWith(fontSize: 12),
+          Container(
+            decoration: BoxDecoration(
+              color: GameTheme.accentBlue.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              onPressed: () => AudioService().toggleMusic(),
+              icon: Icon(
+                AudioService().isMusicEnabled ? Icons.music_note : Icons.music_off,
+                color: Colors.white,
+                size: 20,
+              ),
+              tooltip: '切換背景音樂 (M)',
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'MUSIC',
+            style: TextStyle(
+              fontSize: 10,
+              color: GameTheme.highlight,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
-              color: isEnabled
-                  ? GameTheme.buttonPrimary.withOpacity(0.8)
-                  : GameTheme.gridLine,
+              color: GameTheme.buttonSecondary.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              onPressed: () => AudioService().toggleSfx(),
+              icon: Icon(
+                AudioService().isSfxEnabled ? Icons.volume_up : Icons.volume_off,
+                color: Colors.white,
+                size: 20,
+              ),
+              tooltip: '切換音效 (S)',
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'SFX',
+            style: TextStyle(
+              fontSize: 10,
+              color: GameTheme.highlight,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget ghostPieceControlButton(bool isEnabled, VoidCallback onToggle) {
+    return Container(
+      width: 20,
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: isEnabled 
+                  ? GameTheme.buttonSuccess.withOpacity(0.8)
+                  : GameTheme.primaryDark.withOpacity(0.8),
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
@@ -492,15 +564,15 @@ class GameUIComponents {
                 color: Colors.white,
                 size: 20,
               ),
-              tooltip: isEnabled ? '隱藏Ghost Piece (G)' : '顯示Ghost Piece (G)',
+              tooltip: isEnabled ? '關閉 Ghost Piece (G)' : '開啟 Ghost Piece (G)',
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            isEnabled ? 'ON' : 'OFF',
+          const Text(
+            'GHOST',
             style: TextStyle(
               fontSize: 10,
-              color: isEnabled ? GameTheme.highlight : GameTheme.textSecondary,
+              color: GameTheme.highlight,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -509,29 +581,14 @@ class GameUIComponents {
     );
   }
 
-  /// 控制說明資訊框
   static Widget controlHelpButton(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        gradient: GameTheme.panelGradient,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: GameTheme.boardBorder,
-          width: 1,
-        ),
-        boxShadow: GameTheme.cardShadow,
-      ),
+      width: 20,
       child: Column(
         children: [
-          Text(
-            'CONTROLS',
-            style: GameTheme.accentStyle.copyWith(fontSize: 12),
-          ),
-          const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
-              color: GameTheme.buttonPrimary.withOpacity(0.8),
+              color: GameTheme.accentBlue.withOpacity(0.8),
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
@@ -558,7 +615,6 @@ class GameUIComponents {
     );
   }
 
-  /// 顯示控制說明對話框
   static void _showControlHelp(BuildContext context) {
     showDialog(
       context: context,
@@ -580,41 +636,33 @@ class GameUIComponents {
                     '⌨️ 鍵盤控制',
                     [
                       '← →  移動方塊',
-                      '↑    順時針旋轉',
-                      '↓    軟降（非鎖定）',
-                      '空白   硬降（瞬間落地並鎖定）',
-                      'Z    逆時針旋轉',
-                      'X    順時針旋轉（備用）',
-                      'P    暫停/恢復',
-                      'R    重新開始',
-                      'G    切換Ghost Piece',
+                      '↓  軟降落',
+                      '↑  旋轉方塊',
+                      'Space  快速降落',
+                      'P  暫停/繼續遊戲',
+                      'R  重新開始',
+                      'H  顯示說明',
+                      'M  切換背景音樂',
+                      'S  切換音效',
+                      'G  切換 Ghost Piece',
                     ],
                   ),
                   const SizedBox(height: 16),
                   _buildControlSection(
-                    '🎮 手把控制',
+                    '🎮 WASD 控制',
                     [
-                      '搖桿左/右  移動方塊',
-                      '搖桿上     硬降（瞬間落地）',
-                      '搖桿下     軟降',
-                      '左肩鍵     逆時針旋轉',
-                      '右肩鍵     順時針旋轉',
-                      'A鈕       順時針旋轉',
-                      'B鈕       逆時針旋轉',
-                      'X鈕       硬降',
-                      'Y鈕       暫停',
-                      'Start     暫停/恢復',
-                      'Select    切換Ghost Piece',
+                      'A D  移動方塊',
+                      'S  軟降落',
+                      'W  旋轉方塊',
                     ],
                   ),
                   const SizedBox(height: 16),
                   _buildControlSection(
-                    '📱 觸控控制',
+                    '🎯 手把控制',
                     [
-                      '點擊方向按鈕移動方塊',
-                      '點擊旋轉按鈕改變方向',
-                      '點擊硬降按鈕瞬間落地',
-                      '長按移動按鈕連續移動',
+                      '十字鍵  移動和降落',
+                      'A按鈕  旋轉方塊',
+                      'Start  暫停/繼續',
                     ],
                   ),
                 ],
@@ -622,10 +670,12 @@ class GameUIComponents {
             ),
           ),
           actions: [
-            ElevatedButton(
+            TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              style: GameTheme.primaryButtonStyle,
-              child: const Text('確定'),
+              child: Text(
+                '確定',
+                style: GameTheme.accentStyle,
+              ),
             ),
           ],
         );
@@ -633,154 +683,26 @@ class GameUIComponents {
     );
   }
 
-  /// 建立控制說明區塊
   static Widget _buildControlSection(String title, List<String> controls) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: GameTheme.accentStyle.copyWith(fontSize: 16),
+          style: GameTheme.subtitleStyle.copyWith(
+            fontWeight: FontWeight.bold,
+            color: GameTheme.textAccent,
+          ),
         ),
         const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: GameTheme.gridLine.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: GameTheme.boardBorder.withOpacity(0.3),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: controls
-                .map((control) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Text(
-                        control,
-                        style: GameTheme.bodyStyle.copyWith(fontSize: 13),
-                      ),
-                    ))
-                .toList(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// 遊戲模式切換按鈕
-  static Widget gameModeToggleButton(
-      bool isMarathonMode, VoidCallback onToggle) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        gradient: GameTheme.panelGradient,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: GameTheme.boardBorder,
-          width: 1,
-        ),
-        boxShadow: GameTheme.cardShadow,
-      ),
-      child: Column(
-        children: [
-          Text(
-            'MODE',
-            style: GameTheme.accentStyle.copyWith(fontSize: 12),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            decoration: BoxDecoration(
-              color: isMarathonMode
-                  ? GameTheme.buttonPrimary.withOpacity(0.8)
-                  : GameTheme.gridLine,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: IconButton(
-              onPressed: onToggle,
-              icon: Icon(
-                isMarathonMode ? Icons.speed : Icons.score,
-                color: Colors.white,
-                size: 20,
+        ...controls.map((control) => Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 4),
+              child: Text(
+                control,
+                style: GameTheme.bodyStyle,
               ),
-              tooltip: isMarathonMode ? '切換至傳統模式' : '切換至Marathon模式',
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            isMarathonMode ? 'MARATHON' : 'CLASSIC',
-            style: TextStyle(
-              fontSize: 9,
-              color: isMarathonMode
-                  ? GameTheme.highlight
-                  : GameTheme.textSecondary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Marathon 資訊面板
-  static Widget marathonInfoPanel(MarathonSystem marathonSystem,
-      {bool isVisible = true}) {
-    return MarathonInfoPanel(
-      marathonSystem: marathonSystem,
-      isVisible: isVisible,
-    );
-  }
-
-  /// Marathon 迷你資訊（用於主畫面）
-  static Widget marathonMiniInfo(MarathonSystem marathonSystem) {
-    return MarathonMiniInfo(marathonSystem: marathonSystem);
-  }
-
-  /// 速度顯示框（通用）
-  static Widget speedInfoBox(String speedText, String modeText,
-      {String? subtitle}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        gradient: GameTheme.panelGradient,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: GameTheme.boardBorder,
-          width: 1,
-        ),
-        boxShadow: GameTheme.cardShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'SPEED',
-            style: GameTheme.subtitleStyle.copyWith(fontSize: 11),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            speedText,
-            style: GameTheme.accentStyle.copyWith(fontSize: 18),
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: GameTheme.bodyStyle.copyWith(fontSize: 10),
-            ),
-          ],
-          const SizedBox(height: 4),
-          Text(
-            modeText,
-            style: TextStyle(
-              color: GameTheme.highlight,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+            )),
+      ],
     );
   }
 }

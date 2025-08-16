@@ -207,11 +207,9 @@ class _GameBoardState extends State<GameBoard> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 分數區域
-                    GameUIComponents.infoBox('${gameState.score}',
-                        label: 'SCORE'),
+                    // 合併的 NEXT 和 SCORE 面板
+                    GameUIComponents.nextAndScorePanel(gameState.nextTetromino, gameState.score),
                     const SizedBox(height: 12),
-
 
                     // Marathon 模式資訊或傳統資訊
                     if (gameState.isMarathonMode) ...[
@@ -237,10 +235,6 @@ class _GameBoardState extends State<GameBoard> {
                       ),
                       const SizedBox(height: 12),
                     ],
-
-                    // 下一個方塊預覽
-                    GameUIComponents.nextBlockPreview(gameState.nextTetromino),
-                    const SizedBox(height: 12),
 
                     // 得分系統狀態指示器
                     GameUIComponents.gameStatusIndicators(
