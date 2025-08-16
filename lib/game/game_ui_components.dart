@@ -4,6 +4,7 @@ import '../theme/game_theme.dart';
 import '../services/scoring_service.dart';
 import '../widgets/combo_stats_panel.dart';
 import '../widgets/marathon_info_panel.dart';
+import '../widgets/integrated_stats_panel.dart';
 import '../game/marathon_system.dart';
 import '../services/audio_service.dart';
 
@@ -543,6 +544,18 @@ class GameUIComponents {
 
   static Widget comboStatsPanel(ScoringService scoringService) {
     return ComboStatsPanel(scoringService: scoringService);
+  }
+
+  static Widget integratedStatsPanel(
+    ScoringService scoringService, 
+    MarathonSystem? marathonSystem, 
+    bool isMarathonMode
+  ) {
+    return IntegratedStatsPanel(
+      scoringService: scoringService,
+      marathonSystem: marathonSystem,
+      isMarathonMode: isMarathonMode,
+    );
   }
 
   static Widget audioControlButton() {

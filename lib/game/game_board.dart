@@ -211,13 +211,8 @@ class _GameBoardState extends State<GameBoard> {
                     GameUIComponents.nextAndScorePanel(gameState.nextTetromino, gameState.score, gameState.nextTetrominos),
                     const SizedBox(height: 12),
 
-                    // Marathon 模式資訊或傳統資訊
-                    if (gameState.isMarathonMode) ...[
-                      GameUIComponents.marathonInfoPanel(
-                          gameState.marathonSystem),
-                      const SizedBox(height: 12),
-                    ] else ...[
-                      // 傳統模式的遊戲狀態
+                    // 傳統模式的遊戲狀態（僅在非 Marathon 模式顯示）
+                    if (!gameState.isMarathonMode) ...[
                       Row(
                         children: [
                           Expanded(
@@ -323,8 +318,12 @@ class _GameBoardState extends State<GameBoard> {
                     ),
                     const SizedBox(height: 16),
 
-                    // 連擊統計面板
-                    GameUIComponents.comboStatsPanel(gameState.scoringService),
+                    // 整合統計面板（Marathon + COMBO）
+                    GameUIComponents.integratedStatsPanel(
+                      gameState.scoringService,
+                      gameState.isMarathonMode ? gameState.marathonSystem : null,
+                      gameState.isMarathonMode,
+                    ),
 
                     const SizedBox(height: 16),
                   ],
