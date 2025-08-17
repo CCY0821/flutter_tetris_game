@@ -181,6 +181,7 @@ class _TouchControlsState extends State<TouchControls> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: GameState.colCount * 20,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: GameTheme.panelGradient,
