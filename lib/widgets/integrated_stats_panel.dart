@@ -58,12 +58,15 @@ class IntegratedStatsPanel extends StatelessWidget {
         Icon(
           isMarathonMode ? Icons.speed : Icons.flash_on,
           color: isMarathonMode ? Colors.cyan : GameTheme.accentBlue,
-          size: 18,
+          size: 16,
         ),
-        const SizedBox(width: 6),
-        Text(
-          isMarathonMode ? 'MARATHON STATS' : 'COMBO STATS',
-          style: GameTheme.accentStyle.copyWith(fontSize: 12),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            isMarathonMode ? 'MARATHON' : 'COMBO',
+            style: GameTheme.accentStyle.copyWith(fontSize: 11),
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         if (isMarathonMode && marathonSystem != null) ...[
           const Spacer(),
@@ -115,13 +118,14 @@ class IntegratedStatsPanel extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'LINES',
-                  style: GameTheme.accentStyle.copyWith(fontSize: 10, color: Colors.white70),
-                ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'LINES',
+                    style: GameTheme.accentStyle.copyWith(fontSize: 9, color: Colors.white70),
+                  ),
                 Text(
                   '${stats.totalLines}',
                   style: TextStyle(
@@ -131,23 +135,26 @@ class IntegratedStatsPanel extends StatelessWidget {
                   ),
                 ),
               ],
+                ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'SPEED',
-                  style: GameTheme.accentStyle.copyWith(fontSize: 10, color: Colors.white70),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'SPEED',
+                    style: GameTheme.accentStyle.copyWith(fontSize: 9, color: Colors.white70),
                 ),
                 Text(
                   '${stats.gravity.toStringAsFixed(1)}G',
                   style: TextStyle(
                     color: _getSpeedColor(stats.gravity),
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
+                ),
             ),
           ],
         ),
@@ -216,17 +223,20 @@ class IntegratedStatsPanel extends StatelessWidget {
                       '$currentCombo',
                       style: TextStyle(
                         color: _getComboColor(currentCombo),
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     if (currentCombo > 0) ...[
-                      const SizedBox(width: 4),
-                      Text(
-                        scoringService.comboRankDescription.replaceAll('!', ''),
-                        style: TextStyle(
-                          color: _getComboColor(currentCombo),
-                          fontSize: 8,
+                      const SizedBox(width: 3),
+                      Flexible(
+                        child: Text(
+                          scoringService.comboRankDescription.replaceAll('!', ''),
+                          style: TextStyle(
+                            color: _getComboColor(currentCombo),
+                            fontSize: 7,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -247,14 +257,14 @@ class IntegratedStatsPanel extends StatelessWidget {
                       Icon(
                         Icons.emoji_events,
                         color: GameTheme.highlight,
-                        size: 12,
+                        size: 10,
                       ),
-                    if (maxCombo > 0) const SizedBox(width: 4),
+                    if (maxCombo > 0) const SizedBox(width: 3),
                     Text(
                       '$maxCombo',
                       style: TextStyle(
                         color: _getComboColor(maxCombo),
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -270,8 +280,9 @@ class IntegratedStatsPanel extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildMiniStat('Total', '${stats['combos'] ?? 0}', GameTheme.accentBlue),
-            _buildMiniStat('Points', '${stats['combo_count'] ?? 0}', GameTheme.highlight),
+            Expanded(child: _buildMiniStat('Total', '${stats['combos'] ?? 0}', GameTheme.accentBlue)),
+            const SizedBox(width: 8),
+            Expanded(child: _buildMiniStat('Points', '${stats['combo_count'] ?? 0}', GameTheme.highlight)),
           ],
         ),
       ],

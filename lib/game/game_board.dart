@@ -309,14 +309,6 @@ class _GameBoardState extends State<GameBoard> {
                     ),
                   ),
 
-                  const SizedBox(height: 12),
-
-                        // 觸控按鈕區域
-                        TouchControls(
-                          gameLogic: gameLogic,
-                          gameState: gameState,
-                          onStateChange: () => setState(() {}),
-                        ),
                       ],
                     ),
                   ),
@@ -327,55 +319,77 @@ class _GameBoardState extends State<GameBoard> {
                   Flexible(
                     flex: 2,
                     child: Container(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                      height: GameState.rowCount * cellSize, // 與遊戲場高度對齊
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 合併的 NEXT 和 SCORE 面板
-                    GameUIComponents.nextAndScorePanel(gameState.nextTetromino, gameState.score, gameState.nextTetrominos),
-                    const SizedBox(height: 12),
-
-                    // 傳統模式的遊戲狀態（僅在非 Marathon 模式顯示）
-                    if (!gameState.isMarathonMode) ...[
-                      Row(
-                        children: [
-                          Expanded(
-                            child: GameUIComponents.infoBox(
-                                '${gameState.speedLevel}',
-                                label: 'LEVEL'),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: GameUIComponents.infoBox(
-                                '${gameState.dropSpeed}ms',
-                                label: 'SPEED'),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-
-                    // 得分系統狀態指示器
-                    GameUIComponents.gameStatusIndicators(
-                      combo: gameState.scoringService.currentCombo,
-                      isBackToBackReady: gameState.scoringService.isBackToBackReady,
-                      comboRank: gameState.scoringService.comboRankDescription,
+                    // NEXT 和 SCORE 面板 (頂部固定)
+                    GameUIComponents.nextAndScorePanel(
+                      gameState.nextTetromino, 
+                      gameState.score, 
+                      gameState.nextTetrominos
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
 
-                    // 連擊特效指示器（高連擊時顯示）
-                    if (gameState.scoringService.currentCombo >= 4)
-                      GameUIComponents.comboEffectIndicator(
-                        combo: gameState.scoringService.currentCombo,
-                        comboRank: gameState.scoringService.comboRankDescription,
+                    // 可擴展的中間區域
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            // 傳統模式的遊戲狀態（僅在非 Marathon 模式顯示）
+                            if (!gameState.isMarathonMode) ...[
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: GameUIComponents.infoBox(
+                                        '${gameState.speedLevel}',
+                                        label: 'LEVEL'),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: GameUIComponents.infoBox(
+                                        '${gameState.dropSpeed}ms',
+                                        label: 'SPEED'),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+
+                            // 得分系統狀態指示器
+                            GameUIComponents.gameStatusIndicators(
+                              combo: gameState.scoringService.currentCombo,
+                              isBackToBackReady: gameState.scoringService.isBackToBackReady,
+                              comboRank: gameState.scoringService.comboRankDescription,
+                            ),
+                            const SizedBox(height: 12),
+
+                            // 連擊特效指示器（高連擊時顯示）
+                            if (gameState.scoringService.currentCombo >= 4)
+                              GameUIComponents.comboEffectIndicator(
+                                combo: gameState.scoringService.currentCombo,
+                                comboRank: gameState.scoringService.comboRankDescription,
+                              ),
+                            const SizedBox(height: 12),
+
+                            // 最後一次得分結果
+                            GameUIComponents.scoringInfoPanel(gameState.lastScoringResult),
+                            const SizedBox(height: 16),
+
+                            // 整合統計面板（Marathon + COMBO）
+                            GameUIComponents.integratedStatsPanel(
+                              gameState.scoringService,
+                              gameState.isMarathonMode ? gameState.marathonSystem : null,
+                              gameState.isMarathonMode,
+                            ),
+                          ],
+                        ),
                       ),
-                    const SizedBox(height: 8),
+                    ),
 
-                    // 最後一次得分結果
-                    GameUIComponents.scoringInfoPanel(gameState.lastScoringResult),
+                    // 控制按鈕 (底部固定)
                     const SizedBox(height: 12),
-
-                    // 水平並排控制按鈕
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -390,10 +404,10 @@ class _GameBoardState extends State<GameBoard> {
                                   GameTheme.accentBlue.withOpacity(0.8),
                                 ),
                                 padding: MaterialStateProperty.all(
-                                  const EdgeInsets.symmetric(vertical: 12),
+                                  const EdgeInsets.symmetric(vertical: 10),
                                 ),
                               ),
-                              child: Icon(Icons.settings, size: 20),
+                              child: Icon(Icons.settings, size: 18),
                             ),
                           ),
                         ),
@@ -415,12 +429,12 @@ class _GameBoardState extends State<GameBoard> {
                                   ? GameTheme.secondaryButtonStyle
                                   : GameTheme.primaryButtonStyle).copyWith(
                                 padding: MaterialStateProperty.all(
-                                  const EdgeInsets.symmetric(vertical: 12),
+                                  const EdgeInsets.symmetric(vertical: 10),
                                 ),
                               ),
                               child: Icon(
                                 gameState.isPaused ? Icons.play_arrow : Icons.pause,
-                                size: 20,
+                                size: 18,
                               ),
                             ),
                           ),
@@ -437,25 +451,15 @@ class _GameBoardState extends State<GameBoard> {
                                   GameTheme.buttonDanger,
                                 ),
                                 padding: MaterialStateProperty.all(
-                                  const EdgeInsets.symmetric(vertical: 12),
+                                  const EdgeInsets.symmetric(vertical: 10),
                                 ),
                               ),
-                              child: Icon(Icons.refresh, size: 20),
+                              child: Icon(Icons.refresh, size: 18),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-
-                    // 整合統計面板（Marathon + COMBO）
-                    GameUIComponents.integratedStatsPanel(
-                      gameState.scoringService,
-                      gameState.isMarathonMode ? gameState.marathonSystem : null,
-                      gameState.isMarathonMode,
-                    ),
-
-                      const SizedBox(height: 16),
                     ],
                   ),
                     ),
@@ -463,6 +467,17 @@ class _GameBoardState extends State<GameBoard> {
                 ],
               );
             },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // 觸控按鈕區域 - 置中顯示
+          Center(
+            child: TouchControls(
+              gameLogic: gameLogic,
+              gameState: gameState,
+              onStateChange: () => setState(() {}),
+            ),
           ),
         ],
       ),

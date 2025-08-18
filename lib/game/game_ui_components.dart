@@ -82,16 +82,20 @@ class GameUIComponents {
           const SizedBox(height: 8),
           
           // NEXT 方塊預覽區域 - 水平並排設計
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'NEXT',
-                style: GameTheme.accentStyle.copyWith(fontSize: 12),
-              ),
-              const SizedBox(width: 8),
-              
-              // 主要 NEXT 方塊（第一個）
-              Container(
+              // NEXT 標題和主要方塊
+              Row(
+                children: [
+                  Text(
+                    'NEXT',
+                    style: GameTheme.accentStyle.copyWith(fontSize: 11),
+                  ),
+                  const SizedBox(width: 6),
+                  
+                  // 主要 NEXT 方塊（第一個）
+                  Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: GameTheme.gameBoardBg.withOpacity(0.7),
@@ -125,16 +129,23 @@ class GameUIComponents {
                       .toList(),
                 ),
               ),
+                ],
+              ),
               
-              const SizedBox(width: 4),
+              const SizedBox(height: 6),
               
-              // 下三個方塊預覽（水平排列）
-              ...nextTetrominos.take(3).map((tetromino) => 
-                Container(
-                  margin: const EdgeInsets.only(right: 3),
-                  child: _buildSmallPreview(tetromino),
-                )
-              ).toList(),
+              // 下三個方塊預覽（第二行）
+              Row(
+                children: [
+                  const SizedBox(width: 40), // 對齊NEXT文字下方
+                  ...nextTetrominos.take(3).map((tetromino) => 
+                    Container(
+                      margin: const EdgeInsets.only(right: 2),
+                      child: _buildSmallPreview(tetromino),
+                    )
+                  ).toList(),
+                ],
+              ),
             ],
           ),
         ],
