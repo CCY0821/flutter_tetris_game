@@ -32,7 +32,11 @@ class AudioService {
     try {
       print('Attempting to play background music...');
       print('Music enabled: $_isMusicEnabled');
-      // 先設定循環模式，再播放
+      
+      // 先停止現有音樂，避免重疊播放
+      await _backgroundMusicPlayer.stop();
+      
+      // 設定循環模式，再播放
       await _backgroundMusicPlayer.setReleaseMode(ReleaseMode.loop);
       await _backgroundMusicPlayer.play(
         AssetSource('audio/background_music.mp3'),

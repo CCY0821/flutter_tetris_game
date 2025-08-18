@@ -102,8 +102,10 @@ class GameState {
     marathonSystem.reset();
     scoringService.reset();
 
-    // 不自動播放背景音樂，等待用戶互動
-    // await audioService.playBackgroundMusic();
+    // 重新開始時播放背景音樂
+    if (audioService.isMusicEnabled) {
+      await audioService.playBackgroundMusic();
+    }
   }
 
   // 獲取當前遊戲速度 (毫秒)

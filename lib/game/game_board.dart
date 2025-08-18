@@ -403,8 +403,14 @@ class _GameBoardState extends State<GameBoard> {
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 2),
                             child: ElevatedButton(
-                              onPressed: () => setState(
-                                  () => gameState.isPaused = !gameState.isPaused),
+                              onPressed: () => setState(() {
+                                gameState.isPaused = !gameState.isPaused;
+                                if (gameState.isPaused) {
+                                  gameState.audioService.pauseBackgroundMusic();
+                                } else {
+                                  gameState.audioService.resumeBackgroundMusic();
+                                }
+                              }),
                               style: (gameState.isPaused
                                   ? GameTheme.secondaryButtonStyle
                                   : GameTheme.primaryButtonStyle).copyWith(
