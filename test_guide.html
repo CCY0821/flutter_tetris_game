@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Flutter Tetris 測試指南</title>
+    <style>
+        body { font-family: 'Microsoft YaHei', sans-serif; margin: 20px; line-height: 1.6; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .keyboard { background: #f0f8ff; }
+        .audio { background: #f0fff0; }
+        .touch { background: #fff8dc; }
+        .refresh { background: #ffe4e1; }
+        h2 { color: #2c3e50; }
+        code { background: #f4f4f4; padding: 2px 4px; border-radius: 3px; }
+        .key { background: #3498db; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🎮 Flutter Tetris 測試指南</h1>
+    
+    <div class="section refresh">
+        <h2>🔄 應用刷新方法</h2>
+        <p><strong>在Flutter命令行視窗中按以下按鍵：</strong></p>
+        <ul>
+            <li><span class="key">r</span> - 熱重載 (Hot Reload)</li>
+            <li><span class="key">R</span> - 熱重啟 (Hot Restart)</li>
+            <li><span class="key">q</span> - 退出應用</li>
+        </ul>
+    </div>
+
+    <div class="section keyboard">
+        <h2>⌨️ 鍵盤控制測試</h2>
+        <h3>方向鍵：</h3>
+        <ul>
+            <li><span class="key">←</span> 向左移動</li>
+            <li><span class="key">→</span> 向右移動</li>
+            <li><span class="key">↑</span> 旋轉</li>
+            <li><span class="key">↓</span> 軟降</li>
+            <li><span class="key">Space</span> 硬降</li>
+        </ul>
+        
+        <h3>WASD 控制：</h3>
+        <ul>
+            <li><span class="key">A</span> 向左移動</li>
+            <li><span class="key">D</span> 向右移動</li>
+            <li><span class="key">W</span> 硬降</li>
+            <li><span class="key">S</span> 軟降</li>
+            <li><span class="key">Q</span> 逆時針旋轉</li>
+            <li><span class="key">E</span> 順時針旋轉</li>
+        </ul>
+    </div>
+
+    <div class="section audio">
+        <h2>🔊 音頻測試步驟</h2>
+        <ol>
+            <li>按 <span class="key">R</span> 重新開始遊戲</li>
+            <li>點擊右側的 🎵 音樂按鈕</li>
+            <li>點擊右側的 🔊 音效按鈕</li>
+            <li>嘗試消行聽聽是否有音效</li>
+            <li>檢查Windows音量設定</li>
+        </ol>
+        <p><strong>⚠️ 注意：</strong> 如果沒有聲音，可能是模擬器音頻驅動問題</p>
+    </div>
+
+    <div class="section touch">
+        <h2>📱 觸控按鈕測試</h2>
+        <p>測試螢幕下方的觸控按鈕：</p>
+        <ul>
+            <li>向左/向右移動按鈕</li>
+            <li>旋轉按鈕</li>
+            <li>硬降按鈕</li>
+            <li>暫停按鈕</li>
+        </ul>
+    </div>
+</body>
+</html>
