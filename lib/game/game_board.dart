@@ -19,7 +19,12 @@ class GameBoard extends StatefulWidget {
 }
 
 class _GameBoardState extends State<GameBoard> {
-  static const double cellSize = 20;
+  double _calculateCellSize(BoxConstraints constraints) {
+    // 響應式計算格子大小 - 左側區域約佔60%寬度
+    final gameAreaWidth = constraints.maxWidth * 0.6 - 32; // 60%減去padding
+    final calculatedCellSize = gameAreaWidth / GameState.colCount;
+    return calculatedCellSize.clamp(14.0, 22.0); // 限制在合理範圍內
+  }
 
   late GameState gameState;
   late GameLogic gameLogic;
@@ -46,7 +51,6 @@ class _GameBoardState extends State<GameBoard> {
       onStateChange: () => setState(() {}),
     );
     _initializeGame();
-    RawKeyboard.instance.addListener(_handleKey);
   }
 
   void _initializeGame() async {
@@ -57,7 +61,6 @@ class _GameBoardState extends State<GameBoard> {
 
   @override
   void dispose() {
-    RawKeyboard.instance.removeListener(_handleKey);
     _dropTimer?.cancel();
     controllerHandler.dispose();
     gameState.dispose();
@@ -100,12 +103,123 @@ class _GameBoardState extends State<GameBoard> {
     });
   }
 
-  void _handleKey(RawKeyEvent event) {
-    // 優先處理鍵盤輸入
-    inputHandler.handleKey(event);
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
+      // 直接處理KeyEvent，修改InputHandler和ControllerHandler
+      _handleModernKey(event);
+      return KeyEventResult.handled; // 表示事件已處理
+    }
+    return KeyEventResult.ignored;
+  }
 
-    // 同時處理手把輸入
-    controllerHandler.handleGamepadInput(event);
+  void _handleModernKey(KeyDownEvent event) {
+    final key = event.logicalKey;
+    
+    // 處理系統鍵
+    if (key == LogicalKeyboardKey.keyP && !gameState.isGameOver) {
+      gameState.isPaused = !gameState.isPaused;
+      if (gameState.isPaused) {
+        gameState.audioService.pauseBackgroundMusic();
+      } else {
+        gameState.audioService.resumeBackgroundMusic();
+      }
+      setState(() {});
+      return;
+    } else if (key == LogicalKeyboardKey.keyR) {
+      _startGame();
+      return;
+    } else if (key == LogicalKeyboardKey.keyG) {
+      gameState.toggleGhostPiece();
+      setState(() {});
+      return;
+    }
+    
+    // 處理遊戲控制（只在遊戲運行時）
+    if (!gameState.isPaused && !gameState.isGameOver) {
+      bool stateChanged = false;
+      
+      // 方向鍵控制
+      if (key == LogicalKeyboardKey.arrowLeft) {
+        gameLogic.moveLeft();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.arrowRight) {
+        gameLogic.moveRight();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.arrowUp) {
+        gameLogic.rotate();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.arrowDown) {
+        gameLogic.moveDown();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.space) {
+        gameLogic.hardDrop();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.keyZ) {
+        gameLogic.rotateCounterClockwise();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.keyX) {
+        gameLogic.rotate();
+        stateChanged = true;
+      }
+      // WASD 控制
+      else if (key == LogicalKeyboardKey.keyA) {
+        gameLogic.moveLeft();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.keyD) {
+        gameLogic.moveRight();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.keyW) {
+        gameLogic.hardDrop();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.keyS) {
+        gameLogic.moveDown();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.keyQ) {
+        gameLogic.rotateCounterClockwise();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.keyE) {
+        gameLogic.rotate();
+        stateChanged = true;
+      }
+      // 數字鍵盤控制
+      else if (key == LogicalKeyboardKey.numpad4) {
+        gameLogic.moveLeft();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.numpad6) {
+        gameLogic.moveRight();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.numpad8) {
+        gameLogic.hardDrop();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.numpad2) {
+        gameLogic.moveDown();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.numpad1) {
+        gameLogic.rotateCounterClockwise();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.numpad3) {
+        gameLogic.rotate();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.numpad0) {
+        gameLogic.hardDrop();
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.numpadDecimal) {
+        gameState.isPaused = !gameState.isPaused;
+        if (gameState.isPaused) {
+          gameState.audioService.pauseBackgroundMusic();
+        } else {
+          gameState.audioService.resumeBackgroundMusic();
+        }
+        stateChanged = true;
+      } else if (key == LogicalKeyboardKey.numpadSubtract) {
+        gameState.toggleGhostPiece();
+        stateChanged = true;
+      }
+      
+      if (stateChanged) {
+        setState(() {});
+      }
+    }
   }
 
   void _showSettingsPanel() {
@@ -123,21 +237,28 @@ class _GameBoardState extends State<GameBoard> {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
+    return Focus(
+      autofocus: true,
+      onKeyEvent: _handleKeyEvent,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // 主遊戲區域
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 左側區域（棋盤 + 觸控按鈕）
-              Column(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final cellSize = _calculateCellSize(constraints);
+              return Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 遊戲棋盤
-                  Container(
+                  // 左側區域（棋盤 + 觸控按鈕）
+                  Flexible(
+                    flex: 3,
+                    child: Column(
+                      children: [
+                        // 遊戲棋盤
+                        Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
@@ -171,6 +292,7 @@ class _GameBoardState extends State<GameBoard> {
                                 ghostPiece: gameLogic.shouldShowGhostPiece()
                                     ? gameLogic.calculateGhostPiece()
                                     : null,
+                                cellSize: cellSize,
                               ),
                             ),
                           ),
@@ -189,20 +311,22 @@ class _GameBoardState extends State<GameBoard> {
 
                   const SizedBox(height: 12),
 
-                  // 觸控按鈕區域
-                  TouchControls(
-                    gameLogic: gameLogic,
-                    gameState: gameState,
-                    onStateChange: () => setState(() {}),
+                        // 觸控按鈕區域
+                        TouchControls(
+                          gameLogic: gameLogic,
+                          gameState: gameState,
+                          onStateChange: () => setState(() {}),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
 
-              const SizedBox(width: 16),
+                  const SizedBox(width: 16),
 
-              // 右側控制區
-              Container(
-                width: 180,
+                  // 右側控制區
+                  Flexible(
+                    flex: 2,
+                    child: Container(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -325,11 +449,14 @@ class _GameBoardState extends State<GameBoard> {
                       gameState.isMarathonMode,
                     ),
 
-                    const SizedBox(height: 16),
-                  ],
-                ),
-              ),
-            ],
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),

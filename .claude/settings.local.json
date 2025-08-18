@@ -16,8 +16,21 @@
       "Bash(rm:*)",
       "Bash(python:*)",
       "Bash(start test_marathon_features.html)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(flutter:*)",
+      "Bash(dir:*)",
+      "Bash(wmic desktopmonitor get:*)",
+      "Bash(powershell:*)",
+      "Bash(tasklist:*)",
+      "Bash(wmic:*)",
+      "Bash(taskkill:*)",
+      "Bash(start launch_emulator_visible.bat)",
+      "Bash(start fix_emulator_position.bat)",
+      "Bash(del nul)"
     ],
-    "deny": []
+    "deny": [],
+    "additionalDirectories": [
+      "C:\\Users\\G512LV\\.android\\avd"
+    ]
   }
 }

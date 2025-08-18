@@ -7,9 +7,9 @@ class BoardPainter extends CustomPainter {
   final List<List<Color?>> board;
   final Tetromino? tetromino;
   final Tetromino? ghostPiece;
-  static const double cellSize = 20;
+  final double cellSize;
 
-  BoardPainter(this.board, this.tetromino, {this.ghostPiece});
+  BoardPainter(this.board, this.tetromino, {this.ghostPiece, this.cellSize = 20});
 
   void _drawBlock(Canvas canvas, double x, double y, Color blockColor,
       {bool isActive = false}) {
