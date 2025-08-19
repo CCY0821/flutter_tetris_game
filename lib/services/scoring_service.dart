@@ -6,10 +6,10 @@ import '../models/tetromino.dart';
 class ScoringService {
   // 基礎消行得分（乘以等級）
   static const Map<int, int> _baseLineScores = {
-    1: 100,  // Single
-    2: 300,  // Double  
-    3: 500,  // Triple
-    4: 800,  // Tetris
+    1: 100, // Single
+    2: 300, // Double
+    3: 500, // Triple
+    4: 800, // Tetris
   };
 
   // T-Spin 得分
@@ -27,7 +27,7 @@ class ScoringService {
   bool _lastWasDifficultClear = false; // Back-to-Back 狀態
   int _totalLinesCleared = 0;
   int _maxCombo = 0; // 最大連擊記錄
-  
+
   // 統計資料
   Map<String, int> _statistics = {
     'singles': 0,
@@ -88,7 +88,7 @@ class ScoringService {
       // T-Spin 得分
       String key = _getTSpinKey(tSpinType, linesCleared);
       int baseScore = _tSpinScores[key] ?? 0;
-      
+
       // Back-to-Back 獎勵
       if (_lastWasDifficultClear && isDifficultClear) {
         int b2bBonus = (baseScore * 0.5).round();
@@ -101,14 +101,14 @@ class ScoringService {
         totalPoints += baseScore;
         breakdown['t_spin'] = baseScore;
       }
-      
-      achievements.add('T-Spin ${_getTSpinDisplayName(tSpinType, linesCleared)}');
+
+      achievements
+          .add('T-Spin ${_getTSpinDisplayName(tSpinType, linesCleared)}');
       _statistics['t_spins'] = (_statistics['t_spins'] ?? 0) + 1;
-      
     } else {
       // 標準消行得分
       int baseScore = (_baseLineScores[linesCleared] ?? 0) * currentLevel;
-      
+
       // Back-to-Back 獎勵（僅限 Tetris）
       if (linesCleared == 4 && _lastWasDifficultClear) {
         int b2bBonus = (baseScore * 0.5).round();
@@ -128,20 +128,21 @@ class ScoringService {
 
     // Combo 獎勵計算（官方規範：從 -1 開始，每次消行 +1）
     _comboCount++;
-    
+
     // 更新最大連擊記錄
     if (_comboCount > _maxCombo) {
       _maxCombo = _comboCount;
       _statistics['max_combo'] = _maxCombo;
     }
-    
+
     if (_comboCount > 0) {
       int comboBonus = 50 * _comboCount * currentLevel;
       totalPoints += comboBonus;
       breakdown['combo'] = comboBonus;
       achievements.add('${_comboCount} Combo');
       _statistics['combos'] = (_statistics['combos'] ?? 0) + 1;
-      _statistics['combo_count'] = (_statistics['combo_count'] ?? 0) + _comboCount;
+      _statistics['combo_count'] =
+          (_statistics['combo_count'] ?? 0) + _comboCount;
     }
 
     // 更新狀態
@@ -192,41 +193,59 @@ class ScoringService {
   String _getTSpinDisplayName(String type, int lines) {
     String prefix = type == 'mini' ? 'Mini T-Spin' : 'T-Spin';
     switch (lines) {
-      case 0: return prefix;
-      case 1: return '$prefix Single';
-      case 2: return '$prefix Double';
-      case 3: return '$prefix Triple';
-      default: return prefix;
+      case 0:
+        return prefix;
+      case 1:
+        return '$prefix Single';
+      case 2:
+        return '$prefix Double';
+      case 3:
+        return '$prefix Triple';
+      default:
+        return prefix;
     }
   }
 
   /// 獲取消行名稱
   String _getLineClearName(int lines) {
     switch (lines) {
-      case 1: return 'single';
-      case 2: return 'double';
-      case 3: return 'triple';
-      case 4: return 'tetris';
-      default: return 'lines_$lines';
+      case 1:
+        return 'single';
+      case 2:
+        return 'double';
+      case 3:
+        return 'triple';
+      case 4:
+        return 'tetris';
+      default:
+        return 'lines_$lines';
     }
   }
 
   /// 更新消行統計
   void _updateLineStatistics(int lines) {
     switch (lines) {
-      case 1: _statistics['singles'] = (_statistics['singles'] ?? 0) + 1; break;
-      case 2: _statistics['doubles'] = (_statistics['doubles'] ?? 0) + 1; break;
-      case 3: _statistics['triples'] = (_statistics['triples'] ?? 0) + 1; break;
-      case 4: _statistics['tetrises'] = (_statistics['tetrises'] ?? 0) + 1; break;
+      case 1:
+        _statistics['singles'] = (_statistics['singles'] ?? 0) + 1;
+        break;
+      case 2:
+        _statistics['doubles'] = (_statistics['doubles'] ?? 0) + 1;
+        break;
+      case 3:
+        _statistics['triples'] = (_statistics['triples'] ?? 0) + 1;
+        break;
+      case 4:
+        _statistics['tetrises'] = (_statistics['tetrises'] ?? 0) + 1;
+        break;
     }
   }
 
   /// 當前 Combo 數
   int get currentCombo => max(0, _comboCount);
-  
+
   /// 最大連擊記錄
   int get maxCombo => _maxCombo;
-  
+
   /// 連擊等級描述
   String get comboRankDescription {
     if (_comboCount <= 0) return '';

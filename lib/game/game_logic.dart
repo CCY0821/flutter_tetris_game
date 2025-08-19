@@ -63,18 +63,19 @@ class GameLogic {
       }
     }
 
-    if (clearedRows > 0) {
-      // 使用新的官方得分系統
-      final scoringResult = gameState.scoringService.calculateLineScore(
-        linesCleared: clearedRows,
-        currentLevel: gameState.speedLevel,
-        isTSpin: lastRotationWasWallKick && gameState.currentTetromino?.isT == true,
-        tSpinType: _determineTSpinType(),
-        tetromino: gameState.currentTetromino,
-      );
+    // 總是調用得分計算來正確處理COMBO邏輯（包括重置）
+    final scoringResult = gameState.scoringService.calculateLineScore(
+      linesCleared: clearedRows,
+      currentLevel: gameState.speedLevel,
+      isTSpin:
+          lastRotationWasWallKick && gameState.currentTetromino?.isT == true,
+      tSpinType: _determineTSpinType(),
+      tetromino: gameState.currentTetromino,
+    );
 
+    if (clearedRows > 0) {
       gameState.score += scoringResult.points;
-      
+
       // 更新 Marathon 系統的行數計算
       gameState.updateLinesCleared(clearedRows);
 
@@ -93,16 +94,16 @@ class GameLogic {
         gameState.audioService.playSoundEffect('line_clear');
       }
 
-      // 儲存最後一次得分結果供 UI 顯示
-      gameState.lastScoringResult = scoringResult;
+      // 在矩陣頂部添加新的空行
+      for (int i = 0; i < clearedRows; i++) {
+        newBoard.insert(0, List.generate(GameState.colCount, (_) => null));
+      }
+
+      gameState.board = newBoard;
     }
 
-    // 在矩陣頂部添加新的空行
-    for (int i = 0; i < clearedRows; i++) {
-      newBoard.insert(0, List.generate(GameState.colCount, (_) => null));
-    }
-
-    gameState.board = newBoard;
+    // 總是儲存最後一次得分結果供 UI 顯示（即使是0分也要顯示COMBO重置）
+    gameState.lastScoringResult = scoringResult;
   }
 
   void drop() {
@@ -129,7 +130,7 @@ class GameLogic {
 
     if (canMove(newTetro)) {
       gameState.currentTetromino = newTetro;
-      
+
       // 從隊列中取出下一個方塊
       if (gameState.nextTetrominos.isNotEmpty) {
         gameState.nextTetromino = gameState.nextTetrominos.removeAt(0);
@@ -182,7 +183,8 @@ class GameLogic {
     }
 
     // 硬降獲得額外分數
-    int hardDropPoints = gameState.scoringService.calculateHardDropScore(dropDistance);
+    int hardDropPoints =
+        gameState.scoringService.calculateHardDropScore(dropDistance);
     gameState.score += hardDropPoints;
 
     // 立即鎖定方塊
@@ -259,7 +261,7 @@ class GameLogic {
     // 在實際實現中，這裡會有更複雜的角落檢查
     final tPiece = gameState.currentTetromino!;
     int filledCorners = 0;
-    
+
     final corners = [
       Offset(tPiece.x - 1, tPiece.y - 1), // 左上
       Offset(tPiece.x + 1, tPiece.y - 1), // 右上
