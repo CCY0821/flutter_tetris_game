@@ -76,6 +76,9 @@ class GameLogic {
     if (clearedRows > 0) {
       gameState.score += scoringResult.points;
 
+      // 觸發震動特效
+      gameState.triggerScreenShake();
+
       // 更新 Marathon 系統的行數計算
       gameState.updateLinesCleared(clearedRows);
 

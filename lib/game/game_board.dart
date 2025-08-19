@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'game_state.dart';
@@ -18,7 +19,8 @@ class GameBoard extends StatefulWidget {
   State<GameBoard> createState() => _GameBoardState();
 }
 
-class _GameBoardState extends State<GameBoard> {
+class _GameBoardState extends State<GameBoard>
+    with SingleTickerProviderStateMixin {
   double _calculateCellSize(BoxConstraints constraints) {
     // 響應式計算格子大小 - 左側區域約佔60%寬度
     final gameAreaWidth = constraints.maxWidth * 0.6 - 32; // 60%減去padding
@@ -32,6 +34,10 @@ class _GameBoardState extends State<GameBoard> {
   late ControllerHandler controllerHandler;
   Timer? _dropTimer;
   int _currentSpeed = 500; // 追蹤當前速度
+
+  // 震動特效相關
+  late AnimationController _shakeController;
+  late Animation<double> _shakeAnimation;
 
   @override
   void initState() {
@@ -50,18 +56,53 @@ class _GameBoardState extends State<GameBoard> {
       gameLogic: gameLogic,
       onStateChange: () => setState(() {}),
     );
+
+    // 初始化震動動畫控制器
+    _shakeController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    // 創建震動動畫（左右快速抖動）
+    _shakeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _shakeController,
+      curve: Curves.elasticIn,
+    ));
+
     _initializeGame();
   }
 
   void _initializeGame() async {
     gameState.initBoard(); // 先初始化遊戲板
+    
+    // 設置震動回調
+    gameState.setShakeCallback(() {
+      triggerShakeAnimation();
+    });
+    
     await gameState.initializeAudio();
     await _startGame();
+  }
+
+  // 公開的震動方法供外部調用
+  void triggerShakeAnimation() {
+    _shakeController.reset();
+    _shakeController.repeat(reverse: true);
+
+    // 400ms後停止震動
+    Timer(const Duration(milliseconds: 400), () {
+      _shakeController.stop();
+      _shakeController.reset();
+    });
   }
 
   @override
   void dispose() {
     _dropTimer?.cancel();
+    _shakeController.dispose();
     controllerHandler.dispose();
     gameState.dispose();
     super.dispose();
@@ -257,55 +298,74 @@ class _GameBoardState extends State<GameBoard> {
                     flex: 3,
                     child: Column(
                       children: [
-                        // 遊戲棋盤
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: GameTheme.boardBorder,
-                              width: 3,
+                        // 遊戲棋盤（附震動特效）
+                        AnimatedBuilder(
+                          animation: _shakeAnimation,
+                          builder: (context, child) {
+                            // 計算震動偏移值（左右快速抖動）
+                            double shakeOffset = 0.0;
+                            if (_shakeController.isAnimating) {
+                              // 使用sin函數產生快速左右震動效果
+                              shakeOffset = (math.sin(
+                                      _shakeAnimation.value * math.pi * 8) *
+                                  6);
+                            }
+
+                            return Transform.translate(
+                              offset: Offset(shakeOffset, 0),
+                              child: child,
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: GameTheme.boardBorder,
+                                width: 3,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.5),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 8),
+                                ),
+                                BoxShadow(
+                                  color: GameTheme.accentBlue.withOpacity(0.3),
+                                  blurRadius: 32,
+                                  offset: const Offset(0, 16),
+                                ),
+                              ],
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.5),
-                                blurRadius: 16,
-                                offset: const Offset(0, 8),
-                              ),
-                              BoxShadow(
-                                color: GameTheme.accentBlue.withOpacity(0.3),
-                                blurRadius: 32,
-                                offset: const Offset(0, 16),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Stack(
-                              children: [
-                                SizedBox(
-                                  width: GameState.colCount * cellSize,
-                                  height: GameState.rowCount * cellSize,
-                                  child: CustomPaint(
-                                    painter: BoardPainter(
-                                      gameState.board,
-                                      gameState.currentTetromino,
-                                      ghostPiece:
-                                          gameLogic.shouldShowGhostPiece()
-                                              ? gameLogic.calculateGhostPiece()
-                                              : null,
-                                      cellSize: cellSize,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Stack(
+                                children: [
+                                  SizedBox(
+                                    width: GameState.colCount * cellSize,
+                                    height: GameState.rowCount * cellSize,
+                                    child: CustomPaint(
+                                      painter: BoardPainter(
+                                        gameState.board,
+                                        gameState.currentTetromino,
+                                        ghostPiece: gameLogic
+                                                .shouldShowGhostPiece()
+                                            ? gameLogic.calculateGhostPiece()
+                                            : null,
+                                        cellSize: cellSize,
+                                      ),
                                     ),
                                   ),
-                                ),
 
-                                // 暫停或 Game Over 蓋板
-                                if (gameState.isPaused && !gameState.isGameOver)
-                                  GameUIComponents.overlayText(
-                                      'PAUSED', GameTheme.highlight),
-                                if (gameState.isGameOver)
-                                  GameUIComponents.overlayText(
-                                      'GAME OVER', GameTheme.highlight),
-                              ],
+                                  // 暫停或 Game Over 蓋板
+                                  if (gameState.isPaused &&
+                                      !gameState.isGameOver)
+                                    GameUIComponents.overlayText(
+                                        'PAUSED', GameTheme.highlight),
+                                  if (gameState.isGameOver)
+                                    GameUIComponents.overlayText(
+                                        'GAME OVER', GameTheme.highlight),
+                                ],
+                              ),
                             ),
                           ),
                         ),

@@ -37,6 +37,10 @@ class GameState {
   // 最後一次得分結果
   ScoringResult? lastScoringResult;
 
+  // 震動特效相關
+  bool _isScreenShaking = false;
+  VoidCallback? _onShakeRequested;
+
   // 遊戲模式
   bool isMarathonMode = true; // 預設使用 Marathon 模式
 
@@ -52,6 +56,11 @@ class GameState {
       totalRowCount,
       (_) => List.generate(colCount, (_) => null),
     );
+  }
+
+  // 設置震動回調
+  void setShakeCallback(VoidCallback callback) {
+    _onShakeRequested = callback;
   }
 
   /// 獲取可見遊戲區域的矩陣 (不包含緩衝區)
@@ -91,7 +100,7 @@ class GameState {
     isPaused = false;
     currentTetromino = Tetromino.random(colCount);
     nextTetromino = Tetromino.random(colCount);
-    
+
     // 初始化下三個方塊預覽隊列
     nextTetrominos.clear();
     for (int i = 0; i < 3; i++) {
@@ -181,6 +190,19 @@ class GameState {
   /// 切換Ghost piece顯示狀態
   void toggleGhostPiece() {
     isGhostPieceEnabled = !isGhostPieceEnabled;
+  }
+
+  /// 觸發畫面震動特效
+  void triggerScreenShake() {
+    if (!_isScreenShaking && _onShakeRequested != null) {
+      _isScreenShaking = true;
+      _onShakeRequested!();
+
+      // 400ms後重置狀態
+      Timer(const Duration(milliseconds: 400), () {
+        _isScreenShaking = false;
+      });
+    }
   }
 
   Future<void> dispose() async {
