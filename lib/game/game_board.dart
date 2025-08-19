@@ -358,8 +358,7 @@ class _GameBoardState extends State<GameBoard> {
                                         GameTheme.accentBlue.withOpacity(0.8),
                                       ),
                                       padding: MaterialStateProperty.all(
-                                        const EdgeInsets.symmetric(
-                                            vertical: 5),
+                                        const EdgeInsets.symmetric(vertical: 5),
                                       ),
                                     ),
                                     child: Icon(Icons.settings, size: 12),
@@ -388,8 +387,7 @@ class _GameBoardState extends State<GameBoard> {
                                             : GameTheme.primaryButtonStyle)
                                         .copyWith(
                                       padding: MaterialStateProperty.all(
-                                        const EdgeInsets.symmetric(
-                                            vertical: 5),
+                                        const EdgeInsets.symmetric(vertical: 5),
                                       ),
                                     ),
                                     child: Icon(
@@ -415,8 +413,7 @@ class _GameBoardState extends State<GameBoard> {
                                         GameTheme.buttonDanger,
                                       ),
                                       padding: MaterialStateProperty.all(
-                                        const EdgeInsets.symmetric(
-                                            vertical: 5),
+                                        const EdgeInsets.symmetric(vertical: 5),
                                       ),
                                     ),
                                     child: Icon(Icons.refresh, size: 12),
@@ -425,7 +422,7 @@ class _GameBoardState extends State<GameBoard> {
                               ),
                             ],
                           ),
-                          
+
                           const SizedBox(height: 6),
 
                           // 合併的統計與得分結果面板 (固定在控制按鈕下方)
@@ -435,64 +432,118 @@ class _GameBoardState extends State<GameBoard> {
                             decoration: BoxDecoration(
                               color: GameTheme.primaryDark.withOpacity(0.8),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: GameTheme.gridLine.withOpacity(0.3)),
+                              border: Border.all(
+                                  color: GameTheme.gridLine.withOpacity(0.3)),
                             ),
                             child: Column(
                               children: [
                                 // 第一行：統計數據
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: gameState.isMarathonMode 
-                                    ? [
-                                        Column(
-                                          children: [
-                                            Text('LINES', style: TextStyle(fontSize: 8, color: GameTheme.textSecondary)),
-                                            Text('${gameState.marathonSystem?.totalLinesCleared ?? 0}', 
-                                                 style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
-                                          ],
-                                        ),
-                                        Column(
-                                          children: [
-                                            Text('LEVEL', style: TextStyle(fontSize: 8, color: GameTheme.textSecondary)),
-                                            Text('${gameState.marathonSystem?.currentLevel ?? 1}', 
-                                                 style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
-                                          ],
-                                        ),
-                                        Column(
-                                          children: [
-                                            Text('COMBO', style: TextStyle(fontSize: 8, color: GameTheme.textSecondary)),
-                                            Text('${gameState.scoringService.currentCombo}', 
-                                                 style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
-                                          ],
-                                        ),
-                                      ]
-                                    : [
-                                        Column(
-                                          children: [
-                                            Text('LEVEL', style: TextStyle(fontSize: 8, color: GameTheme.textSecondary)),
-                                            Text('${gameState.speedLevel}', 
-                                                 style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
-                                          ],
-                                        ),
-                                        Column(
-                                          children: [
-                                            Text('SPEED', style: TextStyle(fontSize: 8, color: GameTheme.textSecondary)),
-                                            Text('${gameState.dropSpeed}ms', 
-                                                 style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
-                                          ],
-                                        ),
-                                        Column(
-                                          children: [
-                                            Text('COMBO', style: TextStyle(fontSize: 8, color: GameTheme.textSecondary)),
-                                            Text('${gameState.scoringService.currentCombo}', 
-                                                 style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
-                                          ],
-                                        ),
-                                      ],
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: gameState.isMarathonMode
+                                      ? [
+                                          Column(
+                                            children: [
+                                              Text('LINES',
+                                                  style: TextStyle(
+                                                      fontSize: 8,
+                                                      color: GameTheme
+                                                          .textSecondary)),
+                                              Text(
+                                                  '${gameState.marathonSystem?.totalLinesCleared ?? 0}',
+                                                  style: TextStyle(
+                                                      fontSize: 10,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                            ],
+                                          ),
+                                          Column(
+                                            children: [
+                                              Text('LEVEL',
+                                                  style: TextStyle(
+                                                      fontSize: 8,
+                                                      color: GameTheme
+                                                          .textSecondary)),
+                                              Text(
+                                                  '${gameState.marathonSystem?.currentLevel ?? 1}',
+                                                  style: TextStyle(
+                                                      fontSize: 10,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                            ],
+                                          ),
+                                          Column(
+                                            children: [
+                                              Text('COMBO',
+                                                  style: TextStyle(
+                                                      fontSize: 8,
+                                                      color: GameTheme
+                                                          .textSecondary)),
+                                              Text(
+                                                  '${gameState.scoringService.currentCombo}',
+                                                  style: TextStyle(
+                                                      fontSize: 10,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                            ],
+                                          ),
+                                        ]
+                                      : [
+                                          Column(
+                                            children: [
+                                              Text('LEVEL',
+                                                  style: TextStyle(
+                                                      fontSize: 8,
+                                                      color: GameTheme
+                                                          .textSecondary)),
+                                              Text('${gameState.speedLevel}',
+                                                  style: TextStyle(
+                                                      fontSize: 10,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                            ],
+                                          ),
+                                          Column(
+                                            children: [
+                                              Text('SPEED',
+                                                  style: TextStyle(
+                                                      fontSize: 8,
+                                                      color: GameTheme
+                                                          .textSecondary)),
+                                              Text('${gameState.dropSpeed}ms',
+                                                  style: TextStyle(
+                                                      fontSize: 10,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                            ],
+                                          ),
+                                          Column(
+                                            children: [
+                                              Text('COMBO',
+                                                  style: TextStyle(
+                                                      fontSize: 8,
+                                                      color: GameTheme
+                                                          .textSecondary)),
+                                              Text(
+                                                  '${gameState.scoringService.currentCombo}',
+                                                  style: TextStyle(
+                                                      fontSize: 10,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                            ],
+                                          ),
+                                        ],
                                 ),
-                                
+
                                 const SizedBox(height: 6),
-                                
+
                                 // 分隔線
                                 Container(
                                   height: 1,
@@ -506,39 +557,55 @@ class _GameBoardState extends State<GameBoard> {
                                     ),
                                   ),
                                 ),
-                                
+
                                 const SizedBox(height: 6),
-                                
+
                                 // 第二行：最後得分結果 (固定顯示)
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'LAST SCORE',
-                                      style: TextStyle(fontSize: 8, color: GameTheme.textSecondary),
+                                      style: TextStyle(
+                                          fontSize: 8,
+                                          color: GameTheme.textSecondary),
                                     ),
                                     Expanded(
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
                                         children: [
-                                          Text(
-                                            gameState.lastScoringResult?.description ?? 'None',
-                                            style: TextStyle(
-                                              color: gameState.lastScoringResult != null ? Colors.yellow : GameTheme.textSecondary, 
-                                              fontSize: 9,
-                                              fontWeight: FontWeight.bold
+                                          Flexible(
+                                            child: Text(
+                                              gameState.lastScoringResult
+                                                      ?.description ??
+                                                  'None',
+                                              style: TextStyle(
+                                                  color: gameState
+                                                              .lastScoringResult !=
+                                                          null
+                                                      ? Colors.yellow
+                                                      : GameTheme.textSecondary,
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.bold),
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
                                             ),
                                           ),
-                                          const SizedBox(width: 8),
+                                          const SizedBox(width: 4),
                                           Text(
-                                            gameState.lastScoringResult != null 
-                                              ? '+${gameState.lastScoringResult?.points ?? 0}'
-                                              : '+0',
+                                            gameState.lastScoringResult != null
+                                                ? '+${gameState.lastScoringResult?.points ?? 0}'
+                                                : '+0',
                                             style: TextStyle(
-                                              color: gameState.lastScoringResult != null ? GameTheme.highlight : GameTheme.textSecondary,
-                                              fontSize: 9, 
-                                              fontWeight: FontWeight.bold
-                                            ),
+                                                color: gameState
+                                                            .lastScoringResult !=
+                                                        null
+                                                    ? GameTheme.highlight
+                                                    : GameTheme.textSecondary,
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.bold),
                                           ),
                                         ],
                                       ),
