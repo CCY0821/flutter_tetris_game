@@ -12,7 +12,8 @@ class GameUIComponents {
   static const double cellSize = 6;
 
   // 合併的 NEXT 和 SCORE 組件
-  static Widget nextAndScorePanel(Tetromino? nextTetromino, int score, List<Tetromino> nextTetrominos) {
+  static Widget nextAndScorePanel(
+      Tetromino? nextTetromino, int score, List<Tetromino> nextTetrominos) {
     const previewSize = 6;
     const offsetX = 2;
     const offsetY = 2;
@@ -62,9 +63,9 @@ class GameUIComponents {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // 分隔線
           Container(
             height: 1,
@@ -78,9 +79,9 @@ class GameUIComponents {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // NEXT 方塊預覽區域 - 水平並排設計
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,57 +94,60 @@ class GameUIComponents {
                     style: GameTheme.accentStyle.copyWith(fontSize: 11),
                   ),
                   const SizedBox(width: 6),
-                  
+
                   // 主要 NEXT 方塊（第一個）
                   Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: GameTheme.gameBoardBg.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Column(
-                  children: preview
-                      .map((row) => Row(
-                            children: row
-                                .map(
-                                  (c) => Container(
-                                    width: cellSize * 0.8,
-                                    height: cellSize * 0.8,
-                                    margin: const EdgeInsets.all(0.4),
-                                    decoration: BoxDecoration(
-                                      color: c ??
-                                          GameTheme.gridLine.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(2),
-                                      border: c != null
-                                          ? null
-                                          : Border.all(
-                                              color: GameTheme.gridLine
-                                                  .withOpacity(0.2),
-                                              width: 0.3,
-                                            ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          ))
-                      .toList(),
-                ),
-              ),
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: GameTheme.gameBoardBg.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Column(
+                      children: preview
+                          .map((row) => Row(
+                                children: row
+                                    .map(
+                                      (c) => Container(
+                                        width: cellSize * 0.8,
+                                        height: cellSize * 0.8,
+                                        margin: const EdgeInsets.all(0.4),
+                                        decoration: BoxDecoration(
+                                          color: c ??
+                                              GameTheme.gridLine
+                                                  .withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(2),
+                                          border: c != null
+                                              ? null
+                                              : Border.all(
+                                                  color: GameTheme.gridLine
+                                                      .withOpacity(0.2),
+                                                  width: 0.3,
+                                                ),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              ))
+                          .toList(),
+                    ),
+                  ),
                 ],
               ),
-              
+
               const SizedBox(height: 6),
-              
+
               // 下三個方塊預覽（第二行）
               Row(
                 children: [
                   const SizedBox(width: 40), // 對齊NEXT文字下方
-                  ...nextTetrominos.take(3).map((tetromino) => 
-                    Container(
-                      margin: const EdgeInsets.only(right: 2),
-                      child: _buildSmallPreview(tetromino),
-                    )
-                  ).toList(),
+                  ...nextTetrominos
+                      .take(3)
+                      .map((tetromino) => Container(
+                            margin: const EdgeInsets.only(right: 2),
+                            child: _buildSmallPreview(tetromino),
+                          ))
+                      .toList(),
                 ],
               ),
             ],
@@ -167,7 +171,10 @@ class GameUIComponents {
     for (final p in tetromino.shape) {
       int px = p.dx.toInt() + offsetX;
       int py = p.dy.toInt() + offsetY;
-      if (py >= 0 && py < smallPreviewSize && px >= 0 && px < smallPreviewSize) {
+      if (py >= 0 &&
+          py < smallPreviewSize &&
+          px >= 0 &&
+          px < smallPreviewSize) {
         preview[py][px] = tetromino.color;
       }
     }
@@ -413,8 +420,8 @@ class GameUIComponents {
                                 height: cellSize * 0.8,
                                 margin: const EdgeInsets.all(0.5),
                                 decoration: BoxDecoration(
-                                  color: c ??
-                                      GameTheme.gridLine.withOpacity(0.1),
+                                  color:
+                                      c ?? GameTheme.gridLine.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(2),
                                   border: c != null
                                       ? null
@@ -518,18 +525,20 @@ class GameUIComponents {
     );
   }
 
-  static Widget gameModeToggleButton(bool isMarathonMode, VoidCallback onToggle) {
+  static Widget gameModeToggleButton(
+      bool isMarathonMode, VoidCallback onToggle) {
     return ElevatedButton(
       onPressed: onToggle,
       style: ElevatedButton.styleFrom(
-        backgroundColor: isMarathonMode 
-            ? GameTheme.buttonSuccess 
+        backgroundColor: isMarathonMode
+            ? GameTheme.buttonSuccess
             : GameTheme.buttonSecondary,
         foregroundColor: GameTheme.textPrimary,
         elevation: 4,
-        shadowColor: (isMarathonMode 
-            ? GameTheme.buttonSuccess 
-            : GameTheme.buttonSecondary).withOpacity(0.4),
+        shadowColor: (isMarathonMode
+                ? GameTheme.buttonSuccess
+                : GameTheme.buttonSecondary)
+            .withOpacity(0.4),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -557,11 +566,8 @@ class GameUIComponents {
     return ComboStatsPanel(scoringService: scoringService);
   }
 
-  static Widget integratedStatsPanel(
-    ScoringService scoringService, 
-    MarathonSystem? marathonSystem, 
-    bool isMarathonMode
-  ) {
+  static Widget integratedStatsPanel(ScoringService scoringService,
+      MarathonSystem? marathonSystem, bool isMarathonMode) {
     return IntegratedStatsPanel(
       scoringService: scoringService,
       marathonSystem: marathonSystem,
@@ -570,61 +576,143 @@ class GameUIComponents {
   }
 
   static Widget audioControlButton() {
-    return Container(
-      width: 20,
-      child: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: GameTheme.accentBlue.withOpacity(0.8),
-              borderRadius: BorderRadius.circular(8),
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 音樂控制
+            Row(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: AudioService().isMusicEnabled
+                        ? GameTheme.buttonSuccess.withOpacity(0.8)
+                        : GameTheme.primaryDark.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      AudioService().toggleMusic();
+                      setState(() {});
+                    },
+                    icon: Icon(
+                      AudioService().isMusicEnabled
+                          ? Icons.music_note
+                          : Icons.music_off,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    tooltip: '切換背景音樂 (M)',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'MUSIC ${(AudioService().musicVolume * 100).round()}%',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: GameTheme.textAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: GameTheme.accentBlue,
+                          inactiveTrackColor: GameTheme.gridLine.withOpacity(0.3),
+                          thumbColor: GameTheme.brightAccent,
+                          overlayColor: GameTheme.accentBlue.withOpacity(0.2),
+                          trackHeight: 4,
+                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8),
+                        ),
+                        child: Slider(
+                          value: AudioService().musicVolume,
+                          onChanged: AudioService().isMusicEnabled ? (value) {
+                            AudioService().setMusicVolume(value);
+                            setState(() {});
+                          } : null,
+                          min: 0.0,
+                          max: 1.0,
+                          divisions: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            child: IconButton(
-              onPressed: () => AudioService().toggleMusic(),
-              icon: Icon(
-                AudioService().isMusicEnabled ? Icons.music_note : Icons.music_off,
-                color: Colors.white,
-                size: 20,
-              ),
-              tooltip: '切換背景音樂 (M)',
+            
+            const SizedBox(height: 16),
+            
+            // 音效控制
+            Row(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: AudioService().isSfxEnabled
+                        ? GameTheme.buttonSuccess.withOpacity(0.8)
+                        : GameTheme.primaryDark.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      AudioService().toggleSfx();
+                      setState(() {});
+                    },
+                    icon: Icon(
+                      AudioService().isSfxEnabled
+                          ? Icons.volume_up
+                          : Icons.volume_off,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    tooltip: '切換音效 (S)',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'SFX ${(AudioService().sfxVolume * 100).round()}%',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: GameTheme.textAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: GameTheme.accentBlue,
+                          inactiveTrackColor: GameTheme.gridLine.withOpacity(0.3),
+                          thumbColor: GameTheme.brightAccent,
+                          overlayColor: GameTheme.accentBlue.withOpacity(0.2),
+                          trackHeight: 4,
+                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8),
+                        ),
+                        child: Slider(
+                          value: AudioService().sfxVolume,
+                          onChanged: AudioService().isSfxEnabled ? (value) {
+                            AudioService().setSfxVolume(value);
+                            setState(() {});
+                          } : null,
+                          min: 0.0,
+                          max: 1.0,
+                          divisions: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'MUSIC',
-            style: TextStyle(
-              fontSize: 10,
-              color: GameTheme.highlight,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            decoration: BoxDecoration(
-              color: GameTheme.buttonSecondary.withOpacity(0.8),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: IconButton(
-              onPressed: () => AudioService().toggleSfx(),
-              icon: Icon(
-                AudioService().isSfxEnabled ? Icons.volume_up : Icons.volume_off,
-                color: Colors.white,
-                size: 20,
-              ),
-              tooltip: '切換音效 (S)',
-            ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'SFX',
-            style: TextStyle(
-              fontSize: 10,
-              color: GameTheme.highlight,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 
@@ -635,7 +723,7 @@ class GameUIComponents {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: isEnabled 
+              color: isEnabled
                   ? GameTheme.buttonSuccess.withOpacity(0.8)
                   : GameTheme.primaryDark.withOpacity(0.8),
               borderRadius: BorderRadius.circular(8),

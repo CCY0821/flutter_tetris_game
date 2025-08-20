@@ -10,8 +10,8 @@ class AudioService {
 
   bool _isMusicEnabled = true;
   bool _isSfxEnabled = true;
-  double _musicVolume = 0.5;
-  double _sfxVolume = 0.7;
+  double _musicVolume = 0.8;
+  double _sfxVolume = 0.9;
 
   // Getters
   bool get isMusicEnabled => _isMusicEnabled;
@@ -32,10 +32,10 @@ class AudioService {
     try {
       print('Attempting to play background music...');
       print('Music enabled: $_isMusicEnabled');
-      
+
       // 先停止現有音樂，避免重疊播放
       await _backgroundMusicPlayer.stop();
-      
+
       // 設定循環模式，再播放
       await _backgroundMusicPlayer.setReleaseMode(ReleaseMode.loop);
       await _backgroundMusicPlayer.play(
