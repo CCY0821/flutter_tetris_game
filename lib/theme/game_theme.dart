@@ -1,37 +1,39 @@
 import 'package:flutter/material.dart';
+import '../core/constants.dart';
 
 class GameTheme {
-  // 主要配色方案
-  static const Color primaryDark = Color(0xFF1A1A2E);
-  static const Color secondaryDark = Color(0xFF16213E);
-  static const Color accentBlue = Color(0xFF0F3460);
-  static const Color brightAccent = Color(0xFF533483);
-  static const Color highlight = Color(0xFFE94560);
+  // 🌃 CYBERPUNK 2077 主題配色 - 套用霓虹調色盤
+  // 主要配色方案 (使用 Cyberpunk 調色盤)
+  static const Color primaryDark = cyberpunkBgDeep; // 深層背景
+  static const Color secondaryDark = cyberpunkPanel; // 面板背景
+  static const Color accentBlue = cyberpunkPrimary; // 霓虹青色
+  static const Color brightAccent = cyberpunkAccent; // 電光紫
+  static const Color highlight = cyberpunkSecondary; // 霓虹洋紅
 
-  // 遊戲板配色
-  static const Color gameBoardBg = Color(0xFF0A0E1A);
-  static const Color gridLine = Color(0xFF2A2A4A);
-  static const Color boardBorder = Color(0xFF3A3A6A);
+  // 遊戲板配色 (Cyberpunk 風格)
+  static const Color gameBoardBg = cyberpunkBgDeep;
+  static Color gridLine = cyberpunkGridLine;
+  static const Color boardBorder = cyberpunkPrimary;
 
-  // 按鈕配色
-  static const Color buttonPrimary = Color(0xFF4A90E2);
-  static const Color buttonSecondary = Color(0xFF7B68EE);
-  static const Color buttonDanger = Color(0xFFE94560);
-  static const Color buttonSuccess = Color(0xFF50C878);
+  // 按鈕配色 (霓虹色系)
+  static const Color buttonPrimary = cyberpunkPrimary;
+  static const Color buttonSecondary = cyberpunkAccent;
+  static const Color buttonDanger = cyberpunkSecondary;
+  static const Color buttonSuccess = cyberpunkPrimary;
 
-  // 文字配色
+  // 文字配色 (強調霓虹色)
   static const Color textPrimary = Color(0xFFFFFFFF);
   static const Color textSecondary = Color(0xFFB8B8D1);
-  static const Color textAccent = Color(0xFF64FFDA);
+  static const Color textAccent = cyberpunkPrimary; // 主要強調色
 
-  // 漸變色
+  // 漸變色 (Cyberpunk 深層背景漸變)
   static const LinearGradient backgroundGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF1A1A2E),
-      Color(0xFF16213E),
-      Color(0xFF0F3460),
+      cyberpunkBgDeep,
+      cyberpunkPanel,
+      cyberpunkBgDeep,
     ],
   );
 
@@ -39,21 +41,21 @@ class GameTheme {
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [
-      Color(0xFF2A2A4A),
-      Color(0xFF1A1A3A),
+      cyberpunkPanel,
+      cyberpunkBgDeep,
     ],
   );
 
-  // 陰影效果
+  // 陰影效果 (Cyberpunk 霓虹光暈)
   static List<BoxShadow> get cardShadow => [
         BoxShadow(
           color: Colors.black.withOpacity(0.3),
-          blurRadius: 8,
+          blurRadius: cyberpunkGlowMed,
           offset: const Offset(0, 4),
         ),
         BoxShadow(
-          color: accentBlue.withOpacity(0.1),
-          blurRadius: 16,
+          color: cyberpunkPrimary.withOpacity(0.2),
+          blurRadius: cyberpunkGlowStrong,
           offset: const Offset(0, 8),
         ),
       ];
@@ -61,32 +63,52 @@ class GameTheme {
   static List<BoxShadow> get buttonShadow => [
         BoxShadow(
           color: Colors.black.withOpacity(0.2),
-          blurRadius: 4,
+          blurRadius: cyberpunkGlowSoft,
           offset: const Offset(0, 2),
         ),
       ];
 
-  // 按鈕樣式
+  // 按鈕樣式 (Cyberpunk 霓虹邊框與光暈)
   static ButtonStyle get primaryButtonStyle => ElevatedButton.styleFrom(
-        backgroundColor: buttonPrimary,
+        backgroundColor: buttonPrimary.withOpacity(0.1),
         foregroundColor: textPrimary,
-        elevation: 4,
-        shadowColor: buttonPrimary.withOpacity(0.4),
+        elevation: 0,
+        shadowColor: buttonPrimary.withOpacity(0.5),
+        side: BorderSide(
+          color: buttonPrimary,
+          width: cyberpunkBorderWidth,
+        ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      ).copyWith(
+        overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.hovered)) return buttonPrimary.withOpacity(0.2);
+          if (states.contains(WidgetState.pressed)) return buttonPrimary.withOpacity(0.3);
+          return null;
+        }),
       );
 
   static ButtonStyle get secondaryButtonStyle => ElevatedButton.styleFrom(
-        backgroundColor: buttonSecondary,
+        backgroundColor: buttonSecondary.withOpacity(0.1),
         foregroundColor: textPrimary,
-        elevation: 4,
-        shadowColor: buttonSecondary.withOpacity(0.4),
+        elevation: 0,
+        shadowColor: buttonSecondary.withOpacity(0.5),
+        side: BorderSide(
+          color: buttonSecondary,
+          width: cyberpunkBorderWidth,
+        ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      ).copyWith(
+        overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.hovered)) return buttonSecondary.withOpacity(0.2);
+          if (states.contains(WidgetState.pressed)) return buttonSecondary.withOpacity(0.3);
+          return null;
+        }),
       );
 
   // 文字樣式
