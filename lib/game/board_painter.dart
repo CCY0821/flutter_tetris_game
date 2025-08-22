@@ -12,6 +12,7 @@ class BoardPainter extends CustomPainter {
   // 快取Paint物件避免重複建立
   static final Paint _backgroundPaint = Paint();
   static final Paint _gridPaint = Paint()..strokeWidth = 0.5;
+  static final Paint _gridGlowPaint = Paint()..strokeWidth = 0.3; // 微光邊緣用更細線寬
   static final Paint _blockPaint = Paint();
   static final Paint _highlightPaint = Paint()
     ..style = PaintingStyle.stroke
@@ -101,10 +102,13 @@ class BoardPainter extends CustomPainter {
     ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), _backgroundPaint);
 
-    // 繪製細微的網格線
+    // 🌟 雙筆畫霓虹格線 - 模擬微光邊緣效果
     _gridPaint.shader = null;
-    _gridPaint.color = GameTheme.gridLine.withOpacity(0.3);
-
+    _gridGlowPaint.shader = null;
+    
+    // 第一次繪製：主格線 (60% 透明度)
+    _gridPaint.color = GameTheme.gridLine.withOpacity(0.6);
+    
     for (int y = 0; y <= GameState.rowCount; y++) {
       canvas.drawLine(
         Offset(0, y * cellSize),
@@ -117,6 +121,26 @@ class BoardPainter extends CustomPainter {
         Offset(x * cellSize, 0),
         Offset(x * cellSize, size.height),
         _gridPaint,
+      );
+    }
+    
+    // 第二次繪製：微光邊緣 (更低透明度 + 微偏移)
+    _gridGlowPaint.color = GameTheme.gridLine.withOpacity(0.2);
+    
+    for (int y = 0; y <= GameState.rowCount; y++) {
+      // 微偏移製造光暈效果
+      canvas.drawLine(
+        Offset(0.5, y * cellSize + 0.5),
+        Offset(size.width + 0.5, y * cellSize + 0.5),
+        _gridGlowPaint,
+      );
+    }
+    for (int x = 0; x <= GameState.colCount; x++) {
+      // 微偏移製造光暈效果
+      canvas.drawLine(
+        Offset(x * cellSize + 0.5, 0.5),
+        Offset(x * cellSize + 0.5, size.height + 0.5),
+        _gridGlowPaint,
       );
     }
 

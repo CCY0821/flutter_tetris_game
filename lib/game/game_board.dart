@@ -11,6 +11,7 @@ import 'board_painter.dart';
 import 'touch_controls.dart';
 import '../theme/game_theme.dart';
 import '../widgets/settings_panel.dart';
+import '../core/constants.dart';
 
 class GameBoard extends StatefulWidget {
   const GameBoard({super.key});
@@ -328,21 +329,41 @@ class _GameBoardState extends State<GameBoard>
                           },
                           child: Container(
                             decoration: BoxDecoration(
+                              // 🌃 Neon Gradient - 深色到藍紫的線性漸層背景
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  cyberpunkBgDeep, // 深層背景
+                                  cyberpunkAccent.withOpacity(0.05), // 電光紫極淡
+                                  cyberpunkPrimary.withOpacity(0.03), // 霓虹青極淡
+                                ],
+                                stops: const [0.0, 0.7, 1.0],
+                              ),
                               borderRadius: BorderRadius.circular(16),
+                              // 🔮 HUD Border - 霓虹描邊與輕微外發光
                               border: Border.all(
-                                color: GameTheme.boardBorder,
-                                width: 3,
+                                color: Color.lerp(cyberpunkPrimary, cyberpunkSecondary, 0.5)!, // cyan/magenta 混合
+                                width: 1, // 1px 霓虹描邊
                               ),
                               boxShadow: [
+                                // 原有陰影保留
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.5),
                                   blurRadius: 16,
                                   offset: const Offset(0, 8),
                                 ),
+                                // 霓虹外發光 - 青色
                                 BoxShadow(
-                                  color: GameTheme.accentBlue.withOpacity(0.3),
-                                  blurRadius: 32,
-                                  offset: const Offset(0, 16),
+                                  color: cyberpunkPrimary.withOpacity(0.3),
+                                  blurRadius: cyberpunkGlowSoft, // 輕微外發光
+                                  offset: const Offset(0, 0),
+                                ),
+                                // 霓虹外發光 - 洋紅
+                                BoxShadow(
+                                  color: cyberpunkSecondary.withOpacity(0.2),
+                                  blurRadius: cyberpunkGlowSoft,
+                                  offset: const Offset(0, 0),
                                 ),
                               ],
                             ),
