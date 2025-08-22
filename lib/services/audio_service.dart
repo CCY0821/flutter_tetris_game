@@ -21,8 +21,17 @@ class AudioService {
 
   // 初始化音頻服務
   Future<void> initialize() async {
-    await _backgroundMusicPlayer.setVolume(_musicVolume);
-    await _sfxPlayer.setVolume(_sfxVolume);
+    try {
+      // 確保先停止現有播放器
+      await _backgroundMusicPlayer.stop();
+      await _sfxPlayer.stop();
+      
+      // 重新設置音量
+      await _backgroundMusicPlayer.setVolume(_musicVolume);
+      await _sfxPlayer.setVolume(_sfxVolume);
+    } catch (e) {
+      print('AudioService initialization error: $e');
+    }
   }
 
   // 播放背景音樂
@@ -106,7 +115,13 @@ class AudioService {
 
   // 清理資源
   Future<void> dispose() async {
-    await _backgroundMusicPlayer.dispose();
-    await _sfxPlayer.dispose();
+    try {
+      await _backgroundMusicPlayer.stop();
+      await _sfxPlayer.stop();
+      await _backgroundMusicPlayer.dispose();
+      await _sfxPlayer.dispose();
+    } catch (e) {
+      print('AudioService dispose error: $e');
+    }
   }
 }

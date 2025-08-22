@@ -8,91 +8,90 @@ class BoardPainter extends CustomPainter {
   final Tetromino? tetromino;
   final Tetromino? ghostPiece;
   final double cellSize;
+  
+  // 快取Paint物件避免重複建立
+  static final Paint _backgroundPaint = Paint();
+  static final Paint _gridPaint = Paint()..strokeWidth = 0.5;
+  static final Paint _blockPaint = Paint();
+  static final Paint _highlightPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1;
+  static final Paint _shadowPaint = Paint();
+  static final Paint _ghostPaint = Paint()..style = PaintingStyle.fill;
+  static final Paint _ghostBorderPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 2;
+  static final Paint _ghostDashPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1;
 
   BoardPainter(this.board, this.tetromino, {this.ghostPiece, this.cellSize = 20});
 
   void _drawBlock(Canvas canvas, double x, double y, Color blockColor,
       {bool isActive = false}) {
-    final paint = Paint();
     final rect = Rect.fromLTWH(x * cellSize, y * cellSize, cellSize, cellSize);
-
-    // 主要方塊顏色
-    paint.color = blockColor;
+    
+    // 使用快取的Paint並設定顏色
+    _blockPaint.color = blockColor;
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect, const Radius.circular(2)),
-      paint,
+      _blockPaint,
     );
 
     // 添加高光效果
-    final highlightPaint = Paint()
-      ..color = Colors.white.withOpacity(isActive ? 0.4 : 0.2)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-
+    _highlightPaint.color = Colors.white.withOpacity(isActive ? 0.4 : 0.2);
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         rect.deflate(0.5),
         const Radius.circular(2),
       ),
-      highlightPaint,
+      _highlightPaint,
     );
 
     // 添加內陰影效果
-    final shadowPaint = Paint()..color = Colors.black.withOpacity(0.3);
-
+    _shadowPaint.color = Colors.black.withOpacity(0.3);
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(
             x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2),
         const Radius.circular(1),
       ),
-      shadowPaint,
+      _shadowPaint,
     );
   }
 
   void _drawGhostBlock(Canvas canvas, double x, double y, Color blockColor) {
-    final paint = Paint();
     final rect = Rect.fromLTWH(x * cellSize, y * cellSize, cellSize, cellSize);
 
     // Ghost piece 使用半透明邊框樣式
-    paint.color = blockColor.withOpacity(0.3);
-    paint.style = PaintingStyle.fill;
+    _ghostPaint.color = blockColor.withOpacity(0.3);
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect, const Radius.circular(2)),
-      paint,
+      _ghostPaint,
     );
 
     // 繪製邊框
-    final borderPaint = Paint()
-      ..color = blockColor.withOpacity(0.6)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-
+    _ghostBorderPaint.color = blockColor.withOpacity(0.6);
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect, const Radius.circular(2)),
-      borderPaint,
+      _ghostBorderPaint,
     );
 
     // 添加虛線效果（可選）
-    final dashPaint = Paint()
-      ..color = blockColor.withOpacity(0.8)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
+    _ghostDashPaint.color = blockColor.withOpacity(0.8);
 
     // 繪製內部虛線
     final innerRect = rect.deflate(3);
     canvas.drawRRect(
       RRect.fromRectAndRadius(innerRect, const Radius.circular(1)),
-      dashPaint,
+      _ghostDashPaint,
     );
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint();
-
     // 繪製背景
-    paint.shader = const LinearGradient(
+    _backgroundPaint.shader = const LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
@@ -100,25 +99,24 @@ class BoardPainter extends CustomPainter {
         Color(0xFF0F1419),
       ],
     ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), _backgroundPaint);
 
     // 繪製細微的網格線
-    paint.shader = null;
-    paint.color = GameTheme.gridLine.withOpacity(0.3);
-    paint.strokeWidth = 0.5;
+    _gridPaint.shader = null;
+    _gridPaint.color = GameTheme.gridLine.withOpacity(0.3);
 
     for (int y = 0; y <= GameState.rowCount; y++) {
       canvas.drawLine(
         Offset(0, y * cellSize),
         Offset(size.width, y * cellSize),
-        paint,
+        _gridPaint,
       );
     }
     for (int x = 0; x <= GameState.colCount; x++) {
       canvas.drawLine(
         Offset(x * cellSize, 0),
         Offset(x * cellSize, size.height),
-        paint,
+        _gridPaint,
       );
     }
 
@@ -178,5 +176,10 @@ class BoardPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant BoardPainter oldDelegate) {
+    return board != oldDelegate.board ||
+           tetromino != oldDelegate.tetromino ||
+           ghostPiece != oldDelegate.ghostPiece ||
+           cellSize != oldDelegate.cellSize;
+  }
 }

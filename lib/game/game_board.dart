@@ -38,6 +38,7 @@ class _GameBoardState extends State<GameBoard>
   // 震動特效相關
   late AnimationController _shakeController;
   late Animation<double> _shakeAnimation;
+  Timer? _shakeTimer;
 
   @override
   void initState() {
@@ -89,19 +90,28 @@ class _GameBoardState extends State<GameBoard>
 
   // 公開的震動方法供外部調用
   void triggerShakeAnimation() {
-    _shakeController.reset();
-    _shakeController.repeat(reverse: true);
-
-    // 400ms後停止震動
-    Timer(const Duration(milliseconds: 400), () {
-      _shakeController.stop();
+    if (mounted && !_shakeController.isAnimating) {
       _shakeController.reset();
-    });
+      _shakeController.repeat(reverse: true);
+
+      // 取消現有計時器
+      _shakeTimer?.cancel();
+      
+      // 400ms後停止震動
+      _shakeTimer = Timer(const Duration(milliseconds: 400), () {
+        if (mounted) {
+          _shakeController.stop();
+          _shakeController.reset();
+        }
+        _shakeTimer = null;
+      });
+    }
   }
 
   @override
   void dispose() {
     _dropTimer?.cancel();
+    _shakeTimer?.cancel();
     _shakeController.dispose();
     controllerHandler.dispose();
     gameState.dispose();
@@ -340,18 +350,20 @@ class _GameBoardState extends State<GameBoard>
                               borderRadius: BorderRadius.circular(12),
                               child: Stack(
                                 children: [
-                                  SizedBox(
-                                    width: GameState.colCount * cellSize,
-                                    height: GameState.rowCount * cellSize,
-                                    child: CustomPaint(
-                                      painter: BoardPainter(
-                                        gameState.board,
-                                        gameState.currentTetromino,
-                                        ghostPiece: gameLogic
-                                                .shouldShowGhostPiece()
-                                            ? gameLogic.calculateGhostPiece()
-                                            : null,
-                                        cellSize: cellSize,
+                                  RepaintBoundary(
+                                    child: SizedBox(
+                                      width: GameState.colCount * cellSize,
+                                      height: GameState.rowCount * cellSize,
+                                      child: CustomPaint(
+                                        painter: BoardPainter(
+                                          gameState.board,
+                                          gameState.currentTetromino,
+                                          ghostPiece: gameLogic
+                                                  .shouldShowGhostPiece()
+                                              ? gameLogic.calculateGhostPiece()
+                                              : null,
+                                          cellSize: cellSize,
+                                        ),
                                       ),
                                     ),
                                   ),

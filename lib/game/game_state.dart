@@ -40,6 +40,7 @@ class GameState {
   // 震動特效相關
   bool _isScreenShaking = false;
   VoidCallback? _onShakeRequested;
+  Timer? _shakeTimer;
 
   // 遊戲模式
   bool isMarathonMode = true; // 預設使用 Marathon 模式
@@ -198,14 +199,22 @@ class GameState {
       _isScreenShaking = true;
       _onShakeRequested!();
 
+      // 取消現有的計時器
+      _shakeTimer?.cancel();
+      
       // 400ms後重置狀態
-      Timer(const Duration(milliseconds: 400), () {
+      _shakeTimer = Timer(const Duration(milliseconds: 400), () {
         _isScreenShaking = false;
+        _shakeTimer = null;
       });
     }
   }
 
   Future<void> dispose() async {
+    // 取消震動計時器
+    _shakeTimer?.cancel();
+    _shakeTimer = null;
+    
     await audioService.dispose();
   }
 }
