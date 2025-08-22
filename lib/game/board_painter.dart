@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/tetromino.dart';
 import '../theme/game_theme.dart';
+import '../core/constants.dart';
 import 'game_state.dart';
 
 class BoardPainter extends CustomPainter {
@@ -18,6 +19,11 @@ class BoardPainter extends CustomPainter {
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1;
   static final Paint _shadowPaint = Paint();
+  static final Paint _glowPaint = Paint(); // 單格外發光效果
+  static final Paint _gradientPaint = Paint(); // 垂直漸層高光
+  static final Paint _innerBorderPaint = Paint() // 內描邊效果
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1;
   static final Paint _ghostPaint = Paint()..style = PaintingStyle.fill;
   static final Paint _ghostBorderPaint = Paint()
     ..style = PaintingStyle.stroke
@@ -32,32 +38,53 @@ class BoardPainter extends CustomPainter {
       {bool isActive = false}) {
     final rect = Rect.fromLTWH(x * cellSize, y * cellSize, cellSize, cellSize);
     
-    // 使用快取的Paint並設定顏色
-    _blockPaint.color = blockColor;
+    // 🌟 Step 1: 外發光效果 (依顏色調整強度) - 增強版
+    final glowIntensity = isActive ? cyberpunkGlowMed : cyberpunkGlowSoft;
+    _glowPaint.maskFilter = MaskFilter.blur(BlurStyle.outer, glowIntensity);
+    _glowPaint.color = blockColor.withOpacity(isActive ? 0.6 : 0.4); // 提高發光強度
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect.inflate(1), const Radius.circular(3)),
+      _glowPaint,
+    );
+    
+    // 🎨 Step 2: 垂直漸層主體 (上淺下深) - 保持霓虹色彩
+    _gradientPaint.shader = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Color.lerp(blockColor, Colors.white, 0.1)!, // 上方輕微提亮
+        blockColor, // 下方保持原霓虹色
+      ],
+      stops: const [0.0, 1.0],
+    ).createShader(rect);
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect, const Radius.circular(2)),
-      _blockPaint,
+      _gradientPaint,
     );
 
-    // 添加高光效果
-    _highlightPaint.color = Colors.white.withOpacity(isActive ? 0.4 : 0.2);
+    // ✨ Step 3: 頂部高光效果 - 增強版
+    _highlightPaint.color = Colors.white.withOpacity(isActive ? 0.5 : 0.3); // 提高高光強度
+    final highlightRect = Rect.fromLTWH(
+      rect.left + 1, rect.top + 1, rect.width - 2, rect.height * 0.3
+    );
+    _highlightPaint.shader = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Colors.white.withOpacity(isActive ? 0.3 : 0.15),
+        Colors.white.withOpacity(0.0),
+      ],
+    ).createShader(highlightRect);
     canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        rect.deflate(0.5),
-        const Radius.circular(2),
-      ),
+      RRect.fromRectAndRadius(highlightRect, const Radius.circular(1)),
       _highlightPaint,
     );
 
-    // 添加內陰影效果
-    _shadowPaint.color = Colors.black.withOpacity(0.3);
+    // 🔲 Step 4: 1px 內描邊 (深色)
+    _innerBorderPaint.color = Colors.black.withOpacity(0.4);
     canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-            x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2),
-        const Radius.circular(1),
-      ),
-      _shadowPaint,
+      RRect.fromRectAndRadius(rect.deflate(0.5), const Radius.circular(1.5)),
+      _innerBorderPaint,
     );
   }
 

@@ -119,3 +119,16 @@ const double cyberpunkBorderRadius = 8.0;
 
 /// Cyberpunk 大型圓角
 const double cyberpunkBorderRadiusLarge = 12.0;
+
+// =============================================================================
+// 📺 CYBERPUNK SCANLINE 掃描線系統 📺
+// =============================================================================
+
+/// 是否顯示全畫面掃描線效果
+const bool kShowScanline = true;
+
+/// 掃描線透明度
+const double kScanlineOpacity = 0.08; // 提高透明度讓掃描線更明顯
+
+/// 掃描線間距 (像素)
+const double kScanlineSpacing = 3.0; // 增加間距讓效果更清楚

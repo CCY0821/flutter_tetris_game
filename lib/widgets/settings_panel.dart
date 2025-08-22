@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../theme/game_theme.dart';
+import '../core/constants.dart';
 import '../game/game_state.dart';
 import '../game/game_ui_components.dart';
+import 'cyberpunk_hud_tag.dart';
 
 class SettingsPanel extends StatelessWidget {
   final GameState gameState;
@@ -258,10 +260,21 @@ class SettingsPanel extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: GameTheme.gameBoardBg,
+          backgroundColor: cyberpunkBgDeep,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+            side: BorderSide(
+              color: cyberpunkPrimary.withOpacity(0.5),
+              width: 1,
+            ),
+          ),
           title: Text(
-            '🎮 遊戲控制說明',
-            style: GameTheme.titleStyle.copyWith(fontSize: 20),
+            '🎮 CONTROL INTERFACE',
+            style: GameTheme.titleStyle.copyWith(
+              fontSize: 18,
+              letterSpacing: 2.0,
+              color: cyberpunkPrimary,
+            ),
           ),
           content: SizedBox(
             width: 400,
@@ -270,25 +283,25 @@ class SettingsPanel extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildControlSection(
-                    '⌨️ 鍵盤控制',
+                  _buildCyberpunkControlSection(
+                    '⌨️ KEYBOARD',
                     [
-                      '← →  移動方塊',
-                      '↓  軟降落',
-                      '↑  旋轉方塊',
-                      'Space  快速降落',
-                      'P  暫停/繼續遊戲',
-                      'R  重新開始',
-                      'H  顯示說明',
+                      {'key': '← →', 'text': '← → 移動方塊'},
+                      {'key': '↓', 'text': '↓ 軟降落'},
+                      {'key': '↑', 'text': '↑ 旋轉方塊'},
+                      {'key': 'SPACE', 'text': 'SPACE 快速降落'},
+                      {'key': 'P', 'text': 'P 暫停/繼續'},
+                      {'key': 'R', 'text': 'R 重新開始'},
+                      {'key': 'H', 'text': 'H 顯示說明'},
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  _buildControlSection(
-                    '🎮 WASD 控制',
+                  const SizedBox(height: 20),
+                  _buildCyberpunkControlSection(
+                    '🎮 WASD',
                     [
-                      'A D  移動方塊',
-                      'S  軟降落',
-                      'W  旋轉方塊',
+                      {'key': 'A D', 'text': 'A D 移動方塊'},
+                      {'key': 'S', 'text': 'S 軟降落'},
+                      {'key': 'W', 'text': 'W 旋轉方塊'},
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -337,6 +350,29 @@ class SettingsPanel extends StatelessWidget {
                 style: GameTheme.bodyStyle,
               ),
             )),
+      ],
+    );
+  }
+
+  /// 建立 Cyberpunk 風格控制區段
+  Widget _buildCyberpunkControlSection(String title, List<Map<String, String>> controls) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+            color: cyberpunkAccent,
+          ),
+        ),
+        const SizedBox(height: 12),
+        CyberpunkControlHints(
+          controls: controls,
+          isCompact: false,
+        ),
       ],
     );
   }

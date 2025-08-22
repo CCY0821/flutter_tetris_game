@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'game/game_board.dart';
 import 'theme/game_theme.dart';
 import 'core/constants.dart';
+import 'widgets/scanline_overlay.dart';
 
 void main() {
   runApp(const MyApp());
@@ -116,6 +117,9 @@ class MyApp extends StatelessWidget {
                   ),
                 ),
               ),
+
+              // 🖥️ 全畫面掃描線疊層 (最上層，不影響事件)
+              const ScanlineOverlay(),
             ],
           ),
         ),

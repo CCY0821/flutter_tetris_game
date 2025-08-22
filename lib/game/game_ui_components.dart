@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/tetromino.dart';
 import '../theme/game_theme.dart';
+import '../core/constants.dart';
 import '../services/scoring_service.dart';
 import '../widgets/combo_stats_panel.dart';
 import '../widgets/marathon_info_panel.dart';
@@ -36,13 +37,26 @@ class GameUIComponents {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        gradient: GameTheme.panelGradient,
-        borderRadius: BorderRadius.circular(12),
+        color: cyberpunkPanel, // 面板底色
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
         border: Border.all(
-          color: GameTheme.boardBorder,
-          width: 2,
+          color: cyberpunkPrimary, // 1px primary 外框
+          width: 1,
         ),
-        boxShadow: GameTheme.cardShadow,
+        boxShadow: [
+          // 輕微外光
+          BoxShadow(
+            color: cyberpunkPrimary.withOpacity(0.2),
+            blurRadius: cyberpunkGlowSoft,
+            offset: const Offset(0, 0),
+          ),
+          // 角落裝飾線效果
+          BoxShadow(
+            color: cyberpunkSecondary.withOpacity(0.1),
+            blurRadius: cyberpunkGlowSoft / 2,
+            offset: const Offset(1, 1),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -52,13 +66,19 @@ class GameUIComponents {
             children: [
               Text(
                 'SCORE',
-                style: GameTheme.accentStyle.copyWith(fontSize: 12),
+                style: GameTheme.accentStyle.copyWith(
+                  fontSize: 12,
+                  letterSpacing: 1.5, // 標題字距
+                  color: cyberpunkPrimary,
+                ),
               ),
               Text(
                 '$score',
                 style: GameTheme.titleStyle.copyWith(
                   fontSize: 16,
-                  color: GameTheme.textAccent,
+                  fontWeight: FontWeight.bold, // 數字加粗
+                  letterSpacing: 1.0, // 數字字距
+                  color: cyberpunkCaution, // 賽博黃數字
                 ),
               ),
             ],
@@ -66,14 +86,15 @@ class GameUIComponents {
 
           const SizedBox(height: 8),
 
-          // 分隔線
+          // 霓虹分隔線
           Container(
             height: 1,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
                   Colors.transparent,
-                  GameTheme.gridLine.withOpacity(0.5),
+                  cyberpunkPrimary.withOpacity(0.6),
+                  cyberpunkSecondary.withOpacity(0.3),
                   Colors.transparent,
                 ],
               ),
@@ -91,7 +112,11 @@ class GameUIComponents {
                 children: [
                   Text(
                     'NEXT',
-                    style: GameTheme.accentStyle.copyWith(fontSize: 11),
+                    style: GameTheme.accentStyle.copyWith(
+                      fontSize: 11,
+                      letterSpacing: 1.5, // 標題字距
+                      color: cyberpunkPrimary,
+                    ),
                   ),
                   const SizedBox(width: 6),
 
@@ -445,22 +470,73 @@ class GameUIComponents {
 
   static Widget overlayText(String text, Color color) {
     return Container(
-      color: Colors.black.withOpacity(0.8),
+      // 背景：半透明深色遮罩
+      color: const Color(0xAA0A0F1E),
       child: Center(
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color, width: 2),
-          ),
-          child: Text(
-            text,
-            style: GameTheme.titleStyle.copyWith(
-              color: color,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+            // 面板：深層背景色
+            color: cyberpunkPanel,
+            borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+            // 1px 霓虹描邊
+            border: Border.all(
+              color: cyberpunkPrimary,
+              width: 1,
             ),
+            // glowSoft 外光
+            boxShadow: [
+              BoxShadow(
+                color: cyberpunkPrimary.withOpacity(0.3),
+                blurRadius: cyberpunkGlowSoft,
+                offset: const Offset(0, 0),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 上方細裝飾線
+              Container(
+                width: 120,
+                height: 1,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.transparent,
+                      cyberpunkSecondary.withOpacity(0.8),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // 標題文字
+              Text(
+                text,
+                style: GameTheme.titleStyle.copyWith(
+                  color: cyberpunkPrimary,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 3.0, // 加字距
+                ),
+              ),
+              const SizedBox(height: 8),
+              // 下方細裝飾線
+              Container(
+                width: 80,
+                height: 1,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.transparent,
+                      cyberpunkAccent.withOpacity(0.6),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

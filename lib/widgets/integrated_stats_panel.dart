@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../game/marathon_system.dart';
 import '../services/scoring_service.dart';
 import '../theme/game_theme.dart';
+import '../core/constants.dart';
 
 /// 整合的統計面板：Marathon 模式資訊 + COMBO 統計
 class IntegratedStatsPanel extends StatelessWidget {
@@ -21,13 +22,26 @@ class IntegratedStatsPanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        gradient: GameTheme.panelGradient,
-        borderRadius: BorderRadius.circular(12),
+        color: cyberpunkPanel, // 面板底色
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
         border: Border.all(
-          color: GameTheme.boardBorder,
-          width: 2,
+          color: cyberpunkPrimary, // 1px primary 外框
+          width: 1,
         ),
-        boxShadow: GameTheme.cardShadow,
+        boxShadow: [
+          // 輕微外光
+          BoxShadow(
+            color: cyberpunkPrimary.withOpacity(0.2),
+            blurRadius: cyberpunkGlowSoft,
+            offset: const Offset(0, 0),
+          ),
+          // 角落裝飾線效果
+          BoxShadow(
+            color: cyberpunkAccent.withOpacity(0.1),
+            blurRadius: cyberpunkGlowSoft / 2,
+            offset: const Offset(1, 1),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,14 +71,18 @@ class IntegratedStatsPanel extends StatelessWidget {
       children: [
         Icon(
           isMarathonMode ? Icons.speed : Icons.flash_on,
-          color: isMarathonMode ? Colors.cyan : GameTheme.accentBlue,
+          color: isMarathonMode ? cyberpunkPrimary : cyberpunkAccent,
           size: 16,
         ),
         const SizedBox(width: 4),
         Expanded(
           child: Text(
             isMarathonMode ? 'MARATHON' : 'COMBO',
-            style: GameTheme.accentStyle.copyWith(fontSize: 11),
+            style: GameTheme.accentStyle.copyWith(
+              fontSize: 11,
+              letterSpacing: 1.5, // 標題字距
+              color: cyberpunkPrimary,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -73,15 +91,20 @@ class IntegratedStatsPanel extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.cyan.withOpacity(0.2),
+              color: cyberpunkAccent.withOpacity(0.2),
               borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                color: cyberpunkAccent.withOpacity(0.5),
+                width: 1,
+              ),
             ),
             child: Text(
               'Lv ${marathonSystem!.getLevelDisplayName()}',
               style: TextStyle(
-                color: Colors.cyan,
+                color: cyberpunkAccent,
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
+                letterSpacing: 1.0, // 數字字距
               ),
             ),
           ),
