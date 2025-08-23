@@ -469,74 +469,77 @@ class GameUIComponents {
   }
 
   static Widget overlayText(String text, Color color) {
-    return Container(
-      // 背景：半透明深色遮罩
-      color: const Color(0xAA0A0F1E),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
-          decoration: BoxDecoration(
-            // 面板：深層背景色
-            color: cyberpunkPanel,
-            borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
-            // 1px 霓虹描邊
-            border: Border.all(
-              color: cyberpunkPrimary,
-              width: 1,
+    return Positioned.fill(
+      child: Container(
+        // 背景：半透明深色遮罩
+        color: const Color(0xAA0A0F1E),
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+            decoration: BoxDecoration(
+              // 面板：深層背景色
+              color: cyberpunkPanel,
+              borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+              // 1px 霓虹描邊
+              border: Border.all(
+                color: cyberpunkPrimary,
+                width: 1,
+              ),
+              // glowSoft 外光
+              boxShadow: [
+                BoxShadow(
+                  color: cyberpunkPrimary.withOpacity(0.3),
+                  blurRadius: cyberpunkGlowSoft,
+                  offset: const Offset(0, 0),
+                ),
+              ],
             ),
-            // glowSoft 外光
-            boxShadow: [
-              BoxShadow(
-                color: cyberpunkPrimary.withOpacity(0.3),
-                blurRadius: cyberpunkGlowSoft,
-                offset: const Offset(0, 0),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // 上方細裝飾線
-              Container(
-                width: 120,
-                height: 1,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.transparent,
-                      cyberpunkSecondary.withOpacity(0.8),
-                      Colors.transparent,
-                    ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 上方細裝飾線
+                Container(
+                  width: 120,
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        cyberpunkSecondary.withOpacity(0.8),
+                        Colors.transparent,
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              // 標題文字
-              Text(
-                text,
-                style: GameTheme.titleStyle.copyWith(
-                  color: cyberpunkPrimary,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 3.0, // 加字距
+                const SizedBox(height: 12),
+                // 標題文字
+                Text(
+                  text,
+                  style: GameTheme.titleStyle.copyWith(
+                    color: cyberpunkPrimary,
+                    fontSize: 20, // 縮小字體
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2.0, // 調整字距
+                  ),
+                  textAlign: TextAlign.center, // 置中對齊
                 ),
-              ),
-              const SizedBox(height: 8),
-              // 下方細裝飾線
-              Container(
-                width: 80,
-                height: 1,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.transparent,
-                      cyberpunkAccent.withOpacity(0.6),
-                      Colors.transparent,
-                    ],
+                const SizedBox(height: 8),
+                // 下方細裝飾線
+                Container(
+                  width: 80,
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        cyberpunkAccent.withOpacity(0.6),
+                        Colors.transparent,
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

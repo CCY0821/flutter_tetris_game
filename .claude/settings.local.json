@@ -28,7 +28,9 @@
       "Bash(start fix_emulator_position.bat)",
       "Bash(del nul)",
       "Bash(emulator:*)",
-      "Bash(start fix_audio_emulator.bat)"
+      "Bash(start fix_audio_emulator.bat)",
+      "Bash(git clean:*)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "additionalDirectories": [
