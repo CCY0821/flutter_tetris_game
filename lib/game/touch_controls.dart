@@ -193,14 +193,15 @@ class _TouchControlsState extends State<TouchControls> {
                         ? cyberpunkBg.withOpacity(0.5)
                         : isActive
                             ? Colors.white
-                            : cyberpunkPrimary,
+                            : Colors.white,
                     size: size * 0.4,
                     shadows: isDisabled
                         ? null
                         : [
                             Shadow(
-                              color: (isActive ? cyberpunkSecondary : cyberpunkPrimary)
-                                  .withOpacity(0.8),
+                              color: isActive 
+                                  ? cyberpunkSecondary.withOpacity(0.8)
+                                  : Colors.white.withOpacity(0.6),
                               blurRadius: 6,
                               offset: const Offset(0, 0),
                             ),
