@@ -60,11 +60,29 @@ class _TouchControlsState extends State<TouchControls> {
   void _executeAction(String action, VoidCallback callback) {
     if (widget.gameState.isPaused || widget.gameState.isGameOver) return;
     
-    // 觸覺回饋 - 一般按鈕點擊
+    callback();
+    widget.onStateChange();
+  }
+
+  void _startSinglePress(String action, VoidCallback callback) {
+    if (widget.gameState.isPaused || widget.gameState.isGameOver) return;
+
+    // 觸覺回饋
     HapticFeedback.lightImpact();
+    
+    // 立即設置按下狀態
+    setState(() {
+      _activeButton = action;
+    });
     
     callback();
     widget.onStateChange();
+  }
+
+  void _stopSinglePress() {
+    setState(() {
+      _activeButton = null;
+    });
   }
 
   @override
@@ -84,8 +102,8 @@ class _TouchControlsState extends State<TouchControls> {
         widget.gameState.isPaused || widget.gameState.isGameOver;
     final bool isActive = _activeButton == action && !isDisabled;
 
-    // 方向鍵專用增強效果
-    final bool isDPadButton = ['left', 'right', 'down'].contains(action);
+    // 所有控制按鈕都使用增強效果
+    final bool isDPadButton = ['left', 'right', 'down', 'rotate', 'rotate_ccw', 'hard_drop'].contains(action);
 
     // Cyberpunk 霓虹藍配色
     const neumorphBase = Color(0xFF00D9FF); // 主霓虹藍
@@ -242,14 +260,20 @@ class _TouchControlsState extends State<TouchControls> {
                         splashColor: isDPadButton 
                             ? cyberpunkAccent.withOpacity(0.3)
                             : neumorphBase.withOpacity(0.3),
-                        onTapDown: (!isDisabled && allowRepeat)
-                            ? (_) => _startRepeat(action, onPressed)
+                        onTapDown: !isDisabled
+                            ? allowRepeat
+                                ? (_) => _startRepeat(action, onPressed)
+                                : (_) => _startSinglePress(action, onPressed)
                             : null,
-                        onTapUp:
-                            (!isDisabled && allowRepeat) ? (_) => _stopRepeat() : null,
-                        onTapCancel: (!isDisabled && allowRepeat) ? _stopRepeat : null,
-                        onTap: (!isDisabled && !allowRepeat)
-                            ? () => _executeAction(action, onPressed)
+                        onTapUp: !isDisabled
+                            ? allowRepeat
+                                ? (_) => _stopRepeat()
+                                : (_) => _stopSinglePress()
+                            : null,
+                        onTapCancel: !isDisabled
+                            ? allowRepeat
+                                ? _stopRepeat
+                                : _stopSinglePress
                             : null,
                         child: Center(
                           child: Icon(
