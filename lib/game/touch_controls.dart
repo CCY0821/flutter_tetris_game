@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'game_logic.dart';
 import 'game_state.dart';
 import '../theme/game_theme.dart';
+import '../core/constants.dart';
 
 class TouchControls extends StatefulWidget {
   final GameLogic gameLogic;
@@ -65,123 +66,173 @@ class _TouchControlsState extends State<TouchControls> {
     required String action,
     required VoidCallback onPressed,
     bool allowRepeat = false,
-    double size = 60,
+    double size = 72,
   }) {
     final bool isDisabled =
         widget.gameState.isPaused || widget.gameState.isGameOver;
     final bool isActive = _activeButton == action && !isDisabled;
 
-    // Cyberpunk 色彩定義
-    const cyberpunkPrimary = Color(0xFF00D9FF); // 霓虹藍
-    const cyberpunkSecondary = Color(0xFFFF0080); // 電光粉
-    const cyberpunkAccent = Color(0xFF00FF88); // 亮綠
-    const cyberpunkYellow = Color(0xFFFFDD00); // 黃
-    const cyberpunkBg = Color(0xFF0A0F1E); // 深色背景
+    // 方向鍵專用增強效果
+    final bool isDPadButton = ['left', 'right', 'down'].contains(action);
 
     return Container(
       width: size,
       height: size,
       margin: const EdgeInsets.all(3),
       child: AnimatedScale(
-        scale: isActive ? 0.98 : 1.0,
-        duration: const Duration(milliseconds: 140),
-        curve: Curves.easeOutCubic,
+        scale: isActive ? 0.95 : 1.0,
+        duration: Duration(milliseconds: isDPadButton ? 100 : 140),
+        curve: isDPadButton ? Curves.easeOutQuart : Curves.easeOutCubic,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 140),
-          curve: Curves.easeOutCubic,
-          transform: Matrix4.translationValues(0, isActive ? 3.0 : 0.0, 0),
+          duration: Duration(milliseconds: isDPadButton ? 100 : 140),
+          curve: isDPadButton ? Curves.easeOutQuart : Curves.easeOutCubic,
+          transform: Matrix4.translationValues(
+              0, isActive ? (isDPadButton ? 2.0 : 3.0) : 0.0, 0),
           decoration: BoxDecoration(
             gradient: isDisabled
                 ? LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      cyberpunkBg.withOpacity(0.6),
-                      cyberpunkBg.withOpacity(0.4),
+                      cyberpunkBgDeep.withOpacity(0.6),
+                      cyberpunkBgDeep.withOpacity(0.4),
                     ],
                   )
                 : isActive
                     ? LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [
-                          cyberpunkSecondary,
-                          cyberpunkSecondary.withOpacity(0.8),
-                          cyberpunkBg,
-                        ],
-                        stops: const [0.0, 0.5, 1.0],
+                        colors: isDPadButton
+                            ? [
+                                cyberpunkSecondary,
+                                cyberpunkSecondary.withOpacity(0.9),
+                                cyberpunkAccent.withOpacity(0.6),
+                                cyberpunkBgDeep,
+                              ]
+                            : [
+                                cyberpunkSecondary,
+                                cyberpunkSecondary.withOpacity(0.8),
+                                cyberpunkBgDeep,
+                              ],
+                        stops: isDPadButton
+                            ? [0.0, 0.3, 0.7, 1.0]
+                            : [0.0, 0.5, 1.0],
                       )
                     : LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [
-                          cyberpunkPrimary.withOpacity(0.9),
-                          cyberpunkPrimary.withOpacity(0.7),
-                          cyberpunkBg,
-                        ],
-                        stops: const [0.0, 0.6, 1.0],
+                        colors: isDPadButton
+                            ? [
+                                cyberpunkPrimary.withOpacity(0.95),
+                                cyberpunkPrimary.withOpacity(0.8),
+                                cyberpunkAccent.withOpacity(0.4),
+                                cyberpunkBgDeep,
+                              ]
+                            : [
+                                cyberpunkPrimary.withOpacity(0.9),
+                                cyberpunkPrimary.withOpacity(0.7),
+                                cyberpunkBgDeep,
+                              ],
+                        stops: isDPadButton
+                            ? [0.0, 0.4, 0.7, 1.0]
+                            : [0.0, 0.6, 1.0],
                       ),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(isDPadButton ? 16 : 14),
             border: Border.all(
               color: isActive
-                  ? cyberpunkSecondary
+                  ? (isDPadButton ? cyberpunkAccent : cyberpunkSecondary)
                   : isDisabled
-                      ? cyberpunkBg.withOpacity(0.5)
+                      ? cyberpunkBgDeep.withOpacity(0.5)
                       : cyberpunkPrimary,
-              width: isActive ? 2 : 1,
+              width: isActive
+                  ? (isDPadButton ? 2.5 : 2)
+                  : (isDPadButton ? 1.5 : 1),
             ),
             boxShadow: isDisabled
                 ? []
                 : [
                     // 上方高光陰影
                     BoxShadow(
-                      color: Colors.white.withOpacity(0.25),
-                      blurRadius: isActive ? 2 : 3,
+                      color:
+                          Colors.white.withOpacity(isDPadButton ? 0.3 : 0.25),
+                      blurRadius: isActive ? 2 : (isDPadButton ? 4 : 3),
                       offset: const Offset(0, -1),
                     ),
                     // 主要陰影
                     BoxShadow(
-                      color: (isActive ? cyberpunkSecondary : cyberpunkPrimary)
-                          .withOpacity(isActive ? 0.15 : 0.25),
-                      blurRadius: isActive ? 8 : 14,
-                      spreadRadius: isActive ? 0 : 1,
-                      offset: Offset(0, isActive ? 3 : 6),
+                      color: (isActive
+                              ? (isDPadButton
+                                  ? cyberpunkAccent
+                                  : cyberpunkSecondary)
+                              : cyberpunkPrimary)
+                          .withOpacity(
+                              isActive ? 0.2 : (isDPadButton ? 0.3 : 0.25)),
+                      blurRadius: isActive
+                          ? (isDPadButton ? 10 : 8)
+                          : (isDPadButton ? 16 : 14),
+                      spreadRadius: isActive ? 0 : (isDPadButton ? 2 : 1),
+                      offset: Offset(
+                          0,
+                          isActive
+                              ? (isDPadButton ? 2 : 3)
+                              : (isDPadButton ? 8 : 6)),
                     ),
                     // 霓虹外光
                     BoxShadow(
-                      color: (isActive ? cyberpunkSecondary : cyberpunkPrimary)
-                          .withOpacity(0.2),
-                      blurRadius: isActive ? 16 : 20,
+                      color: (isActive
+                              ? (isDPadButton
+                                  ? cyberpunkAccent
+                                  : cyberpunkSecondary)
+                              : cyberpunkPrimary)
+                          .withOpacity(isDPadButton ? 0.25 : 0.2),
+                      blurRadius: isActive
+                          ? (isDPadButton ? 18 : 16)
+                          : (isDPadButton ? 24 : 20),
                       spreadRadius: -2,
                       offset: const Offset(0, 0),
                     ),
+                    // D-Pad 專用額外霓虹環
+                    if (isDPadButton)
+                      BoxShadow(
+                        color: (isActive ? cyberpunkAccent : cyberpunkPrimary)
+                            .withOpacity(0.15),
+                        blurRadius: isActive ? 28 : 32,
+                        spreadRadius: -4,
+                        offset: const Offset(0, 0),
+                      ),
                   ],
           ),
           child: Material(
             color: Colors.transparent,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(isDPadButton ? 16 : 14),
             child: InkWell(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(isDPadButton ? 16 : 14),
               hoverColor: cyberpunkPrimary.withOpacity(0.1),
-              splashColor: cyberpunkSecondary.withOpacity(0.3),
+              splashColor: (isDPadButton ? cyberpunkAccent : cyberpunkSecondary)
+                  .withOpacity(0.3),
               onTapDown: (!isDisabled && allowRepeat)
                   ? (_) => _startRepeat(action, onPressed)
                   : null,
-              onTapUp: (!isDisabled && allowRepeat) ? (_) => _stopRepeat() : null,
+              onTapUp:
+                  (!isDisabled && allowRepeat) ? (_) => _stopRepeat() : null,
               onTapCancel: (!isDisabled && allowRepeat) ? _stopRepeat : null,
               onTap: (!isDisabled && !allowRepeat)
                   ? () => _executeAction(action, onPressed)
                   : null,
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(isDPadButton ? 14 : 12),
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.white.withOpacity(isActive ? 0.15 : 0.08),
+                      Colors.white.withOpacity(isActive
+                          ? (isDPadButton ? 0.2 : 0.15)
+                          : (isDPadButton ? 0.12 : 0.08)),
                       Colors.transparent,
-                      Colors.black.withOpacity(isActive ? 0.1 : 0.05),
+                      Colors.black.withOpacity(isActive
+                          ? (isDPadButton ? 0.15 : 0.1)
+                          : (isDPadButton ? 0.08 : 0.05)),
                     ],
                     stops: const [0.0, 0.5, 1.0],
                   ),
@@ -190,19 +241,21 @@ class _TouchControlsState extends State<TouchControls> {
                   child: Icon(
                     icon,
                     color: isDisabled
-                        ? cyberpunkBg.withOpacity(0.5)
-                        : isActive
-                            ? Colors.white
-                            : Colors.white,
-                    size: size * 0.4,
+                        ? cyberpunkBgDeep.withOpacity(0.5)
+                        : Colors.white,
+                    size: size * (isDPadButton ? 0.45 : 0.4),
                     shadows: isDisabled
                         ? null
                         : [
                             Shadow(
-                              color: isActive 
-                                  ? cyberpunkSecondary.withOpacity(0.8)
-                                  : Colors.white.withOpacity(0.6),
-                              blurRadius: 6,
+                              color: isActive
+                                  ? (isDPadButton
+                                      ? cyberpunkAccent.withOpacity(0.9)
+                                      : cyberpunkSecondary.withOpacity(0.8))
+                                  : (isDPadButton
+                                      ? cyberpunkPrimary.withOpacity(0.8)
+                                      : Colors.white.withOpacity(0.6)),
+                              blurRadius: isDPadButton ? 8 : 6,
                               offset: const Offset(0, 0),
                             ),
                             Shadow(
@@ -210,6 +263,15 @@ class _TouchControlsState extends State<TouchControls> {
                               blurRadius: 2,
                               offset: const Offset(1, 1),
                             ),
+                            // D-Pad 專用額外內發光
+                            if (isDPadButton)
+                              Shadow(
+                                color: isActive
+                                    ? cyberpunkAccent.withOpacity(0.6)
+                                    : cyberpunkPrimary.withOpacity(0.4),
+                                blurRadius: 12,
+                                offset: const Offset(0, 0),
+                              ),
                           ],
                   ),
                 ),
@@ -223,13 +285,12 @@ class _TouchControlsState extends State<TouchControls> {
 
   @override
   Widget build(BuildContext context) {
-    // Cyberpunk 面板色彩
-    const cyberpunkPrimary = Color(0xFF00D9FF); // 霓虹藍
-    const cyberpunkBg = Color(0xFF0A0F1E); // 深色背景
-    const cyberpunkPanel = Color(0xFF1A1F2E); // 面板背景
-
+    final screenWidth = MediaQuery.of(context).size.width;
+    // 計算控制區域寬度，確保不為負數
+    final controlWidth = (screenWidth - 32).clamp(200.0, double.infinity);
+    
     return Container(
-      width: GameState.colCount * 20,
+      width: controlWidth,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -237,25 +298,21 @@ class _TouchControlsState extends State<TouchControls> {
           end: Alignment.bottomRight,
           colors: [
             cyberpunkPanel,
-            cyberpunkBg,
+            cyberpunkBgDeep,
             cyberpunkPanel.withOpacity(0.8),
           ],
           stops: const [0.0, 0.5, 1.0],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadiusLarge + 4),
         border: Border.all(
           color: cyberpunkPrimary.withOpacity(0.6),
-          width: 1,
+          width: cyberpunkBorderWidth,
         ),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
+          ...cyberpunkPanelShadow,
           BoxShadow(
             color: cyberpunkPrimary.withOpacity(0.15),
-            blurRadius: 16,
+            blurRadius: cyberpunkGlowStrong,
             spreadRadius: -2,
             offset: const Offset(0, 0),
           ),
@@ -273,21 +330,21 @@ class _TouchControlsState extends State<TouchControls> {
                 action: 'rotate_ccw',
                 onPressed: widget.gameLogic.rotateCounterClockwise,
                 allowRepeat: false,
-                size: 40,
+                size: 56,
               ),
               _buildControlButton(
                 icon: Icons.rotate_right,
                 action: 'rotate',
                 onPressed: widget.gameLogic.rotate,
                 allowRepeat: false,
-                size: 45,
+                size: 60,
               ),
               _buildControlButton(
                 icon: Icons.vertical_align_bottom,
                 action: 'hard_drop',
                 onPressed: widget.gameLogic.hardDrop,
                 allowRepeat: false,
-                size: 40,
+                size: 56,
               ),
             ],
           ),
@@ -304,7 +361,7 @@ class _TouchControlsState extends State<TouchControls> {
                 action: 'left',
                 onPressed: widget.gameLogic.moveLeft,
                 allowRepeat: true,
-                size: 40,
+                size: 56,
               ),
 
               // 快速下降
@@ -313,7 +370,7 @@ class _TouchControlsState extends State<TouchControls> {
                 action: 'down',
                 onPressed: widget.gameLogic.moveDown,
                 allowRepeat: true,
-                size: 40,
+                size: 56,
               ),
 
               // 右移
@@ -322,7 +379,7 @@ class _TouchControlsState extends State<TouchControls> {
                 action: 'right',
                 onPressed: widget.gameLogic.moveRight,
                 allowRepeat: true,
-                size: 40,
+                size: 56,
               ),
             ],
           ),
