@@ -50,7 +50,7 @@ class CyberpunkHudTag extends StatelessWidget {
     if (highlightText != null) {
       // 有強調文字時，分割顯示
       final parts = text.split(highlightText!);
-      
+
       return RichText(
         text: TextSpan(
           style: TextStyle(

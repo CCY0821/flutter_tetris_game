@@ -132,9 +132,9 @@ class IntegratedStatsPanel extends StatelessWidget {
   /// 建立 Marathon 區域
   Widget _buildMarathonSection() {
     if (marathonSystem == null) return const SizedBox.shrink();
-    
+
     final stats = marathonSystem!.getStats();
-    
+
     return Column(
       children: [
         // 關卡和進度
@@ -147,18 +147,19 @@ class IntegratedStatsPanel extends StatelessWidget {
                 children: [
                   Text(
                     'LINES',
-                    style: GameTheme.accentStyle.copyWith(fontSize: 9, color: Colors.white70),
+                    style: GameTheme.accentStyle
+                        .copyWith(fontSize: 9, color: Colors.white70),
                   ),
-                Text(
-                  '${stats.totalLines}',
-                  style: TextStyle(
-                    color: Colors.cyan,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  Text(
+                    '${stats.totalLines}',
+                    style: TextStyle(
+                      color: Colors.cyan,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
-                ),
+                ],
+              ),
             ),
             Expanded(
               child: Column(
@@ -166,29 +167,31 @@ class IntegratedStatsPanel extends StatelessWidget {
                 children: [
                   Text(
                     'SPEED',
-                    style: GameTheme.accentStyle.copyWith(fontSize: 9, color: Colors.white70),
-                ),
-                Text(
-                  '${stats.gravity.toStringAsFixed(1)}G',
-                  style: TextStyle(
-                    color: _getSpeedColor(stats.gravity),
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                    style: GameTheme.accentStyle
+                        .copyWith(fontSize: 9, color: Colors.white70),
                   ),
-                ),
-              ],
-                ),
+                  Text(
+                    '${stats.gravity.toStringAsFixed(1)}G',
+                    style: TextStyle(
+                      color: _getSpeedColor(stats.gravity),
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        
+
         // 進度條
         Row(
           children: [
             Text(
               'Progress',
-              style: GameTheme.accentStyle.copyWith(fontSize: 10, color: Colors.white70),
+              style: GameTheme.accentStyle
+                  .copyWith(fontSize: 10, color: Colors.white70),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -213,7 +216,8 @@ class IntegratedStatsPanel extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               '${(stats.progress * 100).toInt()}%',
-              style: GameTheme.accentStyle.copyWith(fontSize: 10, color: Colors.cyan),
+              style: GameTheme.accentStyle
+                  .copyWith(fontSize: 10, color: Colors.cyan),
             ),
           ],
         ),
@@ -238,7 +242,8 @@ class IntegratedStatsPanel extends StatelessWidget {
               children: [
                 Text(
                   'CURRENT',
-                  style: GameTheme.accentStyle.copyWith(fontSize: 10, color: Colors.white70),
+                  style: GameTheme.accentStyle
+                      .copyWith(fontSize: 10, color: Colors.white70),
                 ),
                 Row(
                   children: [
@@ -254,7 +259,8 @@ class IntegratedStatsPanel extends StatelessWidget {
                       const SizedBox(width: 3),
                       Flexible(
                         child: Text(
-                          scoringService.comboRankDescription.replaceAll('!', ''),
+                          scoringService.comboRankDescription
+                              .replaceAll('!', ''),
                           style: TextStyle(
                             color: _getComboColor(currentCombo),
                             fontSize: 7,
@@ -272,7 +278,8 @@ class IntegratedStatsPanel extends StatelessWidget {
               children: [
                 Text(
                   'MAX COMBO',
-                  style: GameTheme.accentStyle.copyWith(fontSize: 10, color: Colors.white70),
+                  style: GameTheme.accentStyle
+                      .copyWith(fontSize: 10, color: Colors.white70),
                 ),
                 Row(
                   children: [
@@ -298,14 +305,18 @@ class IntegratedStatsPanel extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        
+
         // 統計資訊
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(child: _buildMiniStat('Total', '${stats['combos'] ?? 0}', GameTheme.accentBlue)),
+            Expanded(
+                child: _buildMiniStat(
+                    'Total', '${stats['combos'] ?? 0}', GameTheme.accentBlue)),
             const SizedBox(width: 8),
-            Expanded(child: _buildMiniStat('Points', '${stats['combo_count'] ?? 0}', GameTheme.highlight)),
+            Expanded(
+                child: _buildMiniStat('Points', '${stats['combo_count'] ?? 0}',
+                    GameTheme.highlight)),
           ],
         ),
       ],
@@ -318,7 +329,8 @@ class IntegratedStatsPanel extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GameTheme.accentStyle.copyWith(fontSize: 9, color: Colors.white70),
+          style: GameTheme.accentStyle
+              .copyWith(fontSize: 9, color: Colors.white70),
         ),
         Text(
           value,

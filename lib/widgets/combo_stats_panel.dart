@@ -81,7 +81,7 @@ class ComboStatsPanel extends StatelessWidget {
             '${stats['combo_count'] ?? 0}',
             GameTheme.highlight,
           ),
-          
+
           const SizedBox(height: 12),
 
           // 連擊等級條
@@ -105,7 +105,8 @@ class ComboStatsPanel extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GameTheme.accentStyle.copyWith(fontSize: 10, color: Colors.white70),
+          style: GameTheme.accentStyle
+              .copyWith(fontSize: 10, color: Colors.white70),
         ),
         Row(
           children: [
@@ -156,7 +157,8 @@ class ComboStatsPanel extends StatelessWidget {
       children: [
         Text(
           'COMBO LEVELS',
-          style: GameTheme.accentStyle.copyWith(fontSize: 10, color: Colors.white70),
+          style: GameTheme.accentStyle
+              .copyWith(fontSize: 10, color: Colors.white70),
         ),
         const SizedBox(height: 6),
         ...levels.map((level) => _buildLevelIndicator(level)),

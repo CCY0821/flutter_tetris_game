@@ -84,8 +84,10 @@ class GameTheme {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       ).copyWith(
         overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
-          if (states.contains(WidgetState.hovered)) return buttonPrimary.withOpacity(0.2);
-          if (states.contains(WidgetState.pressed)) return buttonPrimary.withOpacity(0.3);
+          if (states.contains(WidgetState.hovered))
+            return buttonPrimary.withOpacity(0.2);
+          if (states.contains(WidgetState.pressed))
+            return buttonPrimary.withOpacity(0.3);
           return null;
         }),
       );
@@ -105,8 +107,10 @@ class GameTheme {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       ).copyWith(
         overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
-          if (states.contains(WidgetState.hovered)) return buttonSecondary.withOpacity(0.2);
-          if (states.contains(WidgetState.pressed)) return buttonSecondary.withOpacity(0.3);
+          if (states.contains(WidgetState.hovered))
+            return buttonSecondary.withOpacity(0.2);
+          if (states.contains(WidgetState.pressed))
+            return buttonSecondary.withOpacity(0.3);
           return null;
         }),
       );

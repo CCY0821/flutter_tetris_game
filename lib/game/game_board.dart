@@ -11,6 +11,7 @@ import 'board_painter.dart';
 import 'touch_controls.dart';
 import '../theme/game_theme.dart';
 import '../widgets/settings_panel.dart';
+import '../widgets/ad_banner.dart';
 import '../core/constants.dart';
 
 class GameBoard extends StatefulWidget {
@@ -733,6 +734,11 @@ class _GameBoardState extends State<GameBoard>
               gameState: gameState,
               onStateChange: () => setState(() {}),
             ),
+          ),
+          
+          // 底部橫幅廣告 - 不影響遊戲佈局
+          const AdBanner(
+            showDebugInfo: true, // 開發模式顯示平台信息
           ),
         ],
       ),

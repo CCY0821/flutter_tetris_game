@@ -9,7 +9,7 @@ class BoardPainter extends CustomPainter {
   final Tetromino? tetromino;
   final Tetromino? ghostPiece;
   final double cellSize;
-  
+
   // 快取Paint物件避免重複建立
   static final Paint _backgroundPaint = Paint();
   static final Paint _gridPaint = Paint()..strokeWidth = 0.5;
@@ -32,12 +32,13 @@ class BoardPainter extends CustomPainter {
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1;
 
-  BoardPainter(this.board, this.tetromino, {this.ghostPiece, this.cellSize = 20});
+  BoardPainter(this.board, this.tetromino,
+      {this.ghostPiece, this.cellSize = 20});
 
   void _drawBlock(Canvas canvas, double x, double y, Color blockColor,
       {bool isActive = false}) {
     final rect = Rect.fromLTWH(x * cellSize, y * cellSize, cellSize, cellSize);
-    
+
     // 🌟 Step 1: 外發光效果 (依顏色調整強度) - 增強版
     final glowIntensity = isActive ? cyberpunkGlowMed : cyberpunkGlowSoft;
     _glowPaint.maskFilter = MaskFilter.blur(BlurStyle.outer, glowIntensity);
@@ -46,7 +47,7 @@ class BoardPainter extends CustomPainter {
       RRect.fromRectAndRadius(rect.inflate(1), const Radius.circular(3)),
       _glowPaint,
     );
-    
+
     // 🎨 Step 2: 垂直漸層主體 (上淺下深) - 保持霓虹色彩
     _gradientPaint.shader = LinearGradient(
       begin: Alignment.topCenter,
@@ -63,10 +64,10 @@ class BoardPainter extends CustomPainter {
     );
 
     // ✨ Step 3: 頂部高光效果 - 增強版
-    _highlightPaint.color = Colors.white.withOpacity(isActive ? 0.5 : 0.3); // 提高高光強度
+    _highlightPaint.color =
+        Colors.white.withOpacity(isActive ? 0.5 : 0.3); // 提高高光強度
     final highlightRect = Rect.fromLTWH(
-      rect.left + 1, rect.top + 1, rect.width - 2, rect.height * 0.3
-    );
+        rect.left + 1, rect.top + 1, rect.width - 2, rect.height * 0.3);
     _highlightPaint.shader = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
@@ -127,15 +128,16 @@ class BoardPainter extends CustomPainter {
         Color(0xFF0F1419),
       ],
     ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), _backgroundPaint);
+    canvas.drawRect(
+        Rect.fromLTWH(0, 0, size.width, size.height), _backgroundPaint);
 
     // 🌟 雙筆畫霓虹格線 - 模擬微光邊緣效果
     _gridPaint.shader = null;
     _gridGlowPaint.shader = null;
-    
+
     // 第一次繪製：主格線 (60% 透明度)
     _gridPaint.color = GameTheme.gridLine.withOpacity(0.6);
-    
+
     for (int y = 0; y <= GameState.rowCount; y++) {
       canvas.drawLine(
         Offset(0, y * cellSize),
@@ -150,10 +152,10 @@ class BoardPainter extends CustomPainter {
         _gridPaint,
       );
     }
-    
+
     // 第二次繪製：微光邊緣 (更低透明度 + 微偏移)
     _gridGlowPaint.color = GameTheme.gridLine.withOpacity(0.2);
-    
+
     for (int y = 0; y <= GameState.rowCount; y++) {
       // 微偏移製造光暈效果
       canvas.drawLine(
@@ -229,8 +231,8 @@ class BoardPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant BoardPainter oldDelegate) {
     return board != oldDelegate.board ||
-           tetromino != oldDelegate.tetromino ||
-           ghostPiece != oldDelegate.ghostPiece ||
-           cellSize != oldDelegate.cellSize;
+        tetromino != oldDelegate.tetromino ||
+        ghostPiece != oldDelegate.ghostPiece ||
+        cellSize != oldDelegate.cellSize;
   }
 }

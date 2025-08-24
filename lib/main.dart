@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: GameTheme.primaryButtonStyle,
         ),
-        // 設定 OutlinedButton 全域樣式  
+        // 設定 OutlinedButton 全域樣式
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
             foregroundColor: cyberpunkPrimary,
@@ -37,8 +37,10 @@ class MyApp extends StatelessWidget {
             ),
           ).copyWith(
             overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
-              if (states.contains(WidgetState.hovered)) return cyberpunkPrimary.withOpacity(0.1);
-              if (states.contains(WidgetState.pressed)) return cyberpunkPrimary.withOpacity(0.2);
+              if (states.contains(WidgetState.hovered))
+                return cyberpunkPrimary.withOpacity(0.1);
+              if (states.contains(WidgetState.pressed))
+                return cyberpunkPrimary.withOpacity(0.2);
               return null;
             }),
           ),
@@ -80,7 +82,8 @@ class MyApp extends StatelessWidget {
                                   GameTheme.brightAccent.withOpacity(0.1),
                                 ],
                               ),
-                              borderRadius: BorderRadius.circular(cyberpunkBorderRadiusLarge),
+                              borderRadius: BorderRadius.circular(
+                                  cyberpunkBorderRadiusLarge),
                               border: Border.all(
                                 color: GameTheme.textAccent.withOpacity(0.3),
                                 width: cyberpunkBorderWidthBold,

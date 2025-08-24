@@ -61,48 +61,48 @@ const double cyberpunkGlowStrong = 16.0;
 
 /// Cyberpunk 主要按鈕光暈效果
 List<BoxShadow> get cyberpunkPrimaryGlow => [
-  BoxShadow(
-    color: cyberpunkPrimary.withOpacity(0.3),
-    blurRadius: cyberpunkGlowMed,
-    spreadRadius: 1,
-  ),
-];
+      BoxShadow(
+        color: cyberpunkPrimary.withOpacity(0.3),
+        blurRadius: cyberpunkGlowMed,
+        spreadRadius: 1,
+      ),
+    ];
 
 /// Cyberpunk 次要按鈕光暈效果
 List<BoxShadow> get cyberpunkSecondaryGlow => [
-  BoxShadow(
-    color: cyberpunkSecondary.withOpacity(0.3),
-    blurRadius: cyberpunkGlowMed,
-    spreadRadius: 1,
-  ),
-];
+      BoxShadow(
+        color: cyberpunkSecondary.withOpacity(0.3),
+        blurRadius: cyberpunkGlowMed,
+        spreadRadius: 1,
+      ),
+    ];
 
 /// Cyberpunk 強調元素光暈效果
 List<BoxShadow> get cyberpunkAccentGlow => [
-  BoxShadow(
-    color: cyberpunkAccent.withOpacity(0.4),
-    blurRadius: cyberpunkGlowStrong,
-    spreadRadius: 2,
-  ),
-];
+      BoxShadow(
+        color: cyberpunkAccent.withOpacity(0.4),
+        blurRadius: cyberpunkGlowStrong,
+        spreadRadius: 2,
+      ),
+    ];
 
 /// Cyberpunk 警告光暈效果
 List<BoxShadow> get cyberpunkCautionGlow => [
-  BoxShadow(
-    color: cyberpunkCaution.withOpacity(0.5),
-    blurRadius: cyberpunkGlowStrong,
-    spreadRadius: 1,
-  ),
-];
+      BoxShadow(
+        color: cyberpunkCaution.withOpacity(0.5),
+        blurRadius: cyberpunkGlowStrong,
+        spreadRadius: 1,
+      ),
+    ];
 
 /// Cyberpunk 面板內陰影
 List<BoxShadow> get cyberpunkPanelShadow => [
-  BoxShadow(
-    color: cyberpunkBgDeep.withOpacity(0.8),
-    blurRadius: cyberpunkGlowSoft,
-    offset: const Offset(0, 2),
-  ),
-];
+      BoxShadow(
+        color: cyberpunkBgDeep.withOpacity(0.8),
+        blurRadius: cyberpunkGlowSoft,
+        offset: const Offset(0, 2),
+      ),
+    ];
 
 // =============================================================================
 // 📐 CYBERPUNK 邊框與圓角常數 📐

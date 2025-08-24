@@ -25,13 +25,13 @@ class Tetromino {
 
   /// 方塊類型與霓虹顏色對應表 - Cyberpunk 2077 風格
   static const Map<TetrominoType, Color> typeColors = {
-    TetrominoType.I: cyberpunkPrimary,     // I: 霓虹青色 #00E5FF (primary)
-    TetrominoType.J: Color(0xFF0066FF),    // J: 純藍霓虹 (深邃電藍)
-    TetrominoType.L: cyberpunkSecondary,   // L: 霓虹洋紅 #FF2ED1 (secondary)
-    TetrominoType.O: cyberpunkCaution,     // O: 賽博黃 #FCEE09 (警示霓虹)
-    TetrominoType.S: Color(0xFF00FF88),    // S: 霓虹綠 (青綠電光)
-    TetrominoType.T: cyberpunkAccent,      // T: 電光紫 #8A2BE2 (accent)
-    TetrominoType.Z: Color(0xFFFF0066),    // Z: 霓虹紅 (洋紅偏紅)
+    TetrominoType.I: cyberpunkPrimary, // I: 霓虹青色 #00E5FF (primary)
+    TetrominoType.J: Color(0xFF0066FF), // J: 純藍霓虹 (深邃電藍)
+    TetrominoType.L: cyberpunkSecondary, // L: 霓虹洋紅 #FF2ED1 (secondary)
+    TetrominoType.O: cyberpunkCaution, // O: 賽博黃 #FCEE09 (警示霓虹)
+    TetrominoType.S: Color(0xFF00FF88), // S: 霓虹綠 (青綠電光)
+    TetrominoType.T: cyberpunkAccent, // T: 電光紫 #8A2BE2 (accent)
+    TetrominoType.Z: Color(0xFFFF0066), // Z: 霓虹紅 (洋紅偏紅)
   };
 
   /// 初始形狀定義（北向，旋轉狀態0）

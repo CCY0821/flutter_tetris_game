@@ -40,6 +40,15 @@ dependencies:
   
   # Shared preferences for persistent storage (high scores, settings)
   shared_preferences: ^2.2.2
+  
+  # Ad platforms - Google AdMob for mobile, AdSense for web
+  google_mobile_ads: ^5.1.0
+  universal_html: ^2.2.4
+  
+  # Platform detection and logging
+  flutter_web_plugins:
+    sdk: flutter
+  logging: ^1.2.0
 
 dev_dependencies:
   flutter_test:

@@ -25,7 +25,7 @@ class AudioService {
       // 確保先停止現有播放器
       await _backgroundMusicPlayer.stop();
       await _sfxPlayer.stop();
-      
+
       // 重新設置音量
       await _backgroundMusicPlayer.setVolume(_musicVolume);
       await _sfxPlayer.setVolume(_sfxVolume);
