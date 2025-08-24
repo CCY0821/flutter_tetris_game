@@ -26,8 +26,11 @@ class SettingsPanel extends StatelessWidget {
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
-        width: 400,
-        constraints: const BoxConstraints(maxHeight: 600),
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+          maxWidth: 400,
+        ),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -78,27 +81,32 @@ class SettingsPanel extends StatelessWidget {
                   Icon(
                     Icons.settings,
                     color: GameTheme.textPrimary,
-                    size: 24,
+                    size: 20,
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'GAME SETTINGS',
-                    style: GameTheme.titleStyle.copyWith(
-                      fontSize: 20,
-                      letterSpacing: 2,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'GAME SETTINGS',
+                      style: GameTheme.titleStyle.copyWith(
+                        fontSize: 16,
+                        letterSpacing: 1.2,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const Spacer(),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
                     icon: Icon(
                       Icons.close,
                       color: GameTheme.textPrimary,
+                      size: 20,
                     ),
                     style: IconButton.styleFrom(
+                      minimumSize: const Size(36, 36),
+                      padding: EdgeInsets.zero,
                       backgroundColor: GameTheme.buttonDanger.withOpacity(0.2),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                     ),
                   ),
@@ -174,7 +182,8 @@ class SettingsPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingSection(String title, IconData icon, {required Widget child}) {
+  Widget _buildSettingSection(String title, IconData icon,
+      {required Widget child}) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -225,7 +234,7 @@ class SettingsPanel extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // 設置內容
           Padding(
             padding: const EdgeInsets.all(16),
@@ -276,8 +285,11 @@ class SettingsPanel extends StatelessWidget {
               color: cyberpunkPrimary,
             ),
           ),
-          content: SizedBox(
-            width: 400,
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.8,
+              maxHeight: MediaQuery.of(context).size.height * 0.6,
+            ),
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,7 +367,8 @@ class SettingsPanel extends StatelessWidget {
   }
 
   /// 建立 Cyberpunk 風格控制區段
-  Widget _buildCyberpunkControlSection(String title, List<Map<String, String>> controls) {
+  Widget _buildCyberpunkControlSection(
+      String title, List<Map<String, String>> controls) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
