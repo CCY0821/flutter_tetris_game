@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'game_logic.dart';
 import 'game_state.dart';
 import '../theme/game_theme.dart';
@@ -28,7 +29,12 @@ class _TouchControlsState extends State<TouchControls> {
   void _startRepeat(String action, VoidCallback callback) {
     if (widget.gameState.isPaused || widget.gameState.isGameOver) return;
 
-    _activeButton = action;
+    // 觸覺回饋 - 僅在開始時觸發一次
+    HapticFeedback.lightImpact();
+    
+    setState(() {
+      _activeButton = action;
+    });
     callback(); // 立即執行一次
     widget.onStateChange();
 
@@ -45,12 +51,18 @@ class _TouchControlsState extends State<TouchControls> {
   }
 
   void _stopRepeat() {
-    _activeButton = null;
+    setState(() {
+      _activeButton = null;
+    });
     _repeatTimer?.cancel();
   }
 
   void _executeAction(String action, VoidCallback callback) {
     if (widget.gameState.isPaused || widget.gameState.isGameOver) return;
+    
+    // 觸覺回饋 - 一般按鈕點擊
+    HapticFeedback.lightImpact();
+    
     callback();
     widget.onStateChange();
   }
@@ -75,198 +87,220 @@ class _TouchControlsState extends State<TouchControls> {
     // 方向鍵專用增強效果
     final bool isDPadButton = ['left', 'right', 'down'].contains(action);
 
-    // Neumorphism + Cyberpunk 配色 (霓虹藍底色)
-    const neumorphBase = Color(0xFF00D9FF); // 霓虹藍底色
-    const neumorphLight = Color(0xFF33E2FF); // 稍亮霓虹藍
-    const neumorphDark = Color(0xFF00A6CC); // 稍暗霓虹藍
+    // Cyberpunk 霓虹藍配色
+    const neumorphBase = Color(0xFF00D9FF); // 主霓虹藍
+    const neumorphLight = Color(0xFF33E2FF); // 亮霓虹藍
+    const neumorphDark = Color(0xFF00A6CC); // 暗霓虹藍
     const cyberpunkAccent = Color(0xFF00FF88); // 霓虹綠
     const cyberpunkPink = Color(0xFFFF0080); // 電光粉
 
+    // 鍵帽尺寸與位移計算
+    final bezelSize = size;
+    final keycapSize = size - 4; // 鍵帽略小於外框
+    final pressOffset = isDPadButton ? 5.0 : 4.0; // 下壓距離
+
     return Container(
-      width: size,
-      height: size,
+      width: bezelSize,
+      height: bezelSize,
       margin: const EdgeInsets.all(3),
-      child: AnimatedScale(
-        scale: isActive ? 0.98 : 1.0,
-        duration: Duration(milliseconds: isDPadButton ? 100 : 140),
-        curve: isDPadButton ? Curves.easeOutQuart : Curves.easeOutCubic,
-        child: AnimatedContainer(
-          duration: Duration(milliseconds: isDPadButton ? 100 : 140),
-          curve: isDPadButton ? Curves.easeOutQuart : Curves.easeOutCubic,
-          decoration: BoxDecoration(
-            // Neumorphism 霓虹藍底色漸變
-            gradient: isDisabled
-                ? LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      neumorphBase.withOpacity(0.3),
-                      neumorphDark.withOpacity(0.3),
-                    ],
-                  )
-                : LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: isActive
-                        ? [
-                            neumorphDark, // 按下時稍深
-                            neumorphBase,
-                          ]
-                        : [
-                            neumorphLight,
-                            neumorphBase,
-                          ],
-                  ),
-            borderRadius: BorderRadius.circular(isDPadButton ? 16 : 14),
-            // Neumorphism 雙陰影系統
-            boxShadow: isDisabled
-                ? [
-                    // 禁用狀態的基礎陰影
-                    const BoxShadow(
-                      color: Color(0x1A000000),
-                      offset: Offset(4, 4),
-                      blurRadius: 8,
-                    ),
-                  ]
-                : isActive
-                    ? [
-                        // Pressed 內陰影效果 (模擬)
-                        const BoxShadow(
-                          color: Color(0x33000000), // 內暗影
-                          offset: Offset(2, 2),
-                          blurRadius: 6,
-                        ),
-                        const BoxShadow(
-                          color: Color(0x0CFFFFFF), // 內高光
-                          offset: Offset(-1, -1),
-                          blurRadius: 4,
-                        ),
-                        // Cyberpunk 霓虹光環 (按下時)
-                        BoxShadow(
-                          color: isDPadButton 
-                              ? cyberpunkAccent.withOpacity(0.4)
-                              : cyberpunkPink.withOpacity(0.3),
-                          offset: const Offset(0, 0),
-                          blurRadius: isDPadButton ? 12 : 8,
-                          spreadRadius: -1,
-                        ),
-                      ]
-                    : [
-                        // Normal Neumorphism 外陰影
-                        const BoxShadow(
-                          color: Color(0x14FFFFFF), // 高光 (左上)
-                          offset: Offset(-4, -4),
-                          blurRadius: 10,
-                        ),
-                        const BoxShadow(
-                          color: Color(0x59000000), // 暗影 (右下) 
-                          offset: Offset(6, 6),
-                          blurRadius: 16,
-                        ),
-                        // Cyberpunk 霓虹外光環
-                        BoxShadow(
-                          color: isDPadButton 
-                              ? cyberpunkAccent.withOpacity(0.2)
-                              : Colors.white.withOpacity(0.15),
-                          offset: const Offset(0, 0),
-                          blurRadius: isDPadButton ? 20 : 16,
-                          spreadRadius: -2,
-                        ),
-                        // D-Pad 專用額外霓虹環
-                        if (isDPadButton)
-                          BoxShadow(
-                            color: cyberpunkPink.withOpacity(0.1),
-                            offset: const Offset(0, 0),
-                            blurRadius: 28,
-                            spreadRadius: -4,
-                          ),
-                      ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(isDPadButton ? 16 : 14),
-            child: InkWell(
+      child: Stack(
+        children: [
+          // 固定外框 (Bezel/Chassis)
+          Container(
+            width: bezelSize,
+            height: bezelSize,
+            decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(isDPadButton ? 16 : 14),
-              hoverColor: const Color(0xFF00D9FF).withOpacity(0.1),
-              splashColor: isDPadButton 
-                  ? const Color(0xFF00FF88).withOpacity(0.3)
-                  : const Color(0xFF00D9FF).withOpacity(0.3),
-              onTapDown: (!isDisabled && allowRepeat)
-                  ? (_) => _startRepeat(action, onPressed)
-                  : null,
-              onTapUp:
-                  (!isDisabled && allowRepeat) ? (_) => _stopRepeat() : null,
-              onTapCancel: (!isDisabled && allowRepeat) ? _stopRepeat : null,
-              onTap: (!isDisabled && !allowRepeat)
-                  ? () => _executeAction(action, onPressed)
-                  : null,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(isDPadButton ? 14 : 12),
-                  // Neumorphism 內部細節漸變
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: isActive
-                        ? [
-                            const Color(0x1A000000), // 按下時內陰影效果
-                            Colors.transparent,
-                            const Color(0x0CFFFFFF), // 微微高光
-                          ]
-                        : [
-                            const Color(0x0AFFFFFF), // 微高光
-                            Colors.transparent,
-                            const Color(0x0A000000), // 微陰影
-                          ],
-                    stops: const [0.0, 0.5, 1.0],
-                  ),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF1A1A1A), // 深灰框架
+                  Color(0xFF0D0D0D), // 更深底色
+                ],
+              ),
+              boxShadow: [
+                // 外框深色陰影
+                const BoxShadow(
+                  color: Color(0x80000000),
+                  offset: Offset(0, 2),
+                  blurRadius: 4,
                 ),
-                child: Center(
-                  child: Icon(
-                    icon,
-                    color: isDisabled
-                        ? neumorphBase.withOpacity(0.3)
-                        : isActive
-                            ? (isDPadButton 
-                                ? const Color(0xFF00FF88) // 按下時霓虹綠
-                                : Colors.white) // 按下時白色
-                            : Colors.black.withOpacity(0.8),
-                    size: size * (isDPadButton ? 0.45 : 0.4),
-                    shadows: isDisabled
-                        ? null
-                        : [
-                            // 主要光效
-                            Shadow(
-                              color: isActive
-                                  ? (isDPadButton
-                                      ? const Color(0xFF00FF88).withOpacity(0.8)
-                                      : Colors.white.withOpacity(0.9))
-                                  : Colors.black.withOpacity(0.6),
-                              blurRadius: isDPadButton ? 10 : 8,
-                              offset: const Offset(0, 0),
+              ],
+            ),
+          ),
+          
+          // 可動鍵帽 (Keycap)
+          AnimatedSlide(
+            offset: isActive ? Offset(0, pressOffset / bezelSize) : Offset.zero,
+            duration: Duration(milliseconds: isActive ? 100 : 5),
+            curve: isActive ? Curves.easeOutCubic : Curves.linear,
+            child: AnimatedScale(
+              scale: isActive ? 0.985 : 1.0,
+              duration: Duration(milliseconds: isActive ? 100 : 5),
+              curve: isActive ? Curves.easeOutCubic : Curves.linear,
+              child: Container(
+                margin: const EdgeInsets.all(2), // 鍵帽與外框間隙
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(isDPadButton ? 14 : 12),
+                  child: Container(
+                    width: keycapSize,
+                    height: keycapSize,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(isDPadButton ? 14 : 12),
+                      // Neumorphism 鍵帽漸變
+                      gradient: isDisabled
+                          ? LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                neumorphBase.withOpacity(0.3),
+                                neumorphDark.withOpacity(0.3),
+                              ],
+                            )
+                          : LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: isActive
+                                  ? [
+                                      neumorphDark,
+                                      neumorphBase.withOpacity(0.9),
+                                    ]
+                                  : [
+                                      neumorphLight,
+                                      neumorphBase,
+                                    ],
                             ),
-                            // 陰影層次
-                            const Shadow(
-                              color: Color(0x66000000),
-                              blurRadius: 2,
-                              offset: Offset(1, 1),
-                            ),
-                            // D-Pad 專用額外內霓虹光
-                            if (isDPadButton)
-                              Shadow(
-                                color: isActive
-                                    ? const Color(0xFF00FF88).withOpacity(0.6)
-                                    : const Color(0xFFFF0080).withOpacity(0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 0),
+                      // 外陰影系統 (不使用內陰影)
+                      boxShadow: isDisabled
+                          ? [
+                              const BoxShadow(
+                                color: Color(0x1A000000),
+                                offset: Offset(2, 2),
+                                blurRadius: 4,
                               ),
-                          ],
+                            ]
+                          : isActive
+                              ? [
+                                  // Pressed 狀態：縮短陰影
+                                  const BoxShadow(
+                                    color: Color(0x0AFFFFFF), // 高光
+                                    offset: Offset(-2, -2),
+                                    blurRadius: 6,
+                                  ),
+                                  const BoxShadow(
+                                    color: Color(0x4D000000), // 暗影
+                                    offset: Offset(3, 3),
+                                    blurRadius: 8,
+                                  ),
+                                  // 霓虹光環縮小
+                                  BoxShadow(
+                                    color: isDPadButton 
+                                        ? cyberpunkAccent.withOpacity(0.3)
+                                        : neumorphBase.withOpacity(0.4),
+                                    offset: const Offset(0, 0),
+                                    blurRadius: isDPadButton ? 12 : 10,
+                                  ),
+                                ]
+                              : [
+                                  // Normal 狀態：完整外陰影
+                                  const BoxShadow(
+                                    color: Color(0x14FFFFFF), // 高光 (左上)
+                                    offset: Offset(-4, -4),
+                                    blurRadius: 10,
+                                  ),
+                                  const BoxShadow(
+                                    color: Color(0x59000000), // 暗影 (右下)
+                                    offset: Offset(6, 6),
+                                    blurRadius: 16,
+                                  ),
+                                  // 霓虹外光環
+                                  BoxShadow(
+                                    color: isDPadButton 
+                                        ? cyberpunkAccent.withOpacity(0.35)
+                                        : neumorphBase.withOpacity(0.55),
+                                    offset: const Offset(0, 0),
+                                    blurRadius: isDPadButton ? 20 : 16,
+                                    spreadRadius: -2,
+                                  ),
+                                  // D-Pad 額外霓虹環
+                                  if (isDPadButton)
+                                    BoxShadow(
+                                      color: cyberpunkPink.withOpacity(0.15),
+                                      offset: const Offset(0, 0),
+                                      blurRadius: 28,
+                                      spreadRadius: -4,
+                                    ),
+                                ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(isDPadButton ? 14 : 12),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(isDPadButton ? 14 : 12),
+                        hoverColor: neumorphBase.withOpacity(0.1),
+                        splashColor: isDPadButton 
+                            ? cyberpunkAccent.withOpacity(0.3)
+                            : neumorphBase.withOpacity(0.3),
+                        onTapDown: (!isDisabled && allowRepeat)
+                            ? (_) => _startRepeat(action, onPressed)
+                            : null,
+                        onTapUp:
+                            (!isDisabled && allowRepeat) ? (_) => _stopRepeat() : null,
+                        onTapCancel: (!isDisabled && allowRepeat) ? _stopRepeat : null,
+                        onTap: (!isDisabled && !allowRepeat)
+                            ? () => _executeAction(action, onPressed)
+                            : null,
+                        child: Center(
+                          child: Icon(
+                            icon,
+                            color: isDisabled
+                                ? neumorphBase.withOpacity(0.3)
+                                : isActive
+                                    ? (isDPadButton 
+                                        ? cyberpunkAccent // 按下時霓虹綠
+                                        : Colors.white) // 按下時白色
+                                    : Colors.black.withOpacity(0.8),
+                            size: keycapSize * (isDPadButton ? 0.45 : 0.4),
+                            shadows: isDisabled
+                                ? null
+                                : [
+                                    // 主要圖示光效
+                                    Shadow(
+                                      color: isActive
+                                          ? (isDPadButton
+                                              ? cyberpunkAccent.withOpacity(0.9)
+                                              : Colors.white.withOpacity(0.9))
+                                          : Colors.black.withOpacity(0.6),
+                                      blurRadius: isDPadButton ? 8 : 6,
+                                      offset: const Offset(0, 0),
+                                    ),
+                                    // 圖示陰影層次
+                                    const Shadow(
+                                      color: Color(0x66000000),
+                                      blurRadius: 2,
+                                      offset: Offset(1, 1),
+                                    ),
+                                    // D-Pad 專用圖示內霓虹光
+                                    if (isDPadButton)
+                                      Shadow(
+                                        color: isActive
+                                            ? cyberpunkAccent.withOpacity(0.7)
+                                            : cyberpunkPink.withOpacity(0.4),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 0),
+                                      ),
+                                  ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
