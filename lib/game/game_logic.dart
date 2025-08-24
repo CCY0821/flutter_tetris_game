@@ -76,6 +76,9 @@ class GameLogic {
 
     if (clearedRows > 0) {
       gameState.score += scoringResult.points;
+      
+      // 即時檢查高分更新
+      _checkHighScoreRealtime();
 
       // 觸發震動特效
       gameState.triggerScreenShake();
@@ -146,8 +149,6 @@ class GameLogic {
       }
     } else {
       gameState.isGameOver = true;
-      // 檢查並更新高分
-      _checkAndUpdateHighScore();
       // 播放遊戲結束音效
       gameState.audioService.playSoundEffect('game_over');
       // 停止背景音樂
@@ -173,6 +174,9 @@ class GameLogic {
       // 軟降得分
       int softDropPoints = gameState.scoringService.calculateSoftDropScore(1);
       gameState.score += softDropPoints;
+      
+      // 即時檢查高分更新
+      _checkHighScoreRealtime();
     }
   }
 
@@ -192,6 +196,9 @@ class GameLogic {
     int hardDropPoints =
         gameState.scoringService.calculateHardDropScore(dropDistance);
     gameState.score += hardDropPoints;
+    
+    // 即時檢查高分更新
+    _checkHighScoreRealtime();
 
     // 立即鎖定方塊
     lockTetromino();
@@ -337,6 +344,15 @@ class GameLogic {
       // 更新 GameState 中的高分快取
       gameState.highScore = gameState.score;
       // TODO: 可以在這裡添加新紀錄的特效或音效
+    }
+  }
+
+  /// 即時檢查並更新高分（非阻塞，用於遊戲進行中）
+  void _checkHighScoreRealtime() {
+    final isNewRecord = HighScoreService.instance.checkAndUpdateHighScoreRealtime(gameState.score);
+    if (isNewRecord) {
+      // 立即更新 GameState 中的高分快取，觸發 UI 刷新
+      gameState.highScore = gameState.score;
     }
   }
 }

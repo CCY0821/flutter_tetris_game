@@ -32,6 +32,17 @@ class HighScoreService {
     return false; // 返回 false 表示沒有破紀錄
   }
 
+  /// 即時檢查並更新高分（非阻塞，用於遊戲進行中）
+  bool checkAndUpdateHighScoreRealtime(int newScore) {
+    if (newScore > _cachedHighScore) {
+      _cachedHighScore = newScore;
+      // 非阻塞背景寫入
+      _prefs?.setInt(_highScoreKey, newScore);
+      return true; // 返回 true 表示創造了新紀錄
+    }
+    return false; // 返回 false 表示沒有破紀錄
+  }
+
   /// 重置高分（用於測試或重置功能）
   Future<void> resetHighScore() async {
     _cachedHighScore = 0;
