@@ -75,141 +75,122 @@ class _TouchControlsState extends State<TouchControls> {
     // 方向鍵專用增強效果
     final bool isDPadButton = ['left', 'right', 'down'].contains(action);
 
+    // Neumorphism + Cyberpunk 配色 (霓虹藍底色)
+    const neumorphBase = Color(0xFF00D9FF); // 霓虹藍底色
+    const neumorphLight = Color(0xFF33E2FF); // 稍亮霓虹藍
+    const neumorphDark = Color(0xFF00A6CC); // 稍暗霓虹藍
+    const cyberpunkAccent = Color(0xFF00FF88); // 霓虹綠
+    const cyberpunkPink = Color(0xFFFF0080); // 電光粉
+
     return Container(
       width: size,
       height: size,
       margin: const EdgeInsets.all(3),
       child: AnimatedScale(
-        scale: isActive ? 0.95 : 1.0,
+        scale: isActive ? 0.98 : 1.0,
         duration: Duration(milliseconds: isDPadButton ? 100 : 140),
         curve: isDPadButton ? Curves.easeOutQuart : Curves.easeOutCubic,
         child: AnimatedContainer(
           duration: Duration(milliseconds: isDPadButton ? 100 : 140),
           curve: isDPadButton ? Curves.easeOutQuart : Curves.easeOutCubic,
-          transform: Matrix4.translationValues(
-              0, isActive ? (isDPadButton ? 2.0 : 3.0) : 0.0, 0),
           decoration: BoxDecoration(
+            // Neumorphism 霓虹藍底色漸變
             gradient: isDisabled
                 ? LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      cyberpunkBgDeep.withOpacity(0.6),
-                      cyberpunkBgDeep.withOpacity(0.4),
+                      neumorphBase.withOpacity(0.3),
+                      neumorphDark.withOpacity(0.3),
                     ],
                   )
-                : isActive
-                    ? LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: isDPadButton
-                            ? [
-                                cyberpunkSecondary,
-                                cyberpunkSecondary.withOpacity(0.9),
-                                cyberpunkAccent.withOpacity(0.6),
-                                cyberpunkBgDeep,
-                              ]
-                            : [
-                                cyberpunkSecondary,
-                                cyberpunkSecondary.withOpacity(0.8),
-                                cyberpunkBgDeep,
-                              ],
-                        stops: isDPadButton
-                            ? [0.0, 0.3, 0.7, 1.0]
-                            : [0.0, 0.5, 1.0],
-                      )
-                    : LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: isDPadButton
-                            ? [
-                                cyberpunkPrimary.withOpacity(0.95),
-                                cyberpunkPrimary.withOpacity(0.8),
-                                cyberpunkAccent.withOpacity(0.4),
-                                cyberpunkBgDeep,
-                              ]
-                            : [
-                                cyberpunkPrimary.withOpacity(0.9),
-                                cyberpunkPrimary.withOpacity(0.7),
-                                cyberpunkBgDeep,
-                              ],
-                        stops: isDPadButton
-                            ? [0.0, 0.4, 0.7, 1.0]
-                            : [0.0, 0.6, 1.0],
-                      ),
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isActive
+                        ? [
+                            neumorphDark, // 按下時稍深
+                            neumorphBase,
+                          ]
+                        : [
+                            neumorphLight,
+                            neumorphBase,
+                          ],
+                  ),
             borderRadius: BorderRadius.circular(isDPadButton ? 16 : 14),
-            border: Border.all(
-              color: isActive
-                  ? (isDPadButton ? cyberpunkAccent : cyberpunkSecondary)
-                  : isDisabled
-                      ? cyberpunkBgDeep.withOpacity(0.5)
-                      : cyberpunkPrimary,
-              width: isActive
-                  ? (isDPadButton ? 2.5 : 2)
-                  : (isDPadButton ? 1.5 : 1),
-            ),
+            // Neumorphism 雙陰影系統
             boxShadow: isDisabled
-                ? []
-                : [
-                    // 上方高光陰影
-                    BoxShadow(
-                      color:
-                          Colors.white.withOpacity(isDPadButton ? 0.3 : 0.25),
-                      blurRadius: isActive ? 2 : (isDPadButton ? 4 : 3),
-                      offset: const Offset(0, -1),
+                ? [
+                    // 禁用狀態的基礎陰影
+                    const BoxShadow(
+                      color: Color(0x1A000000),
+                      offset: Offset(4, 4),
+                      blurRadius: 8,
                     ),
-                    // 主要陰影
-                    BoxShadow(
-                      color: (isActive
-                              ? (isDPadButton
-                                  ? cyberpunkAccent
-                                  : cyberpunkSecondary)
-                              : cyberpunkPrimary)
-                          .withOpacity(
-                              isActive ? 0.2 : (isDPadButton ? 0.3 : 0.25)),
-                      blurRadius: isActive
-                          ? (isDPadButton ? 10 : 8)
-                          : (isDPadButton ? 16 : 14),
-                      spreadRadius: isActive ? 0 : (isDPadButton ? 2 : 1),
-                      offset: Offset(
-                          0,
-                          isActive
-                              ? (isDPadButton ? 2 : 3)
-                              : (isDPadButton ? 8 : 6)),
-                    ),
-                    // 霓虹外光
-                    BoxShadow(
-                      color: (isActive
-                              ? (isDPadButton
-                                  ? cyberpunkAccent
-                                  : cyberpunkSecondary)
-                              : cyberpunkPrimary)
-                          .withOpacity(isDPadButton ? 0.25 : 0.2),
-                      blurRadius: isActive
-                          ? (isDPadButton ? 18 : 16)
-                          : (isDPadButton ? 24 : 20),
-                      spreadRadius: -2,
-                      offset: const Offset(0, 0),
-                    ),
-                    // D-Pad 專用額外霓虹環
-                    if (isDPadButton)
-                      BoxShadow(
-                        color: (isActive ? cyberpunkAccent : cyberpunkPrimary)
-                            .withOpacity(0.15),
-                        blurRadius: isActive ? 28 : 32,
-                        spreadRadius: -4,
-                        offset: const Offset(0, 0),
-                      ),
-                  ],
+                  ]
+                : isActive
+                    ? [
+                        // Pressed 內陰影效果 (模擬)
+                        const BoxShadow(
+                          color: Color(0x33000000), // 內暗影
+                          offset: Offset(2, 2),
+                          blurRadius: 6,
+                        ),
+                        const BoxShadow(
+                          color: Color(0x0CFFFFFF), // 內高光
+                          offset: Offset(-1, -1),
+                          blurRadius: 4,
+                        ),
+                        // Cyberpunk 霓虹光環 (按下時)
+                        BoxShadow(
+                          color: isDPadButton 
+                              ? cyberpunkAccent.withOpacity(0.4)
+                              : cyberpunkPink.withOpacity(0.3),
+                          offset: const Offset(0, 0),
+                          blurRadius: isDPadButton ? 12 : 8,
+                          spreadRadius: -1,
+                        ),
+                      ]
+                    : [
+                        // Normal Neumorphism 外陰影
+                        const BoxShadow(
+                          color: Color(0x14FFFFFF), // 高光 (左上)
+                          offset: Offset(-4, -4),
+                          blurRadius: 10,
+                        ),
+                        const BoxShadow(
+                          color: Color(0x59000000), // 暗影 (右下) 
+                          offset: Offset(6, 6),
+                          blurRadius: 16,
+                        ),
+                        // Cyberpunk 霓虹外光環
+                        BoxShadow(
+                          color: isDPadButton 
+                              ? cyberpunkAccent.withOpacity(0.2)
+                              : Colors.white.withOpacity(0.15),
+                          offset: const Offset(0, 0),
+                          blurRadius: isDPadButton ? 20 : 16,
+                          spreadRadius: -2,
+                        ),
+                        // D-Pad 專用額外霓虹環
+                        if (isDPadButton)
+                          BoxShadow(
+                            color: cyberpunkPink.withOpacity(0.1),
+                            offset: const Offset(0, 0),
+                            blurRadius: 28,
+                            spreadRadius: -4,
+                          ),
+                      ],
           ),
           child: Material(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(isDPadButton ? 16 : 14),
             child: InkWell(
               borderRadius: BorderRadius.circular(isDPadButton ? 16 : 14),
-              hoverColor: cyberpunkPrimary.withOpacity(0.1),
-              splashColor: (isDPadButton ? cyberpunkAccent : cyberpunkSecondary)
-                  .withOpacity(0.3),
+              hoverColor: const Color(0xFF00D9FF).withOpacity(0.1),
+              splashColor: isDPadButton 
+                  ? const Color(0xFF00FF88).withOpacity(0.3)
+                  : const Color(0xFF00D9FF).withOpacity(0.3),
               onTapDown: (!isDisabled && allowRepeat)
                   ? (_) => _startRepeat(action, onPressed)
                   : null,
@@ -222,18 +203,21 @@ class _TouchControlsState extends State<TouchControls> {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(isDPadButton ? 14 : 12),
+                  // Neumorphism 內部細節漸變
                   gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withOpacity(isActive
-                          ? (isDPadButton ? 0.2 : 0.15)
-                          : (isDPadButton ? 0.12 : 0.08)),
-                      Colors.transparent,
-                      Colors.black.withOpacity(isActive
-                          ? (isDPadButton ? 0.15 : 0.1)
-                          : (isDPadButton ? 0.08 : 0.05)),
-                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isActive
+                        ? [
+                            const Color(0x1A000000), // 按下時內陰影效果
+                            Colors.transparent,
+                            const Color(0x0CFFFFFF), // 微微高光
+                          ]
+                        : [
+                            const Color(0x0AFFFFFF), // 微高光
+                            Colors.transparent,
+                            const Color(0x0A000000), // 微陰影
+                          ],
                     stops: const [0.0, 0.5, 1.0],
                   ),
                 ),
@@ -241,34 +225,38 @@ class _TouchControlsState extends State<TouchControls> {
                   child: Icon(
                     icon,
                     color: isDisabled
-                        ? cyberpunkBgDeep.withOpacity(0.5)
-                        : Colors.white,
+                        ? neumorphBase.withOpacity(0.3)
+                        : isActive
+                            ? (isDPadButton 
+                                ? const Color(0xFF00FF88) // 按下時霓虹綠
+                                : Colors.white) // 按下時白色
+                            : Colors.black.withOpacity(0.8),
                     size: size * (isDPadButton ? 0.45 : 0.4),
                     shadows: isDisabled
                         ? null
                         : [
+                            // 主要光效
                             Shadow(
                               color: isActive
                                   ? (isDPadButton
-                                      ? cyberpunkAccent.withOpacity(0.9)
-                                      : cyberpunkSecondary.withOpacity(0.8))
-                                  : (isDPadButton
-                                      ? cyberpunkPrimary.withOpacity(0.8)
-                                      : Colors.white.withOpacity(0.6)),
-                              blurRadius: isDPadButton ? 8 : 6,
+                                      ? const Color(0xFF00FF88).withOpacity(0.8)
+                                      : Colors.white.withOpacity(0.9))
+                                  : Colors.black.withOpacity(0.6),
+                              blurRadius: isDPadButton ? 10 : 8,
                               offset: const Offset(0, 0),
                             ),
-                            Shadow(
-                              color: Colors.black.withOpacity(0.4),
+                            // 陰影層次
+                            const Shadow(
+                              color: Color(0x66000000),
                               blurRadius: 2,
-                              offset: const Offset(1, 1),
+                              offset: Offset(1, 1),
                             ),
-                            // D-Pad 專用額外內發光
+                            // D-Pad 專用額外內霓虹光
                             if (isDPadButton)
                               Shadow(
                                 color: isActive
-                                    ? cyberpunkAccent.withOpacity(0.6)
-                                    : cyberpunkPrimary.withOpacity(0.4),
+                                    ? const Color(0xFF00FF88).withOpacity(0.6)
+                                    : const Color(0xFFFF0080).withOpacity(0.3),
                                 blurRadius: 12,
                                 offset: const Offset(0, 0),
                               ),
