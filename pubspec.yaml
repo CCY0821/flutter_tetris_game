@@ -37,6 +37,9 @@ dependencies:
   
   # Audio player for background music and sound effects
   audioplayers: ^5.2.1
+  
+  # Shared preferences for persistent storage (high scores, settings)
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

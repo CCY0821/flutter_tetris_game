@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/tetromino.dart';
 import '../services/audio_service.dart';
 import '../services/scoring_service.dart';
+import '../services/high_score_service.dart';
 import 'marathon_system.dart';
 
 class GameState {
@@ -28,6 +29,7 @@ class GameState {
   final ScoringService scoringService = ScoringService();
 
   int score = 0;
+  int highScore = 0;
   bool isGameOver = false;
   bool isPaused = false;
 
@@ -92,6 +94,12 @@ class GameState {
 
   Future<void> initializeAudio() async {
     await audioService.initialize();
+    await _loadHighScore();
+  }
+
+  Future<void> _loadHighScore() async {
+    await HighScoreService.instance.initialize();
+    highScore = HighScoreService.instance.highScore;
   }
 
   Future<void> startGame() async {
@@ -201,7 +209,7 @@ class GameState {
 
       // 取消現有的計時器
       _shakeTimer?.cancel();
-      
+
       // 400ms後重置狀態
       _shakeTimer = Timer(const Duration(milliseconds: 400), () {
         _isScreenShaking = false;
@@ -214,7 +222,7 @@ class GameState {
     // 取消震動計時器
     _shakeTimer?.cancel();
     _shakeTimer = null;
-    
+
     await audioService.dispose();
   }
 }

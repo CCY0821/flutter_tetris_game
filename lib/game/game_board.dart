@@ -79,12 +79,12 @@ class _GameBoardState extends State<GameBoard>
 
   void _initializeGame() async {
     gameState.initBoard(); // 先初始化遊戲板
-    
+
     // 設置震動回調
     gameState.setShakeCallback(() {
       triggerShakeAnimation();
     });
-    
+
     await gameState.initializeAudio();
     await _startGame();
   }
@@ -97,7 +97,7 @@ class _GameBoardState extends State<GameBoard>
 
       // 取消現有計時器
       _shakeTimer?.cancel();
-      
+
       // 400ms後停止震動
       _shakeTimer = Timer(const Duration(milliseconds: 400), () {
         if (mounted) {
@@ -343,7 +343,10 @@ class _GameBoardState extends State<GameBoard>
                               borderRadius: BorderRadius.circular(16),
                               // 🔮 HUD Border - 霓虹描邊與輕微外發光
                               border: Border.all(
-                                color: Color.lerp(cyberpunkPrimary, cyberpunkSecondary, 0.5)!, // cyan/magenta 混合
+                                color: Color.lerp(
+                                    cyberpunkPrimary,
+                                    cyberpunkSecondary,
+                                    0.5)!, // cyan/magenta 混合
                                 width: 1, // 1px 霓虹描邊
                               ),
                               boxShadow: [
@@ -421,7 +424,8 @@ class _GameBoardState extends State<GameBoard>
                           GameUIComponents.nextAndScorePanel(
                               gameState.nextTetromino,
                               gameState.score,
-                              gameState.nextTetrominos),
+                              gameState.nextTetrominos,
+                              gameState.highScore),
                           const SizedBox(height: 8),
 
                           // 遊戲狀態指示器 (緊貼NEXT面板，固定位置)

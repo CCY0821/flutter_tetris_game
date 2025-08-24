@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/tetromino.dart';
+import '../services/high_score_service.dart';
 import 'game_state.dart';
 import 'srs_system.dart';
 
@@ -145,6 +146,8 @@ class GameLogic {
       }
     } else {
       gameState.isGameOver = true;
+      // 檢查並更新高分
+      _checkAndUpdateHighScore();
       // 播放遊戲結束音效
       gameState.audioService.playSoundEffect('game_over');
       // 停止背景音樂
@@ -325,5 +328,15 @@ class GameLogic {
         !gameState.isPaused &&
         !gameState.isGameOver &&
         gameState.currentTetromino != null;
+  }
+
+  /// 檢查並更新高分
+  Future<void> _checkAndUpdateHighScore() async {
+    final isNewRecord = await HighScoreService.instance.updateHighScore(gameState.score);
+    if (isNewRecord) {
+      // 更新 GameState 中的高分快取
+      gameState.highScore = gameState.score;
+      // TODO: 可以在這裡添加新紀錄的特效或音效
+    }
   }
 }

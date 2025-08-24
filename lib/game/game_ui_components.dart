@@ -14,7 +14,7 @@ class GameUIComponents {
 
   // 合併的 NEXT 和 SCORE 組件
   static Widget nextAndScorePanel(
-      Tetromino? nextTetromino, int score, List<Tetromino> nextTetrominos) {
+      Tetromino? nextTetromino, int score, List<Tetromino> nextTetrominos, int highScore) {
     const previewSize = 6;
     const offsetX = 2;
     const offsetY = 2;
@@ -60,6 +60,32 @@ class GameUIComponents {
       ),
       child: Column(
         children: [
+          // High Score 區域
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'HIGH SCORE',
+                style: GameTheme.accentStyle.copyWith(
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                  color: cyberpunkAccent, // 霓虹綠用於最高分
+                ),
+              ),
+              Text(
+                '$highScore',
+                style: GameTheme.titleStyle.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.8,
+                  color: cyberpunkAccent, // 霓虹綠數字
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 6),
+
           // 分數區域
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -701,18 +727,22 @@ class GameUIComponents {
                       SliderTheme(
                         data: SliderTheme.of(context).copyWith(
                           activeTrackColor: GameTheme.accentBlue,
-                          inactiveTrackColor: GameTheme.gridLine.withOpacity(0.3),
+                          inactiveTrackColor:
+                              GameTheme.gridLine.withOpacity(0.3),
                           thumbColor: GameTheme.brightAccent,
                           overlayColor: GameTheme.accentBlue.withOpacity(0.2),
                           trackHeight: 4,
-                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8),
+                          thumbShape:
+                              RoundSliderThumbShape(enabledThumbRadius: 8),
                         ),
                         child: Slider(
                           value: AudioService().musicVolume,
-                          onChanged: AudioService().isMusicEnabled ? (value) {
-                            AudioService().setMusicVolume(value);
-                            setState(() {});
-                          } : null,
+                          onChanged: AudioService().isMusicEnabled
+                              ? (value) {
+                                  AudioService().setMusicVolume(value);
+                                  setState(() {});
+                                }
+                              : null,
                           min: 0.0,
                           max: 1.0,
                           divisions: 20,
@@ -723,9 +753,9 @@ class GameUIComponents {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // 音效控制
             Row(
               children: [
@@ -767,18 +797,22 @@ class GameUIComponents {
                       SliderTheme(
                         data: SliderTheme.of(context).copyWith(
                           activeTrackColor: GameTheme.accentBlue,
-                          inactiveTrackColor: GameTheme.gridLine.withOpacity(0.3),
+                          inactiveTrackColor:
+                              GameTheme.gridLine.withOpacity(0.3),
                           thumbColor: GameTheme.brightAccent,
                           overlayColor: GameTheme.accentBlue.withOpacity(0.2),
                           trackHeight: 4,
-                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8),
+                          thumbShape:
+                              RoundSliderThumbShape(enabledThumbRadius: 8),
                         ),
                         child: Slider(
                           value: AudioService().sfxVolume,
-                          onChanged: AudioService().isSfxEnabled ? (value) {
-                            AudioService().setSfxVolume(value);
-                            setState(() {});
-                          } : null,
+                          onChanged: AudioService().isSfxEnabled
+                              ? (value) {
+                                  AudioService().setSfxVolume(value);
+                                  setState(() {});
+                                }
+                              : null,
                           min: 0.0,
                           max: 1.0,
                           divisions: 20,
