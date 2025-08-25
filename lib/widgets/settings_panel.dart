@@ -5,7 +5,7 @@ import '../game/game_state.dart';
 import '../game/game_ui_components.dart';
 import 'cyberpunk_hud_tag.dart';
 
-class SettingsPanel extends StatelessWidget {
+class SettingsPanel extends StatefulWidget {
   final GameState gameState;
   final VoidCallback onGameModeToggle;
   final VoidCallback onGhostPieceToggle;
@@ -21,6 +21,11 @@ class SettingsPanel extends StatelessWidget {
     required this.gameContext,
   });
 
+  @override
+  State<SettingsPanel> createState() => _SettingsPanelState();
+}
+
+class _SettingsPanelState extends State<SettingsPanel> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -126,8 +131,11 @@ class SettingsPanel extends StatelessWidget {
                       'GAME MODE',
                       Icons.gamepad,
                       child: GameUIComponents.gameModeToggleButton(
-                        gameState.isMarathonMode,
-                        onGameModeToggle,
+                        widget.gameState.isMarathonMode,
+                        () {
+                          widget.onGameModeToggle();
+                          setState(() {}); // 立即刷新對話框狀態
+                        },
                       ),
                     ),
 
@@ -235,7 +243,7 @@ class SettingsPanel extends StatelessWidget {
 
   Widget _buildControlsButton() {
     return ElevatedButton(
-      onPressed: () => _showControlHelp(gameContext),
+      onPressed: () => _showControlHelp(widget.gameContext),
       style: GameTheme.primaryButtonStyle.copyWith(
         backgroundColor: WidgetStateProperty.all(
           GameTheme.accentBlue.withOpacity(0.8),
