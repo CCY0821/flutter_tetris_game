@@ -142,18 +142,6 @@ class SettingsPanel extends StatelessWidget {
 
                     const SizedBox(height: 20),
 
-                    // Ghost Piece 設置
-                    _buildSettingSection(
-                      'VISUAL AIDS',
-                      Icons.visibility,
-                      child: GameUIComponents.ghostPieceControlButton(
-                        gameState.isGhostPieceEnabled,
-                        onGhostPieceToggle,
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
                     // 控制說明
                     _buildSettingSection(
                       'CONTROLS',
