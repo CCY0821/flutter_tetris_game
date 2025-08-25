@@ -316,6 +316,13 @@ class _GameBoardState extends State<GameBoard>
   }
 
   void _showSettingsPanel() {
+    // 暫停遊戲和背景音樂（如果遊戲正在進行）
+    bool wasGameRunning = !gameState.isGameOver && !gameState.isPaused;
+    if (wasGameRunning) {
+      gameState.isPaused = true;
+      gameState.audioService.pauseBackgroundMusic();
+    }
+    
     showDialog(
       context: context,
       builder: (dialogContext) => SettingsPanel(
@@ -325,7 +332,18 @@ class _GameBoardState extends State<GameBoard>
         onStateChange: () => setState(() {}),
         gameContext: context,
       ),
-    );
+    ).then((_) {
+      // 設定面板關閉後，恢復遊戲狀態（如果之前在運行）
+      if (wasGameRunning) {
+        // 注意：不自動恢復遊戲，讓玩家手動決定
+        // 但要恢復背景音樂（如果音樂是啟用的）
+        if (gameState.audioService.isMusicEnabled && !gameState.isPaused) {
+          gameState.audioService.resumeBackgroundMusic();
+        }
+      }
+      // 觸發 UI 更新
+      setState(() {});
+    });
   }
 
   @override
