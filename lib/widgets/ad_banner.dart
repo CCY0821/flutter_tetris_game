@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import '../config/ad_config.dart';
 import '../services/ads/ad_factory.dart';
 import '../services/ads/ad_service_interface.dart';
+import '../services/ads/admob_service.dart';
 
 /// Unified banner ad widget that works across all platforms.
 /// 
@@ -20,18 +21,22 @@ class AdBanner extends StatefulWidget {
   /// Whether to show a debug indicator (for development)
   final bool showDebugInfo;
   
+  /// Optional callback to pause game when ad is clicked
+  final VoidCallback? onGamePauseRequested;
+  
   const AdBanner({
     super.key,
     this.onAdLoaded,
     this.onAdError,
     this.showDebugInfo = false,
+    this.onGamePauseRequested,
   });
   
   @override
   State<AdBanner> createState() => _AdBannerState();
 }
 
-class _AdBannerState extends State<AdBanner> {
+class _AdBannerState extends State<AdBanner> with WidgetsBindingObserver {
   static final Logger _logger = Logger('AdBanner');
   
   /// Ad service instance
@@ -44,7 +49,42 @@ class _AdBannerState extends State<AdBanner> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initializeAdService();
+  }
+  
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _adService?.dispose();
+    super.dispose();
+  }
+  
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    
+    _logger.info('App lifecycle state changed: $state');
+    
+    if (state == AppLifecycleState.resumed && _adService != null) {
+      _logger.info('App resumed - refreshing ad widget');
+      
+      // Check if the service has an onAppResumed method
+      if (_adService is AdMobService) {
+        (_adService as AdMobService).onAppResumed().then((_) {
+          // Force a rebuild after ad refresh is complete to ensure UI updates
+          if (mounted) {
+            _logger.info('Rebuilding AdBanner after ad refresh');
+            setState(() {});
+          }
+        });
+      } else {
+        // For other ad services, just force a rebuild
+        if (mounted) {
+          setState(() {});
+        }
+      }
+    }
   }
   
   /// Initialize the appropriate ad service for current platform.
@@ -72,6 +112,9 @@ class _AdBannerState extends State<AdBanner> {
       }
       
       final bool initialized = await _adService!.initialize();
+      
+      // Set up ad click callback to pause game
+      _adService!.setOnAdClickCallback(widget.onGamePauseRequested);
       
       if (mounted) {
         setState(() {
@@ -240,13 +283,5 @@ class _AdBannerState extends State<AdBanner> {
         ],
       ),
     );
-  }
-  
-  @override
-  void dispose() {
-    // Dispose ad service
-    _adService?.dispose();
-    _logger.fine('AdBanner disposed');
-    super.dispose();
   }
 }

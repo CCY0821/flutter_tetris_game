@@ -43,6 +43,11 @@ abstract class AdServiceInterface {
   
   /// Get the current platform name for logging purposes.
   String get platformName;
+  
+  /// Set callback to be called when ad is clicked (before navigation).
+  /// 
+  /// This allows the game to be paused before the ad opens external browser.
+  void setOnAdClickCallback(GamePauseCallback? callback);
 }
 
 /// Banner ad load state enumeration.
@@ -65,3 +70,6 @@ typedef AdEventCallback = void Function(String eventType, Map<String, dynamic> d
 
 /// Ad error callback for handling ad loading errors.
 typedef AdErrorCallback = void Function(String error, String? details);
+
+/// Callback function type for game pause requests from ad clicks.
+typedef GamePauseCallback = void Function();

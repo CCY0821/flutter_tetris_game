@@ -22,7 +22,7 @@ class GameBoard extends StatefulWidget {
 }
 
 class _GameBoardState extends State<GameBoard>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   double _calculateCellSize(BoxConstraints constraints) {
     // 響應式計算格子大小 - 左側區域約佔60%寬度
     final gameAreaWidth = constraints.maxWidth * 0.6 - 32; // 60%減去padding
@@ -45,6 +45,7 @@ class _GameBoardState extends State<GameBoard>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     gameState = GameState();
     gameLogic = GameLogic(gameState);
     inputHandler = InputHandler(
@@ -112,12 +113,51 @@ class _GameBoardState extends State<GameBoard>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _dropTimer?.cancel();
     _shakeTimer?.cancel();
     _shakeController.dispose();
     controllerHandler.dispose();
     gameState.dispose();
     super.dispose();
+  }
+  
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    
+    switch (state) {
+      case AppLifecycleState.resumed:
+        // 應用恢復時，如果遊戲正在進行但被暫停了，不要自動恢復
+        // 讓玩家手動決定是否繼續，這樣更安全
+        debugPrint('Game: App resumed, keeping current pause state');
+        break;
+        
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+        // 應用暫停或失去焦點時，自動暫停遊戲
+        if (!gameState.isGameOver && !gameState.isPaused) {
+          debugPrint('Game: Auto-pausing due to app state change');
+          gameState.isPaused = true;
+          gameState.audioService.pauseBackgroundMusic();
+          setState(() {});
+        }
+        break;
+        
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        break;
+    }
+  }
+
+  /// Handle ad click by pausing the game immediately
+  void _pauseGameForAdClick() {
+    if (!gameState.isGameOver && !gameState.isPaused) {
+      debugPrint('Game: Pausing for ad click');
+      gameState.isPaused = true;
+      gameState.audioService.pauseBackgroundMusic();
+      setState(() {});
+    }
   }
 
   Future<void> _startGame() async {
@@ -737,8 +777,9 @@ class _GameBoardState extends State<GameBoard>
           ),
           
           // 底部橫幅廣告 - 不影響遊戲佈局
-          const AdBanner(
+          AdBanner(
             showDebugInfo: true, // 開發模式顯示平台信息
+            onGamePauseRequested: _pauseGameForAdClick, // 廣告點擊時暫停遊戲
           ),
         ],
       ),

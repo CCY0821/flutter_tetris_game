@@ -35,6 +35,11 @@ class AdSenseService implements AdServiceInterface {
   @override
   bool get isAdsEnabled => AdConfig.adsEnabled && _isInitialized;
   
+  @override
+  void setOnAdClickCallback(GamePauseCallback? callback) {
+    // AdSense service placeholder - callback would be used in actual implementation
+  }
+  
   /// Initialize AdSense by loading the required JavaScript SDK.
   /// 
   /// Returns [true] if initialization successful, [false] otherwise.

@@ -26,6 +26,12 @@ class AdMobService implements AdServiceInterface {
   /// Retry counter for failed ad loads
   int _retryCount = 0;
   
+  /// Flag to track if ad needs refresh after app resume
+  bool _needsRefresh = false;
+  
+  /// Callback to pause game when ad is clicked
+  GamePauseCallback? _onAdClickCallback;
+  
   @override
   Logger get logger => _logger;
   
@@ -34,6 +40,11 @@ class AdMobService implements AdServiceInterface {
   
   @override
   bool get isAdsEnabled => AdConfig.adsEnabled && _isInitialized;
+  
+  @override
+  void setOnAdClickCallback(GamePauseCallback? callback) {
+    _onAdClickCallback = callback;
+  }
   
   /// Initialize AdMob SDK and configure settings.
   /// 
@@ -115,16 +126,24 @@ class AdMobService implements AdServiceInterface {
             _handleAdLoadFailure(error);
           },
           onAdOpened: (Ad ad) {
-            _logger.info('Banner ad opened');
+            _logger.info('Banner ad opened - user navigating to external content');
           },
           onAdClosed: (Ad ad) {
-            _logger.info('Banner ad closed');
+            _logger.info('Banner ad closed - user returned to app');
+            // 當用戶從廣告返回時，可以觸發遊戲狀態檢查
           },
           onAdImpression: (Ad ad) {
             _logger.fine('Banner ad impression recorded');
           },
           onAdClicked: (Ad ad) {
-            _logger.info('Banner ad clicked - CPC event');
+            _logger.info('Banner ad clicked - pausing game before navigation');
+            
+            // First: Pause the game immediately
+            _onAdClickCallback?.call();
+            
+            // Then: Log CPC event and mark for refresh
+            _logger.info('CPC event triggered - ad navigation will follow');
+            _needsRefresh = true;
           },
         ),
       );
@@ -190,6 +209,24 @@ class AdMobService implements AdServiceInterface {
     );
   }
   
+  /// Handle app resume event - refresh ad if needed
+  /// 
+  /// Call this method when the app resumes from background to ensure
+  /// ads are properly refreshed after external navigation.
+  Future<void> onAppResumed() async {
+    if (_isInitialized) {
+      _logger.info('App resumed - checking ad state');
+      
+      // Always refresh the ad after app resume to ensure clickability
+      // This is especially important after users return from ad clicks
+      if (_bannerAd != null) {
+        _logger.info('Refreshing banner ad after app resume to ensure clickability');
+        _needsRefresh = false;
+        await _loadBannerAd();
+      }
+    }
+  }
+  
   @override
   Future<void> dispose() async {
     _logger.info('Disposing AdMob service');
@@ -198,6 +235,7 @@ class AdMobService implements AdServiceInterface {
     _isInitialized = false;
     _loadState = AdLoadState.notInitialized;
     _retryCount = 0;
+    _needsRefresh = false;
     
     _logger.info('AdMob service disposed');
   }
