@@ -7,7 +7,6 @@ import 'cyberpunk_hud_tag.dart';
 
 class SettingsPanel extends StatefulWidget {
   final GameState gameState;
-  final VoidCallback onGameModeToggle;
   final VoidCallback onGhostPieceToggle;
   final VoidCallback onStateChange;
   final BuildContext gameContext;
@@ -15,7 +14,6 @@ class SettingsPanel extends StatefulWidget {
   const SettingsPanel({
     super.key,
     required this.gameState,
-    required this.onGameModeToggle,
     required this.onGhostPieceToggle,
     required this.onStateChange,
     required this.gameContext,
@@ -126,20 +124,6 @@ class _SettingsPanelState extends State<SettingsPanel> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 遊戲模式設置
-                    _buildSettingSection(
-                      'GAME MODE',
-                      Icons.gamepad,
-                      child: GameUIComponents.gameModeToggleButton(
-                        widget.gameState.isMarathonMode,
-                        () {
-                          widget.onGameModeToggle();
-                          setState(() {}); // 立即刷新對話框狀態
-                        },
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
 
                     // 音頻設置
                     _buildSettingSection(

@@ -44,14 +44,7 @@ class GameState {
   VoidCallback? _onShakeRequested;
   Timer? _shakeTimer;
 
-  // 遊戲模式
-  bool isMarathonMode = true; // 預設使用 Marathon 模式
-
-  // 速度系統相關
-  static const int baseSpeed = 500; // 起始速度 (毫秒)
-  static const int maxSpeed = 300; // 最高速度 (毫秒)
-  static const int speedIncrease = 20; // 每階段加速 (毫秒)
-  static const int scorePerLevel = 1000; // 每級所需分數
+  // 遊戲模式：固定使用 Marathon 模式
 
   void initBoard() {
     // 創建包含緩衝區的完整矩陣 (40行 x 10列)
@@ -128,48 +121,27 @@ class GameState {
 
   // 獲取當前遊戲速度 (毫秒)
   int get dropSpeed {
-    if (isMarathonMode) {
-      return marathonSystem.getDropInterval();
-    } else {
-      // 傳統速度系統
-      int level = score ~/ scorePerLevel;
-      int currentSpeed = baseSpeed - (level * speedIncrease);
-      return currentSpeed < maxSpeed ? maxSpeed : currentSpeed;
-    }
+    return marathonSystem.getDropInterval();
   }
 
   // 獲取當前速度等級
   int get speedLevel {
-    if (isMarathonMode) {
-      return marathonSystem.currentLevel;
-    } else {
-      return (score ~/ scorePerLevel) + 1;
-    }
+    return marathonSystem.currentLevel;
   }
 
-  // 獲取下一個速度等級所需分數
+  // 獲取下一個速度等級所需分數 (Marathon 模式不基於分數升級)
   int get nextLevelScore {
-    if (isMarathonMode) {
-      // Marathon 模式不基於分數升級
-      return score + 1000; // 顯示用的假值
-    } else {
-      int currentLevel = score ~/ scorePerLevel;
-      return (currentLevel + 1) * scorePerLevel;
-    }
+    return score + 1000; // 顯示用的假值
   }
 
-  // 獲取到下一個等級還需要的分數
+  // 獲取到下一個等級還需要的分數 (Marathon 模式不基於分數升級)
   int get scoreToNextLevel {
-    if (isMarathonMode) {
-      return 0; // Marathon 模式不基於分數升級
-    } else {
-      return nextLevelScore - score;
-    }
+    return 0;
   }
 
-  /// 更新消除行數（Marathon 模式用）
+  /// 更新消除行數
   void updateLinesCleared(int lines) {
-    if (isMarathonMode && lines > 0) {
+    if (lines > 0) {
       bool leveledUp = marathonSystem.updateLinesCleared(lines);
       if (leveledUp) {
         // 可以在這裡添加升級音效或特效
@@ -178,22 +150,15 @@ class GameState {
     }
   }
 
-  /// 切換遊戲模式
-  void toggleGameMode() {
-    isMarathonMode = !isMarathonMode;
-    if (isMarathonMode) {
-      marathonSystem.reset();
-    }
-  }
 
-  /// 獲取當前關卡進度（Marathon 模式用）
+  /// 獲取當前關卡進度
   double get levelProgress {
-    return isMarathonMode ? marathonSystem.levelProgress : 0.0;
+    return marathonSystem.levelProgress;
   }
 
-  /// 獲取到下一關的行數需求（Marathon 模式用）
+  /// 獲取到下一關的行數需求
   int get linesToNextLevel {
-    return isMarathonMode ? marathonSystem.linesToNextLevel : 0;
+    return marathonSystem.linesToNextLevel;
   }
 
   /// 切換Ghost piece顯示狀態

@@ -327,7 +327,6 @@ class _GameBoardState extends State<GameBoard>
       context: context,
       builder: (dialogContext) => SettingsPanel(
         gameState: gameState,
-        onGameModeToggle: () => setState(() => gameState.toggleGameMode()),
         onGhostPieceToggle: () => setState(() => gameState.toggleGhostPiece()),
         onStateChange: () => setState(() {}),
         gameContext: context,
@@ -597,8 +596,7 @@ class _GameBoardState extends State<GameBoard>
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceAround,
-                                  children: gameState.isMarathonMode
-                                      ? [
+                                  children: [
                                           Column(
                                             children: [
                                               Text('LINES',
@@ -624,54 +622,6 @@ class _GameBoardState extends State<GameBoard>
                                                           .textSecondary)),
                                               Text(
                                                   '${gameState.marathonSystem?.currentLevel ?? 1}',
-                                                  style: TextStyle(
-                                                      fontSize: 10,
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                            ],
-                                          ),
-                                          Column(
-                                            children: [
-                                              Text('COMBO',
-                                                  style: TextStyle(
-                                                      fontSize: 8,
-                                                      color: GameTheme
-                                                          .textSecondary)),
-                                              Text(
-                                                  '${gameState.scoringService.currentCombo}',
-                                                  style: TextStyle(
-                                                      fontSize: 10,
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                            ],
-                                          ),
-                                        ]
-                                      : [
-                                          Column(
-                                            children: [
-                                              Text('LEVEL',
-                                                  style: TextStyle(
-                                                      fontSize: 8,
-                                                      color: GameTheme
-                                                          .textSecondary)),
-                                              Text('${gameState.speedLevel}',
-                                                  style: TextStyle(
-                                                      fontSize: 10,
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                            ],
-                                          ),
-                                          Column(
-                                            children: [
-                                              Text('SPEED',
-                                                  style: TextStyle(
-                                                      fontSize: 8,
-                                                      color: GameTheme
-                                                          .textSecondary)),
-                                              Text('${gameState.dropSpeed}ms',
                                                   style: TextStyle(
                                                       fontSize: 10,
                                                       color: Colors.white,

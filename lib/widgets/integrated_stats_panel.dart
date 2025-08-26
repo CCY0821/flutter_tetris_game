@@ -8,13 +8,11 @@ import '../core/constants.dart';
 class IntegratedStatsPanel extends StatelessWidget {
   final MarathonSystem? marathonSystem;
   final ScoringService scoringService;
-  final bool isMarathonMode;
 
   const IntegratedStatsPanel({
     super.key,
     this.marathonSystem,
     required this.scoringService,
-    this.isMarathonMode = false,
   });
 
   @override
@@ -50,8 +48,8 @@ class IntegratedStatsPanel extends StatelessWidget {
           _buildHeader(),
           const SizedBox(height: 12),
 
-          // Marathon 模式資訊（如果啟用）
-          if (isMarathonMode && marathonSystem != null) ...[
+          // Marathon 模式資訊
+          if (marathonSystem != null) ...[
             _buildMarathonSection(),
             const SizedBox(height: 12),
             _buildDivider(),
@@ -70,14 +68,14 @@ class IntegratedStatsPanel extends StatelessWidget {
     return Row(
       children: [
         Icon(
-          isMarathonMode ? Icons.speed : Icons.flash_on,
-          color: isMarathonMode ? cyberpunkPrimary : cyberpunkAccent,
+          Icons.speed,
+          color: cyberpunkPrimary,
           size: 16,
         ),
         const SizedBox(width: 4),
         Expanded(
           child: Text(
-            isMarathonMode ? 'MARATHON' : 'COMBO',
+            'MARATHON',
             style: GameTheme.accentStyle.copyWith(
               fontSize: 11,
               letterSpacing: 1.5, // 標題字距
@@ -86,7 +84,7 @@ class IntegratedStatsPanel extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        if (isMarathonMode && marathonSystem != null) ...[
+        if (marathonSystem != null) ...[
           const Spacer(),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

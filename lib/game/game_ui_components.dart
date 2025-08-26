@@ -630,38 +630,6 @@ class GameUIComponents {
     );
   }
 
-  static Widget gameModeToggleButton(
-      bool isMarathonMode, VoidCallback onToggle) {
-    return ElevatedButton(
-      onPressed: onToggle,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isMarathonMode
-            ? GameTheme.buttonSuccess
-            : GameTheme.buttonSecondary,
-        foregroundColor: GameTheme.textPrimary,
-        elevation: 4,
-        shadowColor: (isMarathonMode
-                ? GameTheme.buttonSuccess
-                : GameTheme.buttonSecondary)
-            .withOpacity(0.4),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            isMarathonMode ? Icons.speed : Icons.videogame_asset,
-            size: 18,
-          ),
-          const SizedBox(width: 6),
-          Text(isMarathonMode ? 'Marathon' : 'Classic'),
-        ],
-      ),
-    );
-  }
 
   static Widget marathonInfoPanel(MarathonSystem marathonSystem) {
     return MarathonInfoPanel(marathonSystem: marathonSystem);
@@ -672,11 +640,10 @@ class GameUIComponents {
   }
 
   static Widget integratedStatsPanel(ScoringService scoringService,
-      MarathonSystem? marathonSystem, bool isMarathonMode) {
+      MarathonSystem? marathonSystem) {
     return IntegratedStatsPanel(
       scoringService: scoringService,
       marathonSystem: marathonSystem,
-      isMarathonMode: isMarathonMode,
     );
   }
 

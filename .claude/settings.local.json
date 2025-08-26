@@ -30,7 +30,13 @@
       "Bash(emulator:*)",
       "Bash(start fix_audio_emulator.bat)",
       "Bash(git clean:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(timeout 60 adb:*)",
+      "Bash(r)",
+      "Bash(adb shell input tap:*)",
+      "Bash(adb shell am start:*)",
+      "Bash(adb shell input keyevent:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "additionalDirectories": [
