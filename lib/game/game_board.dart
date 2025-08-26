@@ -80,15 +80,56 @@ class _GameBoardState extends State<GameBoard>
   }
 
   void _initializeGame() async {
-    gameState.initBoard(); // 先初始化遊戲板
-
     // 設置震動回調
     gameState.setShakeCallback(() {
       triggerShakeAnimation();
     });
 
     await gameState.initializeAudio();
-    await _startGame();
+    
+    // 嘗試從本地存儲載入遊戲狀態
+    bool stateLoaded = false;
+    try {
+      stateLoaded = await gameState.loadState();
+      if (stateLoaded) {
+        debugPrint('Game: Successfully loaded saved game state');
+        // 載入成功，保持暫停狀態並啟動定時器
+        _currentSpeed = gameState.dropSpeed;
+        if (!gameState.isGameOver) {
+          _startGameTimer();
+        }
+        setState(() {}); // 更新 UI
+        return;
+      }
+    } catch (e) {
+      debugPrint('Game: Error loading saved state: $e');
+      stateLoaded = false;
+    }
+    
+    // 無有有效的保存狀態，檢查是否需要初始化新遊戲
+    bool needsNewGame = false;
+    
+    if (gameState.board.isEmpty) {
+      // 棋盤未初始化，需要新遊戲
+      needsNewGame = true;
+    } else if (gameState.isGameOver) {
+      // 遊戲已結束，但不自動開始新遊戲，等待玩家手動開始
+      needsNewGame = false;
+    } else if (!gameState.isValidGameInProgress()) {
+      // 當前狀態無效，需要新遊戲
+      needsNewGame = true;
+    }
+    
+    if (needsNewGame) {
+      debugPrint('Game: Starting new game (no valid saved state)');
+      await _startGame();
+    } else {
+      // 保持當前狀態，只確保定時器正常
+      debugPrint('Game: Maintaining current game state');
+      if (!gameState.isGameOver) {
+        _startGameTimer();
+      }
+    }
   }
 
   // 公開的震動方法供外部調用
@@ -128,24 +169,54 @@ class _GameBoardState extends State<GameBoard>
     
     switch (state) {
       case AppLifecycleState.resumed:
-        // 應用恢復時，如果遊戲正在進行但被暫停了，不要自動恢復
-        // 讓玩家手動決定是否繼續，這樣更安全
-        debugPrint('Game: App resumed, keeping current pause state');
+        // 應用恢復時，保持暫停狀態，讓玩家手動決定是否繼續
+        debugPrint('Game: App resumed, maintaining pause state');
+        
+        // 確保定時器在遊戲進行中時正常運行 (但不自動恢復)
+        if (!gameState.isGameOver && _dropTimer?.isActive != true) {
+          debugPrint('Game: Restarting timer after app resume');
+          _startGameTimer();
+        }
+        
+        // 恢復背景音樂（僅當遊戲未暫停且音樂已啟用時）
+        if (!gameState.isGameOver && !gameState.isPaused && 
+            gameState.audioService.isMusicEnabled) {
+          debugPrint('Game: Resuming background music after app resume');
+          gameState.audioService.resumeBackgroundMusic();
+        }
         break;
         
       case AppLifecycleState.paused:
       case AppLifecycleState.inactive:
-        // 應用暫停或失去焦點時，自動暫停遊戲
-        if (!gameState.isGameOver && !gameState.isPaused) {
-          debugPrint('Game: Auto-pausing due to app state change');
-          gameState.isPaused = true;
-          gameState.audioService.pauseBackgroundMusic();
-          setState(() {});
+        // 應用暫停或失去焦點時，自動暫停遊戲並保存狀態
+        if (!gameState.isGameOver) {
+          if (!gameState.isPaused) {
+            debugPrint('Game: Auto-pausing due to app state change');
+            gameState.isPaused = true;
+            gameState.audioService.pauseBackgroundMusic();
+            setState(() {});
+          }
+          
+          // 保存遊戲狀態到本地存儲
+          if (gameState.isValidGameInProgress()) {
+            gameState.saveState().then((success) {
+              if (success) {
+                debugPrint('Game: State saved successfully on app pause');
+              } else {
+                debugPrint('Game: Failed to save state on app pause');
+              }
+            });
+          }
         }
         break;
         
       case AppLifecycleState.detached:
       case AppLifecycleState.hidden:
+        // 應用進程被系統終止前，確保保存狀態
+        if (!gameState.isGameOver && gameState.isValidGameInProgress()) {
+          gameState.saveState();
+          debugPrint('Game: State saved on app detached/hidden');
+        }
         break;
     }
   }
@@ -161,10 +232,13 @@ class _GameBoardState extends State<GameBoard>
   }
 
   Future<void> _startGame() async {
+    // 開始新遊戲時清除保存的狀態
+    await gameState.clearSavedState();
     await gameState.startGame();
     _currentSpeed = gameState.dropSpeed;
     _startGameTimer();
     setState(() {});
+    debugPrint('Game: New game started, saved state cleared');
   }
 
   void _startGameTimer() {

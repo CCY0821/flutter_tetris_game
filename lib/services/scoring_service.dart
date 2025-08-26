@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/material.dart';
 import '../models/tetromino.dart';
 
 /// 官方俄羅斯方塊得分系統服務
@@ -262,6 +263,22 @@ class ScoringService {
 
   /// 總消行數
   int get totalLinesCleared => _totalLinesCleared;
+
+  /// 恢復得分系統狀態（用於載入存檔）
+  void restoreState({
+    required int comboCount,
+    required bool lastWasDifficultClear,
+    required int totalLinesCleared,
+    required int maxCombo,
+    required Map<String, int> statistics,
+  }) {
+    _comboCount = comboCount;
+    _lastWasDifficultClear = lastWasDifficultClear;
+    _totalLinesCleared = totalLinesCleared;
+    _maxCombo = maxCombo;
+    _statistics = Map<String, int>.from(statistics);
+    debugPrint('Scoring service state restored: combo=$comboCount, maxCombo=$maxCombo, totalLines=$totalLinesCleared');
+  }
 }
 
 /// 得分結果類

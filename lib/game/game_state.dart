@@ -4,9 +4,23 @@ import '../models/tetromino.dart';
 import '../services/audio_service.dart';
 import '../services/scoring_service.dart';
 import '../services/high_score_service.dart';
+import '../core/game_persistence.dart';
 import 'marathon_system.dart';
 
 class GameState {
+  // 單例模式
+  static GameState? _instance;
+  static GameState get instance {
+    _instance ??= GameState._internal();
+    return _instance!;
+  }
+  
+  // 私有構造函數
+  GameState._internal();
+  
+  // 工廠構造函數
+  factory GameState() => instance;
+
   // 可見遊戲區域：10寬 x 20高
   static const int visibleRowCount = 20;
   static const int colCount = 10;
@@ -181,6 +195,115 @@ class GameState {
         _shakeTimer = null;
       });
     }
+  }
+
+  /// 保存當前遊戲狀態到本地存儲
+  Future<bool> saveState() async {
+    try {
+      final gameData = GameStateData(
+        board: List.from(board.map((row) => List<Color?>.from(row))),
+        currentTetromino: currentTetromino?.copy(),
+        nextTetromino: nextTetromino?.copy(),
+        nextTetrominos: nextTetrominos.map((t) => t.copy()).toList(),
+        score: score,
+        highScore: highScore,
+        isGameOver: isGameOver,
+        isPaused: isPaused,
+        isGhostPieceEnabled: isGhostPieceEnabled,
+        marathonCurrentLevel: marathonSystem.currentLevel,
+        marathonTotalLinesCleared: marathonSystem.totalLinesCleared,
+        marathonLinesInCurrentLevel: marathonSystem.linesInCurrentLevel,
+        scoringComboCount: scoringService.currentCombo,
+        scoringLastWasDifficultClear: scoringService.isBackToBackReady,
+        scoringTotalLinesCleared: scoringService.totalLinesCleared,
+        scoringMaxCombo: scoringService.maxCombo,
+        scoringStatistics: scoringService.getStatistics(),
+      );
+      return await GamePersistence.saveGameState(gameData);
+    } catch (e) {
+      debugPrint('Failed to save game state: $e');
+      return false;
+    }
+  }
+
+  /// 從本地存儲載入遊戲狀態
+  Future<bool> loadState() async {
+    try {
+      final gameData = await GamePersistence.loadGameState();
+      if (gameData == null || !gameData.isValidGameInProgress()) {
+        debugPrint('No valid saved game state found');
+        return false;
+      }
+
+      // 恢復基本遊戲狀態
+      board = List.from(gameData.board.map((row) => List<Color?>.from(row)));
+      currentTetromino = gameData.currentTetromino?.copy();
+      nextTetromino = gameData.nextTetromino?.copy();
+      nextTetrominos = gameData.nextTetrominos.map((t) => t.copy()).toList();
+      score = gameData.score;
+      highScore = gameData.highScore;
+      isGameOver = gameData.isGameOver;
+      isPaused = gameData.isPaused; // 保持暫停狀態
+      isGhostPieceEnabled = gameData.isGhostPieceEnabled;
+
+      // 恢復 Marathon 系統狀態
+      marathonSystem.setLevel(
+        gameData.marathonCurrentLevel,
+        totalLines: gameData.marathonTotalLinesCleared,
+      );
+      marathonSystem.setLinesInCurrentLevel(gameData.marathonLinesInCurrentLevel);
+
+      // 恢復 Scoring 服務狀態
+      scoringService.restoreState(
+        comboCount: gameData.scoringComboCount,
+        lastWasDifficultClear: gameData.scoringLastWasDifficultClear,
+        totalLinesCleared: gameData.scoringTotalLinesCleared,
+        maxCombo: gameData.scoringMaxCombo,
+        statistics: gameData.scoringStatistics,
+      );
+
+      debugPrint('Game state loaded successfully: $gameData');
+      return true;
+    } catch (e) {
+      debugPrint('Failed to load game state: $e');
+      return false;
+    }
+  }
+
+  /// 清除保存的遊戲狀態 (開始新遊戲時調用)
+  Future<void> clearSavedState() async {
+    await GamePersistence.clearGameState();
+    debugPrint('Saved game state cleared');
+  }
+
+  /// 檢查是否有有效的保存狀態
+  Future<bool> hasSavedState() async {
+    try {
+      final gameData = await GamePersistence.loadGameState();
+      return gameData != null && gameData.isValidGameInProgress();
+    } catch (e) {
+      debugPrint('Error checking saved state: $e');
+      return false;
+    }
+  }
+
+  /// 檢查當前遊戲狀態是否有效 (非全新狀態)
+  bool isValidGameInProgress() {
+    // 嚴格檢查：必須同時滿足以下條件才認為是有效的進行中遊戲
+    return !isGameOver && 
+           currentTetromino != null && 
+           nextTetromino != null && 
+           (score > 0 || marathonSystem.totalLinesCleared > 0 || !_isBoardEmpty());
+  }
+
+  /// 檢查棋盤是否為空
+  bool _isBoardEmpty() {
+    for (final row in board) {
+      for (final cell in row) {
+        if (cell != null) return false;
+      }
+    }
+    return true;
   }
 
   Future<void> dispose() async {

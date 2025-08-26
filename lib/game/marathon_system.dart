@@ -188,6 +188,13 @@ class MarathonSystem {
     _gravityCache.clear();
     _dropTimeCache.clear();
   }
+
+  /// 直接設定當前關卡的行數進度（用於載入存檔）
+  void setLinesInCurrentLevel(int lines) {
+    if (lines < 0) lines = 0;
+    if (lines >= linesPerLevel && !isMaxLevel) lines = linesPerLevel - 1;
+    _linesInCurrentLevel = lines;
+  }
 }
 
 /// Marathon 統計資訊
