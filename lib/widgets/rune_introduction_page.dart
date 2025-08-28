@@ -114,8 +114,6 @@ class RuneIntroductionPage extends StatelessWidget {
                     const SizedBox(height: 20),
                     _buildRuneCategory('TEMPORAL', cyberpunkAccent, _getTimeRunes()),
                     const SizedBox(height: 20),
-                    _buildRuneCategory('MANIPULATION', cyberpunkSecondary, _getManipulationRunes()),
-                    const SizedBox(height: 20),
                     _buildRuneCategory('ENHANCEMENT', cyberpunkSuccess, _getEnhancementRunes()),
                   ],
                 ),
@@ -352,6 +350,7 @@ class RuneIntroductionPage extends StatelessWidget {
 
   List<RuneData> _getClearRunes() {
     return [
+      // 1 格能量符文
       RuneData(
         name: 'Flame Burst',
         icon: Icons.local_fire_department,
@@ -361,6 +360,15 @@ class RuneIntroductionPage extends StatelessWidget {
         categoryColor: cyberpunkDanger,
       ),
       RuneData(
+        name: 'Thunder Strike',
+        icon: Icons.flash_on,
+        cost: 1,
+        cooldown: '8s',
+        description: '隨機清除 1 列（偏向高堆積區）',
+        categoryColor: cyberpunkDanger,
+      ),
+      // 3 格能量符文
+      RuneData(
         name: 'Dragon Roar',
         icon: Icons.whatshot,
         cost: 3,
@@ -369,11 +377,11 @@ class RuneIntroductionPage extends StatelessWidget {
         categoryColor: cyberpunkDanger,
       ),
       RuneData(
-        name: 'Thunder Strike',
-        icon: Icons.flash_on,
-        cost: 1,
+        name: 'Column Breaker',
+        icon: Icons.view_column,
+        cost: 3,
         cooldown: '8s',
-        description: '隨機清除 1 列（偏向高堆積區）',
+        description: '清除當前方塊影子所覆蓋的整條縱列',
         categoryColor: cyberpunkDanger,
       ),
     ];
@@ -403,12 +411,11 @@ class RuneIntroductionPage extends StatelessWidget {
         categoryColor: cyberpunkPrimary,
       ),
       RuneData(
-        name: 'Divine Shield',
-        icon: Icons.shield,
+        name: 'Gravity Reset',
+        icon: Icons.vertical_align_bottom,
         cost: 3,
         cooldown: '25s',
-        duration: '5s',
-        description: '5 秒內觸頂不會遊戲結束',
+        description: '整個棋盤壓縮到底部，消除所有空洞',
         categoryColor: cyberpunkPrimary,
       ),
     ];
@@ -437,18 +444,6 @@ class RuneIntroductionPage extends StatelessWidget {
     ];
   }
 
-  List<RuneData> _getManipulationRunes() {
-    return [
-      RuneData(
-        name: 'Element Morph',
-        icon: Icons.transform,
-        cost: 1,
-        cooldown: '8s',
-        description: '將當前方塊變換為隨機形狀',
-        categoryColor: cyberpunkSecondary,
-      ),
-    ];
-  }
 
   List<RuneData> _getEnhancementRunes() {
     return [
