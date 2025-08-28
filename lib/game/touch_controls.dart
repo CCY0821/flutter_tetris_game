@@ -91,6 +91,53 @@ class _TouchControlsState extends State<TouchControls> {
     super.dispose();
   }
 
+  Widget _buildRuneSlot(int index) {
+    const slotSize = 48.0;
+    const neumorphBase = Color(0xFF00D9FF);
+    const neumorphDark = Color(0xFF00A6CC);
+    const cyberpunkAccent = Color(0xFF00FF88);
+    
+    return Container(
+      width: slotSize,
+      height: slotSize,
+      margin: const EdgeInsets.symmetric(vertical: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            neumorphBase.withOpacity(0.1),
+            neumorphDark.withOpacity(0.15),
+          ],
+        ),
+        border: Border.all(
+          color: cyberpunkAccent.withOpacity(0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            offset: const Offset(2, 2),
+            blurRadius: 4,
+          ),
+          BoxShadow(
+            color: cyberpunkAccent.withOpacity(0.1),
+            offset: const Offset(0, 0),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: Center(
+        child: Icon(
+          Icons.add_circle_outline,
+          color: cyberpunkAccent.withOpacity(0.4),
+          size: 20,
+        ),
+      ),
+    );
+  }
+
   Widget _buildControlButton({
     required IconData icon,
     required String action,
@@ -364,69 +411,87 @@ class _TouchControlsState extends State<TouchControls> {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 旋轉按鈕和硬降按鈕
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          // 觸控按鈕區域 (置中)
+          Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              _buildControlButton(
-                icon: Icons.rotate_left,
-                action: 'rotate_ccw',
-                onPressed: widget.gameLogic.rotateCounterClockwise,
-                allowRepeat: false,
-                size: 56,
+              // 旋轉按鈕和硬降按鈕
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildControlButton(
+                    icon: Icons.rotate_left,
+                    action: 'rotate_ccw',
+                    onPressed: widget.gameLogic.rotateCounterClockwise,
+                    allowRepeat: false,
+                    size: 56,
+                  ),
+                  _buildControlButton(
+                    icon: Icons.rotate_right,
+                    action: 'rotate',
+                    onPressed: widget.gameLogic.rotate,
+                    allowRepeat: false,
+                    size: 60,
+                  ),
+                  _buildControlButton(
+                    icon: Icons.vertical_align_bottom,
+                    action: 'hard_drop',
+                    onPressed: widget.gameLogic.hardDrop,
+                    allowRepeat: false,
+                    size: 56,
+                  ),
+                ],
               ),
-              _buildControlButton(
-                icon: Icons.rotate_right,
-                action: 'rotate',
-                onPressed: widget.gameLogic.rotate,
-                allowRepeat: false,
-                size: 60,
-              ),
-              _buildControlButton(
-                icon: Icons.vertical_align_bottom,
-                action: 'hard_drop',
-                onPressed: widget.gameLogic.hardDrop,
-                allowRepeat: false,
-                size: 56,
+
+              const SizedBox(height: 6),
+
+              // 方向按鈕
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 左移
+                  _buildControlButton(
+                    icon: Icons.keyboard_arrow_left,
+                    action: 'left',
+                    onPressed: widget.gameLogic.moveLeft,
+                    allowRepeat: true,
+                    size: 56,
+                  ),
+
+                  // 快速下降
+                  _buildControlButton(
+                    icon: Icons.keyboard_arrow_down,
+                    action: 'down',
+                    onPressed: widget.gameLogic.moveDown,
+                    allowRepeat: true,
+                    size: 56,
+                  ),
+
+                  // 右移
+                  _buildControlButton(
+                    icon: Icons.keyboard_arrow_right,
+                    action: 'right',
+                    onPressed: widget.gameLogic.moveRight,
+                    allowRepeat: true,
+                    size: 56,
+                  ),
+                ],
               ),
             ],
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(width: 16),
 
-          // 方向按鈕
-          Row(
+          // 符文槽區域 (右側)
+          Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 左移
-              _buildControlButton(
-                icon: Icons.keyboard_arrow_left,
-                action: 'left',
-                onPressed: widget.gameLogic.moveLeft,
-                allowRepeat: true,
-                size: 56,
-              ),
-
-              // 快速下降
-              _buildControlButton(
-                icon: Icons.keyboard_arrow_down,
-                action: 'down',
-                onPressed: widget.gameLogic.moveDown,
-                allowRepeat: true,
-                size: 56,
-              ),
-
-              // 右移
-              _buildControlButton(
-                icon: Icons.keyboard_arrow_right,
-                action: 'right',
-                onPressed: widget.gameLogic.moveRight,
-                allowRepeat: true,
-                size: 56,
-              ),
+              _buildRuneSlot(0),
+              _buildRuneSlot(1),
+              _buildRuneSlot(2),
             ],
           ),
         ],
