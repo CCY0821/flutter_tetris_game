@@ -4,6 +4,7 @@ import '../core/constants.dart';
 import '../game/game_state.dart';
 import '../game/game_ui_components.dart';
 import 'cyberpunk_hud_tag.dart';
+import 'rune_introduction_page.dart';
 
 class SettingsPanel extends StatefulWidget {
   final GameState gameState;
@@ -143,6 +144,15 @@ class _SettingsPanelState extends State<SettingsPanel> {
 
                     const SizedBox(height: 20),
 
+                    // 符文介紹
+                    _buildSettingSection(
+                      'RUNE COMPENDIUM',
+                      Icons.auto_awesome,
+                      child: _buildRuneCompendiumButton(),
+                    ),
+
+                    const SizedBox(height: 20),
+
                     // 旋轉系統資訊
                     _buildSettingSection(
                       'ROTATION SYSTEM',
@@ -241,6 +251,34 @@ class _SettingsPanelState extends State<SettingsPanel> {
           Text('View Controls'),
         ],
       ),
+    );
+  }
+
+  Widget _buildRuneCompendiumButton() {
+    return ElevatedButton(
+      onPressed: () => _showRuneCompendium(context),
+      style: GameTheme.primaryButtonStyle.copyWith(
+        backgroundColor: WidgetStateProperty.all(
+          cyberpunkPrimary.withOpacity(0.8),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.auto_awesome, size: 18, color: Colors.white),
+          const SizedBox(width: 8),
+          Text('View Runes', style: TextStyle(color: Colors.white)),
+        ],
+      ),
+    );
+  }
+
+  void _showRuneCompendium(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const RuneIntroductionPage();
+      },
     );
   }
 
