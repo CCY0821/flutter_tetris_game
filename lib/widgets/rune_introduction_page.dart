@@ -106,15 +106,20 @@ class RuneIntroductionPage extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    _buildRuneCategory('CLEANSE', cyberpunkDanger, _getClearRunes()),
+                    _buildRuneCategory(
+                        'CLEANSE', cyberpunkDanger, _getClearRunes()),
                     const SizedBox(height: 20),
-                    _buildRuneCategory('FIELD CONTROL', cyberpunkWarning, _getFieldRunes()),
+                    _buildRuneCategory(
+                        'FIELD CONTROL', cyberpunkWarning, _getFieldRunes()),
                     const SizedBox(height: 20),
-                    _buildRuneCategory('SURVIVAL', cyberpunkPrimary, _getSurvivalRunes()),
+                    _buildRuneCategory(
+                        'SURVIVAL', cyberpunkPrimary, _getSurvivalRunes()),
                     const SizedBox(height: 20),
-                    _buildRuneCategory('TEMPORAL', cyberpunkAccent, _getTimeRunes()),
+                    _buildRuneCategory(
+                        'TEMPORAL', cyberpunkAccent, _getTimeRunes()),
                     const SizedBox(height: 20),
-                    _buildRuneCategory('ENHANCEMENT', cyberpunkSuccess, _getEnhancementRunes()),
+                    _buildRuneCategory('ENHANCEMENT', cyberpunkSuccess,
+                        _getEnhancementRunes()),
                   ],
                 ),
               ),
@@ -125,7 +130,8 @@ class RuneIntroductionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildRuneCategory(String categoryName, Color categoryColor, List<RuneData> runes) {
+  Widget _buildRuneCategory(
+      String categoryName, Color categoryColor, List<RuneData> runes) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -168,7 +174,7 @@ class RuneIntroductionPage extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // 符文列表
           Padding(
             padding: const EdgeInsets.all(12),
@@ -237,9 +243,9 @@ class RuneIntroductionPage extends StatelessWidget {
               size: 24,
             ),
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // 符文信息
           Expanded(
             child: Column(
@@ -330,16 +336,18 @@ class RuneIntroductionPage extends StatelessWidget {
               height: 12,
               margin: const EdgeInsets.only(left: 1),
               decoration: BoxDecoration(
-                color: index < cost 
-                  ? cyberpunkAccent
-                  : cyberpunkAccent.withOpacity(0.2),
+                color: index < cost
+                    ? cyberpunkAccent
+                    : cyberpunkAccent.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(2),
-                boxShadow: index < cost ? [
-                  BoxShadow(
-                    color: cyberpunkAccent.withOpacity(0.5),
-                    blurRadius: 2,
-                  ),
-                ] : null,
+                boxShadow: index < cost
+                    ? [
+                        BoxShadow(
+                          color: cyberpunkAccent.withOpacity(0.5),
+                          blurRadius: 2,
+                        ),
+                      ]
+                    : null,
               ),
             ),
           ),
@@ -443,7 +451,6 @@ class RuneIntroductionPage extends StatelessWidget {
       ),
     ];
   }
-
 
   List<RuneData> _getEnhancementRunes() {
     return [

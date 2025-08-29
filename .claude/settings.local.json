@@ -36,7 +36,14 @@
       "Bash(adb shell input tap:*)",
       "Bash(adb shell am start:*)",
       "Bash(adb shell input keyevent:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(adb:*)",
+      "Bash(start ms-settings:developers)",
+      "Bash(del \"C:\\Users\\G512LV\\flutter_tetris_game\\lib\\widgets\\energy_bar.dart\")",
+      "Bash(del \"C:\\Users\\G512LV\\flutter_tetris_game\\lib\\test_energy_bar_page.dart\")",
+      "Bash(del \"C:\\Users\\G512LV\\flutter_tetris_game\\test\\energy_bar_test.dart\")",
+      "WebFetch(domain:github.com)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "additionalDirectories": [

@@ -6,6 +6,11 @@ import '../services/scoring_service.dart';
 import '../services/high_score_service.dart';
 import '../core/game_persistence.dart';
 import 'marathon_system.dart';
+import 'rune_energy_manager.dart';
+import 'rune_system.dart';
+import 'rune_loadout.dart';
+import 'rune_events.dart';
+import 'monotonic_timer.dart';
 
 class GameState {
   // 單例模式
@@ -14,10 +19,10 @@ class GameState {
     _instance ??= GameState._internal();
     return _instance!;
   }
-  
+
   // 私有構造函數
   GameState._internal();
-  
+
   // 工廠構造函數
   factory GameState() => instance;
 
@@ -41,6 +46,11 @@ class GameState {
   final AudioService audioService = AudioService();
   final MarathonSystem marathonSystem = MarathonSystem();
   final ScoringService scoringService = ScoringService();
+  final RuneEnergyManager runeEnergyManager = RuneEnergyManager();
+
+  // 符文系統
+  final RuneLoadout runeLoadout = RuneLoadout();
+  late RuneSystem runeSystem;
 
   int score = 0;
   int highScore = 0;
@@ -102,6 +112,26 @@ class GameState {
   Future<void> initializeAudio() async {
     await audioService.initialize();
     await _loadHighScore();
+    _initializeRuneSystem();
+  }
+
+  /// 初始化符文系統
+  void _initializeRuneSystem() {
+    // 初始化事件總線
+    RuneEventBus.initialize();
+
+    // 創建符文系統實例
+    runeSystem = RuneSystem(runeLoadout);
+    runeSystem.setEnergyManager(runeEnergyManager);
+    runeSystem.setBoardChangeCallback(() {
+      // 棋盤變化通知，可以在此處觸發UI更新
+      debugPrint('GameState: Board changed by rune system');
+    });
+
+    // 啟動單調時鐘
+    MonotonicTimer.start();
+
+    debugPrint('GameState: Rune system initialized');
   }
 
   Future<void> _loadHighScore() async {
@@ -123,9 +153,13 @@ class GameState {
       nextTetrominos.add(Tetromino.random(colCount));
     }
 
-    // 重置 Marathon 系統和得分系統
+    // 重置 Marathon 系統、得分系統和符文能量系統
     marathonSystem.reset();
     scoringService.reset();
+    runeEnergyManager.reset();
+
+    // 重新載入符文配置（清除運行時狀態）
+    runeSystem.reloadLoadout();
 
     // 重新開始時播放背景音樂
     if (audioService.isMusicEnabled) {
@@ -153,7 +187,7 @@ class GameState {
     return 0;
   }
 
-  /// 更新消除行數
+  /// 更新消除行數 (自然消除，非法术清除)
   void updateLinesCleared(int lines) {
     if (lines > 0) {
       bool leveledUp = marathonSystem.updateLinesCleared(lines);
@@ -161,9 +195,12 @@ class GameState {
         // 可以在這裡添加升級音效或特效
         audioService.playSoundEffect('level_up'); // 如果有的話
       }
+
+      // 自然消除行数产生符文能量
+      // 注意: 法术造成的清除不可调用此方法
+      runeEnergyManager.addScore(lines);
     }
   }
-
 
   /// 獲取當前關卡進度
   double get levelProgress {
@@ -251,7 +288,8 @@ class GameState {
         gameData.marathonCurrentLevel,
         totalLines: gameData.marathonTotalLinesCleared,
       );
-      marathonSystem.setLinesInCurrentLevel(gameData.marathonLinesInCurrentLevel);
+      marathonSystem
+          .setLinesInCurrentLevel(gameData.marathonLinesInCurrentLevel);
 
       // 恢復 Scoring 服務狀態
       scoringService.restoreState(
@@ -290,10 +328,10 @@ class GameState {
   /// 檢查當前遊戲狀態是否有效 (非全新狀態)
   bool isValidGameInProgress() {
     // 嚴格檢查：必須同時滿足以下條件才認為是有效的進行中遊戲
-    return !isGameOver && 
-           currentTetromino != null && 
-           nextTetromino != null && 
-           (score > 0 || marathonSystem.totalLinesCleared > 0 || !_isBoardEmpty());
+    return !isGameOver &&
+        currentTetromino != null &&
+        nextTetromino != null &&
+        (score > 0 || marathonSystem.totalLinesCleared > 0 || !_isBoardEmpty());
   }
 
   /// 檢查棋盤是否為空
@@ -310,6 +348,11 @@ class GameState {
     // 取消震動計時器
     _shakeTimer?.cancel();
     _shakeTimer = null;
+
+    // 清理符文系統
+    runeSystem.dispose();
+    RuneEventBus.dispose();
+    MonotonicTimer.stop();
 
     await audioService.dispose();
   }

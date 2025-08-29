@@ -13,8 +13,8 @@ class GameUIComponents {
   static const double cellSize = 6;
 
   // 合併的 NEXT 和 SCORE 組件
-  static Widget nextAndScorePanel(
-      Tetromino? nextTetromino, int score, List<Tetromino> nextTetrominos, int highScore) {
+  static Widget nextAndScorePanel(Tetromino? nextTetromino, int score,
+      List<Tetromino> nextTetrominos, int highScore) {
     const previewSize = 6;
     const offsetX = 2;
     const offsetY = 2;
@@ -630,7 +630,6 @@ class GameUIComponents {
     );
   }
 
-
   static Widget marathonInfoPanel(MarathonSystem marathonSystem) {
     return MarathonInfoPanel(marathonSystem: marathonSystem);
   }
@@ -639,8 +638,8 @@ class GameUIComponents {
     return ComboStatsPanel(scoringService: scoringService);
   }
 
-  static Widget integratedStatsPanel(ScoringService scoringService,
-      MarathonSystem? marathonSystem) {
+  static Widget integratedStatsPanel(
+      ScoringService scoringService, MarathonSystem? marathonSystem) {
     return IntegratedStatsPanel(
       scoringService: scoringService,
       marathonSystem: marathonSystem,

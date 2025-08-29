@@ -12,6 +12,8 @@ import 'touch_controls.dart';
 import '../theme/game_theme.dart';
 import '../widgets/settings_panel.dart';
 import '../widgets/ad_banner.dart';
+import '../widgets/rune_energy_hud.dart';
+import '../core/pixel_snap.dart';
 import '../core/constants.dart';
 
 class GameBoard extends StatefulWidget {
@@ -86,7 +88,7 @@ class _GameBoardState extends State<GameBoard>
     });
 
     await gameState.initializeAudio();
-    
+
     // 嘗試從本地存儲載入遊戲狀態
     bool stateLoaded = false;
     try {
@@ -105,10 +107,10 @@ class _GameBoardState extends State<GameBoard>
       debugPrint('Game: Error loading saved state: $e');
       stateLoaded = false;
     }
-    
+
     // 無有有效的保存狀態，檢查是否需要初始化新遊戲
     bool needsNewGame = false;
-    
+
     if (gameState.board.isEmpty) {
       // 棋盤未初始化，需要新遊戲
       needsNewGame = true;
@@ -119,7 +121,7 @@ class _GameBoardState extends State<GameBoard>
       // 當前狀態無效，需要新遊戲
       needsNewGame = true;
     }
-    
+
     if (needsNewGame) {
       debugPrint('Game: Starting new game (no valid saved state)');
       await _startGame();
@@ -162,30 +164,31 @@ class _GameBoardState extends State<GameBoard>
     gameState.dispose();
     super.dispose();
   }
-  
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    
+
     switch (state) {
       case AppLifecycleState.resumed:
         // 應用恢復時，保持暫停狀態，讓玩家手動決定是否繼續
         debugPrint('Game: App resumed, maintaining pause state');
-        
+
         // 確保定時器在遊戲進行中時正常運行 (但不自動恢復)
         if (!gameState.isGameOver && _dropTimer?.isActive != true) {
           debugPrint('Game: Restarting timer after app resume');
           _startGameTimer();
         }
-        
+
         // 恢復背景音樂（僅當遊戲未暫停且音樂已啟用時）
-        if (!gameState.isGameOver && !gameState.isPaused && 
+        if (!gameState.isGameOver &&
+            !gameState.isPaused &&
             gameState.audioService.isMusicEnabled) {
           debugPrint('Game: Resuming background music after app resume');
           gameState.audioService.resumeBackgroundMusic();
         }
         break;
-        
+
       case AppLifecycleState.paused:
       case AppLifecycleState.inactive:
         // 應用暫停或失去焦點時，自動暫停遊戲並保存狀態
@@ -196,7 +199,7 @@ class _GameBoardState extends State<GameBoard>
             gameState.audioService.pauseBackgroundMusic();
             setState(() {});
           }
-          
+
           // 保存遊戲狀態到本地存儲
           if (gameState.isValidGameInProgress()) {
             gameState.saveState().then((success) {
@@ -209,7 +212,7 @@ class _GameBoardState extends State<GameBoard>
           }
         }
         break;
-        
+
       case AppLifecycleState.detached:
       case AppLifecycleState.hidden:
         // 應用進程被系統終止前，確保保存狀態
@@ -396,7 +399,7 @@ class _GameBoardState extends State<GameBoard>
       gameState.isPaused = true;
       gameState.audioService.pauseBackgroundMusic();
     }
-    
+
     showDialog(
       context: context,
       builder: (dialogContext) => SettingsPanel(
@@ -671,55 +674,52 @@ class _GameBoardState extends State<GameBoard>
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceAround,
                                   children: [
-                                          Column(
-                                            children: [
-                                              Text('LINES',
-                                                  style: TextStyle(
-                                                      fontSize: 8,
-                                                      color: GameTheme
-                                                          .textSecondary)),
-                                              Text(
-                                                  '${gameState.marathonSystem?.totalLinesCleared ?? 0}',
-                                                  style: TextStyle(
-                                                      fontSize: 10,
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                            ],
-                                          ),
-                                          Column(
-                                            children: [
-                                              Text('LEVEL',
-                                                  style: TextStyle(
-                                                      fontSize: 8,
-                                                      color: GameTheme
-                                                          .textSecondary)),
-                                              Text(
-                                                  '${gameState.marathonSystem?.currentLevel ?? 1}',
-                                                  style: TextStyle(
-                                                      fontSize: 10,
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                            ],
-                                          ),
-                                          Column(
-                                            children: [
-                                              Text('COMBO',
-                                                  style: TextStyle(
-                                                      fontSize: 8,
-                                                      color: GameTheme
-                                                          .textSecondary)),
-                                              Text(
-                                                  '${gameState.scoringService.currentCombo}',
-                                                  style: TextStyle(
-                                                      fontSize: 10,
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                            ],
-                                          ),
-                                        ],
+                                    Column(
+                                      children: [
+                                        Text('LINES',
+                                            style: TextStyle(
+                                                fontSize: 8,
+                                                color:
+                                                    GameTheme.textSecondary)),
+                                        Text(
+                                            '${gameState.marathonSystem?.totalLinesCleared ?? 0}',
+                                            style: TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                    Column(
+                                      children: [
+                                        Text('LEVEL',
+                                            style: TextStyle(
+                                                fontSize: 8,
+                                                color:
+                                                    GameTheme.textSecondary)),
+                                        Text(
+                                            '${gameState.marathonSystem?.currentLevel ?? 1}',
+                                            style: TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                    Column(
+                                      children: [
+                                        Text('COMBO',
+                                            style: TextStyle(
+                                                fontSize: 8,
+                                                color:
+                                                    GameTheme.textSecondary)),
+                                        Text(
+                                            '${gameState.scoringService.currentCombo}',
+                                            style: TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                  ],
                                 ),
 
                                 const SizedBox(height: 6),
@@ -798,6 +798,20 @@ class _GameBoardState extends State<GameBoard>
 
                           // 使用 Spacer 推到底部
                           const Spacer(),
+
+                          // 符文能量 HUD (右侧欄最下方，触控区上方)
+                          RuneEnergyHUD(
+                            energyStatus:
+                                gameState.runeEnergyManager.getStatus(),
+                            gap: snap(
+                                4.0, MediaQuery.of(context).devicePixelRatio),
+                          ),
+
+                          // 保留与触控按钮区的安全间距
+                          SizedBox(
+                            height: snap(
+                                12.0, MediaQuery.of(context).devicePixelRatio),
+                          ),
                         ],
                       ),
                     ),
@@ -817,7 +831,7 @@ class _GameBoardState extends State<GameBoard>
               onStateChange: () => setState(() {}),
             ),
           ),
-          
+
           // 底部橫幅廣告 - 不影響遊戲佈局
           AdBanner(
             showDebugInfo: true, // 開發模式顯示平台信息

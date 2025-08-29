@@ -7,24 +7,24 @@ import 'admob_service.dart';
 import 'adsense_service.dart';
 
 /// Factory class for creating platform-specific ad services.
-/// 
+///
 /// This factory implements the Factory pattern to create appropriate
 /// ad service instances based on the current platform. Follows OCP
 /// (Open/Closed Principle) by allowing new ad services to be added
 /// without modifying existing code.
 class AdFactory {
   static final Logger _logger = Logger('AdFactory');
-  
+
   /// Private constructor to prevent instantiation
   AdFactory._();
-  
+
   /// Create appropriate ad service based on current platform.
-  /// 
+  ///
   /// Returns:
   /// - [AdMobService] for Android and iOS platforms
   /// - [AdSenseService] for web platform
   /// - null if platform is not supported
-  /// 
+  ///
   /// The returned service must be initialized before use.
   static AdServiceInterface? createAdService() {
     try {
@@ -38,7 +38,8 @@ class AdFactory {
         _logger.info('Creating AdMob service for iOS platform');
         return AdMobService();
       } else {
-        _logger.warning('Unsupported platform for ads: ${Platform.operatingSystem}');
+        _logger.warning(
+            'Unsupported platform for ads: ${Platform.operatingSystem}');
         return null;
       }
     } catch (error, stackTrace) {
@@ -46,9 +47,9 @@ class AdFactory {
       return null;
     }
   }
-  
+
   /// Check if ads are supported on the current platform.
-  /// 
+  ///
   /// Returns true for web, Android, and iOS platforms.
   static bool get isAdSupportedPlatform {
     try {
@@ -57,7 +58,7 @@ class AdFactory {
       return false;
     }
   }
-  
+
   /// Get human-readable platform name for logging.
   static String get currentPlatformName {
     try {

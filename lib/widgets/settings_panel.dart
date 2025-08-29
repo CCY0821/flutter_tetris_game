@@ -5,6 +5,7 @@ import '../game/game_state.dart';
 import '../game/game_ui_components.dart';
 import 'cyberpunk_hud_tag.dart';
 import 'rune_introduction_page.dart';
+import 'rune_selection_page.dart';
 
 class SettingsPanel extends StatefulWidget {
   final GameState gameState;
@@ -125,7 +126,6 @@ class _SettingsPanelState extends State<SettingsPanel> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-
                     // 音頻設置
                     _buildSettingSection(
                       'AUDIO',
@@ -144,10 +144,19 @@ class _SettingsPanelState extends State<SettingsPanel> {
 
                     const SizedBox(height: 20),
 
+                    // 符文配置
+                    _buildSettingSection(
+                      'RUNE LOADOUT',
+                      Icons.auto_awesome,
+                      child: _buildRuneLoadoutButton(),
+                    ),
+
+                    const SizedBox(height: 20),
+
                     // 符文介紹
                     _buildSettingSection(
                       'RUNE COMPENDIUM',
-                      Icons.auto_awesome,
+                      Icons.menu_book,
                       child: _buildRuneCompendiumButton(),
                     ),
 
@@ -270,6 +279,37 @@ class _SettingsPanelState extends State<SettingsPanel> {
           Text('View Runes', style: TextStyle(color: Colors.white)),
         ],
       ),
+    );
+  }
+
+  Widget _buildRuneLoadoutButton() {
+    return ElevatedButton(
+      onPressed: () => _showRuneLoadout(context),
+      style: GameTheme.primaryButtonStyle.copyWith(
+        backgroundColor: WidgetStateProperty.all(
+          GameTheme.accentBlue.withOpacity(0.8),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.tune, size: 18),
+          const SizedBox(width: 8),
+          Text('Configure Loadout'),
+        ],
+      ),
+    );
+  }
+
+  void _showRuneLoadout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return RuneSelectionPage(
+          initialLoadout: widget.gameState.runeLoadout,
+          onLoadoutChanged: widget.onStateChange,
+        );
+      },
     );
   }
 

@@ -277,7 +277,8 @@ class ScoringService {
     _totalLinesCleared = totalLinesCleared;
     _maxCombo = maxCombo;
     _statistics = Map<String, int>.from(statistics);
-    debugPrint('Scoring service state restored: combo=$comboCount, maxCombo=$maxCombo, totalLines=$totalLinesCleared');
+    debugPrint(
+        'Scoring service state restored: combo=$comboCount, maxCombo=$maxCombo, totalLines=$totalLinesCleared');
   }
 }
 

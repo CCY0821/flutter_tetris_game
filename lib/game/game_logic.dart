@@ -3,6 +3,7 @@ import '../models/tetromino.dart';
 import '../services/high_score_service.dart';
 import 'game_state.dart';
 import 'srs_system.dart';
+import 'rune_system.dart';
 
 class GameLogic {
   final GameState gameState;
@@ -12,6 +13,29 @@ class GameLogic {
   String lastKickType = '';
 
   GameLogic(this.gameState);
+
+  /// 每邏輯幀更新（由 GameBoard 調用）
+  void onLogicFrameStart() {
+    // 更新符文系統狀態
+    gameState.runeSystem.onLogicFrameStart();
+  }
+
+  /// 執行符文系統的批處理操作
+  void executeRuneBatch() {
+    gameState.runeSystem.executeBatch(gameState.board);
+  }
+
+  /// 符文施法
+  RuneCastResult castRune(int slotIndex) {
+    // 創建遊戲上下文對象供符文使用
+    final gameContext = _GameContext(this);
+
+    return gameState.runeSystem.castRune(
+      slotIndex,
+      board: gameState.board,
+      gameContext: gameContext,
+    );
+  }
 
   bool canMove(Tetromino tetro,
       {int dx = 0, int dy = 0, List<Offset>? overrideShape}) {
@@ -76,7 +100,7 @@ class GameLogic {
 
     if (clearedRows > 0) {
       gameState.score += scoringResult.points;
-      
+
       // 即時檢查高分更新
       _checkHighScoreRealtime();
 
@@ -174,7 +198,7 @@ class GameLogic {
       // 軟降得分
       int softDropPoints = gameState.scoringService.calculateSoftDropScore(1);
       gameState.score += softDropPoints;
-      
+
       // 即時檢查高分更新
       _checkHighScoreRealtime();
     }
@@ -196,7 +220,7 @@ class GameLogic {
     int hardDropPoints =
         gameState.scoringService.calculateHardDropScore(dropDistance);
     gameState.score += hardDropPoints;
-    
+
     // 即時檢查高分更新
     _checkHighScoreRealtime();
 
@@ -339,7 +363,8 @@ class GameLogic {
 
   /// 檢查並更新高分
   Future<void> _checkAndUpdateHighScore() async {
-    final isNewRecord = await HighScoreService.instance.updateHighScore(gameState.score);
+    final isNewRecord =
+        await HighScoreService.instance.updateHighScore(gameState.score);
     if (isNewRecord) {
       // 更新 GameState 中的高分快取
       gameState.highScore = gameState.score;
@@ -349,10 +374,25 @@ class GameLogic {
 
   /// 即時檢查並更新高分（非阻塞，用於遊戲進行中）
   void _checkHighScoreRealtime() {
-    final isNewRecord = HighScoreService.instance.checkAndUpdateHighScoreRealtime(gameState.score);
+    final isNewRecord = HighScoreService.instance
+        .checkAndUpdateHighScoreRealtime(gameState.score);
     if (isNewRecord) {
       // 立即更新 GameState 中的高分快取，觸發 UI 刷新
       gameState.highScore = gameState.score;
     }
   }
+}
+
+/// 遊戲上下文類
+/// 為符文系統提供必要的遊戲邏輯訪問接口
+class _GameContext {
+  final GameLogic gameLogic;
+
+  _GameContext(this.gameLogic);
+
+  /// 獲取當前方塊
+  Tetromino? get currentTetromino => gameLogic.gameState.currentTetromino;
+
+  /// 計算影子方塊位置
+  Tetromino? calculateGhostPiece() => gameLogic.calculateGhostPiece();
 }

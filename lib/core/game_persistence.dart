@@ -59,7 +59,8 @@ class GamePersistence {
 
       // 版本檢查
       if (version != _stateVersion) {
-        debugPrint('Game state version mismatch. Expected: $_stateVersion, Got: $version');
+        debugPrint(
+            'Game state version mismatch. Expected: $_stateVersion, Got: $version');
         return null;
       }
 
@@ -97,15 +98,14 @@ class GamePersistence {
   static Map<String, dynamic> _gameDataToMap(GameStateData gameData) {
     return {
       'board': _boardToIntList(gameData.board),
-      'currentTetromino': gameData.currentTetromino != null 
-          ? _tetrominoToMap(gameData.currentTetromino!) 
+      'currentTetromino': gameData.currentTetromino != null
+          ? _tetrominoToMap(gameData.currentTetromino!)
           : null,
-      'nextTetromino': gameData.nextTetromino != null 
-          ? _tetrominoToMap(gameData.nextTetromino!) 
+      'nextTetromino': gameData.nextTetromino != null
+          ? _tetrominoToMap(gameData.nextTetromino!)
           : null,
-      'nextTetrominos': gameData.nextTetrominos
-          .map((t) => _tetrominoToMap(t))
-          .toList(),
+      'nextTetrominos':
+          gameData.nextTetrominos.map((t) => _tetrominoToMap(t)).toList(),
       'score': gameData.score,
       'highScore': gameData.highScore,
       'isGameOver': gameData.isGameOver,
@@ -131,21 +131,23 @@ class GamePersistence {
     final boardData = map['board'] as List<dynamic>;
     final board = _intListToBoard(boardData);
 
-    final currentTetrominoData = map['currentTetromino'] as Map<String, dynamic>?;
+    final currentTetrominoData =
+        map['currentTetromino'] as Map<String, dynamic>?;
     final nextTetrominoData = map['nextTetromino'] as Map<String, dynamic>?;
     final nextTetrominosData = map['nextTetrominos'] as List<dynamic>;
 
     final marathonData = map['marathonSystem'] as Map<String, dynamic>;
     final scoringData = map['scoringService'] as Map<String, dynamic>;
-    final scoringStats = Map<String, int>.from(scoringData['statistics'] as Map);
+    final scoringStats =
+        Map<String, int>.from(scoringData['statistics'] as Map);
 
     return GameStateData(
       board: board,
-      currentTetromino: currentTetrominoData != null 
-          ? _tetrominoFromMap(currentTetrominoData) 
+      currentTetromino: currentTetrominoData != null
+          ? _tetrominoFromMap(currentTetrominoData)
           : null,
-      nextTetromino: nextTetrominoData != null 
-          ? _tetrominoFromMap(nextTetrominoData) 
+      nextTetromino: nextTetrominoData != null
+          ? _tetrominoFromMap(nextTetrominoData)
           : null,
       nextTetrominos: nextTetrominosData
           .cast<Map<String, dynamic>>()
@@ -160,7 +162,8 @@ class GamePersistence {
       marathonTotalLinesCleared: marathonData['totalLinesCleared'] as int,
       marathonLinesInCurrentLevel: marathonData['linesInCurrentLevel'] as int,
       scoringComboCount: scoringData['comboCount'] as int,
-      scoringLastWasDifficultClear: scoringData['lastWasDifficultClear'] as bool,
+      scoringLastWasDifficultClear:
+          scoringData['lastWasDifficultClear'] as bool,
       scoringTotalLinesCleared: scoringData['totalLinesCleared'] as int,
       scoringMaxCombo: scoringData['maxCombo'] as int,
       scoringStatistics: scoringStats,
@@ -169,19 +172,21 @@ class GamePersistence {
 
   /// 將棋盤轉換為整數列表
   static List<List<int>> _boardToIntList(List<List<Color?>> board) {
-    return board.map((row) => 
-      row.map((color) => color == null ? -1 : (_colorToInt[color] ?? 0))
-         .toList()
-    ).toList();
+    return board
+        .map((row) => row
+            .map((color) => color == null ? -1 : (_colorToInt[color] ?? 0))
+            .toList())
+        .toList();
   }
 
   /// 從整數列表還原棋盤
   static List<List<Color?>> _intListToBoard(List<dynamic> intList) {
-    return intList.map((row) => 
-      (row as List<dynamic>).map((colorInt) => 
-        colorInt == -1 ? null : _intToColor[colorInt as int]
-      ).toList()
-    ).toList();
+    return intList
+        .map((row) => (row as List<dynamic>)
+            .map((colorInt) =>
+                colorInt == -1 ? null : _intToColor[colorInt as int])
+            .toList())
+        .toList();
   }
 
   /// 將 Tetromino 轉換為 Map
@@ -201,7 +206,7 @@ class GamePersistence {
     tetromino.x = map['x'] as int;
     tetromino.y = map['y'] as int;
     tetromino.rotation = map['rotation'] as int;
-    
+
     // 需要根據旋轉狀態重新計算 shape
     // 這裡簡化處理，假設會在載入後重新計算正確的 shape
     return tetromino;
@@ -220,12 +225,12 @@ class GameStateData {
   final bool isGameOver;
   final bool isPaused;
   final bool isGhostPieceEnabled;
-  
+
   // Marathon System 狀態
   final int marathonCurrentLevel;
   final int marathonTotalLinesCleared;
   final int marathonLinesInCurrentLevel;
-  
+
   // Scoring Service 狀態
   final int scoringComboCount;
   final bool scoringLastWasDifficultClear;
@@ -256,10 +261,10 @@ class GameStateData {
   /// 檢查遊戲狀態是否有效 (非新遊戲狀態)
   bool isValidGameInProgress() {
     // 嚴格檢查：必須同時滿足以下條件才認為是有效的進行中遊戲
-    return !isGameOver && 
-           currentTetromino != null && 
-           nextTetromino != null && 
-           (score > 0 || marathonTotalLinesCleared > 0 || !_isBoardEmpty());
+    return !isGameOver &&
+        currentTetromino != null &&
+        nextTetromino != null &&
+        (score > 0 || marathonTotalLinesCleared > 0 || !_isBoardEmpty());
   }
 
   /// 檢查棋盤是否為空
@@ -275,7 +280,7 @@ class GameStateData {
   @override
   String toString() {
     return 'GameStateData(score: $score, level: $marathonCurrentLevel, '
-           'lines: $marathonTotalLinesCleared, gameOver: $isGameOver, '
-           'paused: $isPaused, hasCurrentPiece: ${currentTetromino != null})';
+        'lines: $marathonTotalLinesCleared, gameOver: $isGameOver, '
+        'paused: $isPaused, hasCurrentPiece: ${currentTetromino != null})';
   }
 }

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'game/game_board.dart';
+import 'game/monotonic_timer.dart';
 import 'theme/game_theme.dart';
 import 'core/constants.dart';
 import 'widgets/scanline_overlay.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // 設置系統UI樣式
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
@@ -15,7 +16,7 @@ void main() {
     systemNavigationBarColor: Colors.transparent,
     systemNavigationBarIconBrightness: Brightness.light,
   ));
-  
+
   runApp(const MyApp());
 }
 
@@ -27,23 +28,25 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-  
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
-  
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
-  
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    
+
+    // 更新單調時鐘狀態
+    MonotonicTimer.handleAppLifecycle(state);
+
     switch (state) {
       case AppLifecycleState.resumed:
         // 應用從背景恢復時，確保遊戲狀態正確
