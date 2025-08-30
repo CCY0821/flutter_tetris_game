@@ -29,11 +29,63 @@ flutter build apk
 ```
 
 ## Recent Features (based on git history)
+- **Rune System**: Complete rune system with energy management and spell casting
+- **Rune Configuration Persistence**: Save/load rune loadouts across app restarts
+- **Rune UI**: Rune slots that light up when energy is sufficient and respond to clicks
+- **Energy System**: Rune energy bars that fill through line clearing
 - Next piece display functionality
 - Game pause/restart mechanics
 - Game Over detection and alerts
 - Scoring system with combo mechanics
 - Various bug fixes and improvements
+
+## Known Issues and Solutions
+
+### Rune System Debugging (SOLVED - Aug 30, 2025)
+**Problem**: Rune slots not lighting up despite full energy bars, clicking had no response.
+
+**Root Cause**: 
+- Rune loadout configuration was never persisted to storage
+- RuneSystem always initialized with empty slots (runeType: null)
+- Missing synchronization between rune selection and game state
+
+**Solution Implemented**:
+1. **Added Rune Persistence** (`lib/core/game_persistence.dart`):
+   - `saveRuneLoadout()`, `loadRuneLoadout()`, `clearRuneLoadout()`
+   - SharedPreferences with version control
+   - Complete error handling and debug logging
+
+2. **Fixed Game State Initialization** (`lib/game/game_state.dart`):
+   - Added `_loadRuneLoadout()` called during startup
+   - Added `saveRuneLoadout()` to save changes and reload system
+   - Correct initialization order: audio → high score → rune loadout → rune system
+   - Added UI update callback mechanism for energy changes
+
+3. **Enhanced Rune System** (`lib/game/rune_system.dart`):
+   - Improved slot initialization debug output
+   - Changed throttling from frame-based to time-based (250ms)
+   - Added `reloadLoadout()` for configuration changes
+
+4. **Updated Touch Controls** (`lib/game/touch_controls.dart`):
+   - Added rune system initialization safety check
+   - Enhanced energy checking logic
+   - Comprehensive debug logging
+
+5. **Modified Settings Panel** (`lib/widgets/settings_panel.dart`):
+   - Updated rune selection callback to auto-save and reload
+
+**Verification**:
+- ✅ Rune slots load with correct runeTypes (not null)
+- ✅ Slots light up when energy is sufficient (ready state)
+- ✅ Clicking consumes energy and casts spells correctly
+- ✅ Configuration persists across app restarts
+- ✅ Real-time UI updates when energy changes
+
+**Debug Pattern for Future Issues**:
+1. Check logs for "RuneSystem: Initializing slots..."
+2. Look for "runeType: null" vs actual rune types
+3. Verify "GamePersistence: Rune loadout loaded/saved" messages
+4. Monitor slot states: empty vs ready vs cooling_down
 
 ## Guidelines
 - Follow Flutter/Dart conventions and best practices
