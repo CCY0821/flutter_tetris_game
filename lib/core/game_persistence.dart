@@ -2,12 +2,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/tetromino.dart';
+import '../game/rune_loadout.dart';
 
 /// 遊戲狀態持久化工具類
 /// 負責將遊戲狀態序列化到本地存儲，並在需要時恢復
 class GamePersistence {
   static const String _gameStateKey = 'tetris_game_state';
+  static const String _runeLoadoutKey = 'tetris_rune_loadout';
   static const int _stateVersion = 1;
+  static const int _runeLoadoutVersion = 1;
 
   /// 顏色到整數的映射表 (用於序列化)
   static final Map<Color, int> _colorToInt = {
@@ -210,6 +213,78 @@ class GamePersistence {
     // 需要根據旋轉狀態重新計算 shape
     // 這裡簡化處理，假設會在載入後重新計算正確的 shape
     return tetromino;
+  }
+
+  /// 保存符文配置
+  static Future<bool> saveRuneLoadout(RuneLoadout loadout) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final loadoutMap = {
+        'version': _runeLoadoutVersion,
+        'loadout': loadout.toJson(),
+      };
+      final jsonString = jsonEncode(loadoutMap);
+      final result = await prefs.setString(_runeLoadoutKey, jsonString);
+      debugPrint('GamePersistence: Rune loadout saved - $loadout');
+      return result;
+    } catch (e) {
+      debugPrint('Failed to save rune loadout: $e');
+      return false;
+    }
+  }
+
+  /// 載入符文配置
+  static Future<RuneLoadout?> loadRuneLoadout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonString = prefs.getString(_runeLoadoutKey);
+      if (jsonString == null) {
+        debugPrint('GamePersistence: No saved rune loadout found');
+        return null;
+      }
+
+      final loadoutMap = jsonDecode(jsonString) as Map<String, dynamic>;
+      final version = loadoutMap['version'] as int?;
+
+      // 版本檢查
+      if (version != _runeLoadoutVersion) {
+        debugPrint(
+            'Rune loadout version mismatch. Expected: $_runeLoadoutVersion, Got: $version');
+        return null;
+      }
+
+      final loadoutData = loadoutMap['loadout'] as Map<String, dynamic>;
+      final loadout = RuneLoadout.fromJson(loadoutData);
+      debugPrint('GamePersistence: Rune loadout loaded - $loadout');
+      return loadout;
+    } catch (e) {
+      debugPrint('Failed to load rune loadout: $e');
+      return null;
+    }
+  }
+
+  /// 清除保存的符文配置
+  static Future<bool> clearRuneLoadout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final result = await prefs.remove(_runeLoadoutKey);
+      debugPrint('GamePersistence: Rune loadout cleared');
+      return result;
+    } catch (e) {
+      debugPrint('Failed to clear rune loadout: $e');
+      return false;
+    }
+  }
+
+  /// 檢查是否有保存的符文配置
+  static Future<bool> hasSavedRuneLoadout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.containsKey(_runeLoadoutKey);
+    } catch (e) {
+      debugPrint('Failed to check saved rune loadout: $e');
+      return false;
+    }
   }
 }
 

@@ -307,7 +307,12 @@ class _SettingsPanelState extends State<SettingsPanel> {
       builder: (BuildContext context) {
         return RuneSelectionPage(
           initialLoadout: widget.gameState.runeLoadout,
-          onLoadoutChanged: widget.onStateChange,
+          onLoadoutChanged: () async {
+            // 保存符文配置並重新載入符文系統
+            await widget.gameState.saveRuneLoadout();
+            // 觸發UI更新
+            widget.onStateChange();
+          },
         );
       },
     );

@@ -199,8 +199,9 @@ class RuneSystem {
   RuneType? _activeTemporalRune;
   Timer? _temporalEffectTimer;
 
-  /// 單幀節流
-  bool _frameHasCast = false;
+  /// 基於時間的節流（毫秒）
+  static const int _castThrottleMs = 250; // 250ms節流間隔
+  int _lastCastTime = 0;
 
   /// 事件訂閱
   StreamSubscription<RuneEvent>? _eventSubscription;
@@ -222,11 +223,16 @@ class RuneSystem {
 
   /// 初始化符文槽
   void _initializeSlots() {
+    debugPrint('RuneSystem: Initializing slots...');
     for (int i = 0; i < slots.length; i++) {
-      slots[i].runeType = loadout.getSlot(i);
+      final runeType = loadout.getSlot(i);
+      debugPrint('RuneSystem: Slot $i - runeType: $runeType');
+      slots[i].runeType = runeType;
       slots[i].reset();
+      debugPrint('RuneSystem: Slot $i - after reset: state=${slots[i].state}');
     }
     _updateTemporalMutex();
+    debugPrint('RuneSystem: Slots initialized');
   }
 
   /// 訂閱事件
@@ -251,7 +257,7 @@ class RuneSystem {
 
   /// 每邏輯幀更新（由 GameLogic 調用）
   void onLogicFrameStart() {
-    _frameHasCast = false; // 重置單幀節流標誌
+    // 節流現在基於時間，不需要重置標誌
 
     // 更新所有槽位狀態
     for (final slot in slots) {
@@ -285,9 +291,10 @@ class RuneSystem {
       return RuneCastResult.failure(RuneCastError.slotEmpty, '槽位為空');
     }
 
-    // 單幀節流檢查
-    if (_frameHasCast) {
-      return RuneCastResult.failure(RuneCastError.frameThrottled, '單幀節流');
+    // 基於時間的節流檢查
+    final now = MonotonicTimer.now;
+    if (now - _lastCastTime < _castThrottleMs) {
+      return RuneCastResult.failure(RuneCastError.frameThrottled, '施法冷卻中');
     }
 
     final definition = RuneConstants.getDefinition(slot.runeType!);
@@ -328,7 +335,7 @@ class RuneSystem {
 
     // 執行施法
     try {
-      _frameHasCast = true; // 設置節流標誌
+      _lastCastTime = now; // 記錄施法時間
 
       // 發送施法事件
       RuneEventBus.emitCast(slot.runeType!);
@@ -611,7 +618,7 @@ class RuneSystem {
               })
           .toList(),
       'activeTemporalRune': _activeTemporalRune?.name,
-      'frameHasCast': _frameHasCast,
+      'lastCastTime': _lastCastTime,
       'pendingOperations': batchProcessor.pendingOperationCount,
     };
   }

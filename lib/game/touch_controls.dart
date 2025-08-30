@@ -28,6 +28,20 @@ class _TouchControlsState extends State<TouchControls> {
   Timer? _repeatTimer;
   String? _activeButton;
 
+  @override
+  void initState() {
+    super.initState();
+    // 設置UI更新回調，當能量變化時觸發rebuild
+    widget.gameState.setUIUpdateCallback(() {
+      debugPrint('TouchControls: UI update callback triggered!');
+      if (mounted) {
+        setState(() {
+          debugPrint('TouchControls: setState called - rebuilding UI');
+        });
+      }
+    });
+  }
+
   void _startRepeat(String action, VoidCallback callback) {
     if (widget.gameState.isPaused || widget.gameState.isGameOver) return;
 
@@ -96,6 +110,11 @@ class _TouchControlsState extends State<TouchControls> {
   Widget _buildRuneSlot(int index) {
     const slotSize = 48.0;
 
+    // 確保符文系統已初始化
+    if (!widget.gameState.hasRuneSystemInitialized) {
+      return _buildEmptyRuneSlot(slotSize);
+    }
+
     // 獲取符文槽配置和狀態
     final runeType = widget.gameState.runeLoadout.getSlot(index);
     final runeSlot = widget.gameState.runeSystem.slots[index];
@@ -107,12 +126,23 @@ class _TouchControlsState extends State<TouchControls> {
 
     final definition = RuneConstants.getDefinition(runeType);
     final isDisabled = widget.gameState.isPaused || widget.gameState.isGameOver;
-    final canCast = runeSlot.canCast && !isDisabled;
+    final hasEnoughEnergy = widget.gameState.runeEnergyManager.canConsume(definition.energyCost);
+    final canCast = runeSlot.canCast && !isDisabled && hasEnoughEnergy;
+    
+    debugPrint('RuneSlot $index (${definition.name}): '
+        'canCast=${runeSlot.canCast}, disabled=$isDisabled, '
+        'hasEnoughEnergy=$hasEnoughEnergy (need ${definition.energyCost}), '
+        'final canCast=$canCast');
 
     return GestureDetector(
-      onTap: canCast
-          ? () => _castRune(index)
-          : () => _showRuneError(runeSlot, index),
+      onTap: () {
+        debugPrint('RuneSlot $index clicked! canCast=$canCast');
+        if (canCast) {
+          _castRune(index);
+        } else {
+          _showRuneError(runeSlot, index);
+        }
+      },
       child: Container(
         width: slotSize,
         height: slotSize,
@@ -256,7 +286,22 @@ class _TouchControlsState extends State<TouchControls> {
   }
 
   void _castRune(int index) {
+    // 調試信息：打印當前狀態
+    final loadout = widget.gameState.runeLoadout;
+    final energyManager = widget.gameState.runeEnergyManager;
+    final runeType = loadout.getSlot(index);
+    
+    debugPrint('=== RUNE CAST DEBUG ===');
+    debugPrint('Slot $index: ${runeType?.toString() ?? "EMPTY"}');
+    debugPrint('Energy Status: ${energyManager.toString()}');
+    debugPrint('Energy canConsume(1): ${energyManager.canConsume(1)}');
+    debugPrint('Energy canConsume(2): ${energyManager.canConsume(2)}');
+    debugPrint('Energy canConsume(3): ${energyManager.canConsume(3)}');
+    
     final result = widget.gameLogic.castRune(index);
+    
+    debugPrint('Cast Result: Success=${result.isSuccess}, Error=${result.error}, Message=${result.message}');
+    debugPrint('=======================');
 
     if (!result.isSuccess) {
       _showRuneErrorByResult(result, index);

@@ -9,6 +9,7 @@ import 'marathon_system.dart';
 import 'rune_energy_manager.dart';
 import 'rune_system.dart';
 import 'rune_loadout.dart';
+import 'rune_definitions.dart';
 import 'rune_events.dart';
 import 'monotonic_timer.dart';
 
@@ -51,6 +52,10 @@ class GameState {
   // 符文系統
   final RuneLoadout runeLoadout = RuneLoadout();
   late RuneSystem runeSystem;
+  bool _runeSystemInitialized = false;
+
+  // Getter for rune system initialization status
+  bool get hasRuneSystemInitialized => _runeSystemInitialized;
 
   int score = 0;
   int highScore = 0;
@@ -68,6 +73,9 @@ class GameState {
   VoidCallback? _onShakeRequested;
   Timer? _shakeTimer;
 
+  // UI更新回調
+  VoidCallback? _notifyUIUpdate;
+
   // 遊戲模式：固定使用 Marathon 模式
 
   void initBoard() {
@@ -81,6 +89,11 @@ class GameState {
   // 設置震動回調
   void setShakeCallback(VoidCallback callback) {
     _onShakeRequested = callback;
+  }
+
+  // 設置UI更新回調
+  void setUIUpdateCallback(VoidCallback callback) {
+    _notifyUIUpdate = callback;
   }
 
   /// 獲取可見遊戲區域的矩陣 (不包含緩衝區)
@@ -112,6 +125,7 @@ class GameState {
   Future<void> initializeAudio() async {
     await audioService.initialize();
     await _loadHighScore();
+    await _loadRuneLoadout();
     _initializeRuneSystem();
   }
 
@@ -128,15 +142,46 @@ class GameState {
       debugPrint('GameState: Board changed by rune system');
     });
 
+    // 設置能量變化回調來觸發UI更新
+    runeEnergyManager.setOnEnergyChanged(() {
+      debugPrint('Energy changed! Triggering UI update...');
+      // 觸發UI更新 - 這會讓依賴GameState的Widget重新構建
+      _notifyUIUpdate?.call();
+    });
+
     // 啟動單調時鐘
     MonotonicTimer.start();
 
+    _runeSystemInitialized = true;
     debugPrint('GameState: Rune system initialized');
   }
 
   Future<void> _loadHighScore() async {
     await HighScoreService.instance.initialize();
     highScore = HighScoreService.instance.highScore;
+  }
+
+  /// 載入符文配置
+  Future<void> _loadRuneLoadout() async {
+    final savedLoadout = await GamePersistence.loadRuneLoadout();
+    if (savedLoadout != null) {
+      // 載入保存的配置
+      runeLoadout.slots = List<RuneType?>.from(savedLoadout.slots);
+      debugPrint('GameState: Loaded saved rune loadout - $runeLoadout');
+    } else {
+      // 使用預設空配置
+      debugPrint('GameState: Using default empty rune loadout');
+    }
+  }
+
+  /// 保存符文配置並重新載入符文系統
+  Future<void> saveRuneLoadout() async {
+    await GamePersistence.saveRuneLoadout(runeLoadout);
+    // 重新初始化符文系統槽位
+    if (_runeSystemInitialized) {
+      runeSystem.reloadLoadout();
+      debugPrint('GameState: Rune loadout saved and system reloaded');
+    }
   }
 
   Future<void> startGame() async {
