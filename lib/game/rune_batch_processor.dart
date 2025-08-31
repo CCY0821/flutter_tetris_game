@@ -62,9 +62,13 @@ class ClearRowOperation extends BoardOperation {
   @override
   void execute(List<List<Color?>> board) {
     if (isValid(board)) {
+      debugPrint('BatchProcessor: Executing ClearRowOperation for row $row');
       for (int col = 0; col < board[row].length; col++) {
         board[row][col] = null;
       }
+      debugPrint('BatchProcessor: Row $row cleared successfully');
+    } else {
+      debugPrint('BatchProcessor: ClearRowOperation invalid for row $row');
     }
   }
 }
@@ -230,6 +234,12 @@ class RuneBatchProcessor {
   /// 設置棋盤變化回調
   void setOnBoardChanged(VoidCallback callback) {
     _onBoardChanged = callback;
+  }
+  
+  /// 手動觸發棋盤變化通知
+  void notifyBoardChanged() {
+    _onBoardChanged?.call();
+    debugPrint('RuneBatchProcessor: Manual board change notification sent');
   }
 
   /// 添加操作到批處理隊列

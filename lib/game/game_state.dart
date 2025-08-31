@@ -138,8 +138,9 @@ class GameState {
     runeSystem = RuneSystem(runeLoadout);
     runeSystem.setEnergyManager(runeEnergyManager);
     runeSystem.setBoardChangeCallback(() {
-      // 棋盤變化通知，可以在此處觸發UI更新
+      // 棋盤變化通知，觸發UI更新
       debugPrint('GameState: Board changed by rune system');
+      _notifyUIUpdate?.call();
     });
 
     // 設置能量變化回調來觸發UI更新

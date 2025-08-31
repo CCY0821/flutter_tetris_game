@@ -273,6 +273,7 @@ class RuneSystem {
 
   /// 執行批處理操作
   void executeBatch(List<List<Color?>> board) {
+    debugPrint('RuneSystem: executeBatch called, pending operations: ${batchProcessor.pendingOperationCount}');
     batchProcessor.execute(board);
   }
 
@@ -429,20 +430,87 @@ class RuneSystem {
     }
   }
 
+  /// 選擇最佳的清除目標行（已落地方塊最多的行）
+  int _pickBestRowToClear(List<List<Color?>> board) {
+    int bestRow = -1;
+    int maxBlocks = 0;
+    
+    // 只檢查可見區域的行 (假設可見區域是底部20行)
+    final startRow = math.max(0, board.length - 20);
+    
+    for (int row = startRow; row < board.length; row++) {
+      int blockCount = 0;
+      for (int col = 0; col < board[row].length; col++) {
+        if (board[row][col] != null) {
+          blockCount++;
+        }
+      }
+      
+      // 選擇方塊數量最多的行（但不是滿行，滿行會自然清除）
+      if (blockCount > maxBlocks && blockCount < board[row].length) {
+        maxBlocks = blockCount;
+        bestRow = row;
+      }
+    }
+    
+    // 如果沒找到合適的行，選擇底部有方塊的行
+    if (bestRow == -1) {
+      for (int row = board.length - 1; row >= startRow; row--) {
+        for (int col = 0; col < board[row].length; col++) {
+          if (board[row][col] != null) {
+            return row;
+          }
+        }
+      }
+    }
+    
+    return bestRow;
+  }
+
   /// 執行 Flame Burst
   RuneCastResult _executeFlameBurst(
       List<List<Color?>> board, dynamic gameContext) {
-    if (gameContext?.currentTetromino == null) {
-      return RuneCastResult.failure(RuneCastError.systemError, '無當前方塊');
+    // 選擇最佳目標行（已落地方塊最多的行）
+    final targetRow = _pickBestRowToClear(board);
+    
+    // 添加詳細的調試日誌
+    debugPrint('[FlameBurst] boardH=${board.length}, boardW=${board[0].length}');
+    debugPrint('[FlameBurst] targetRow=$targetRow (best row with most blocks)');
+    
+    if (targetRow < 0) {
+      debugPrint('[FlameBurst] No suitable row found to clear');
+      return RuneCastResult.failure(RuneCastError.systemError, '找不到合適的清除目標');
+    }
+    
+    if (targetRow >= board.length) {
+      debugPrint('[FlameBurst] targetRow out of bounds: $targetRow');
+      return RuneCastResult.failure(RuneCastError.systemError, '目標行位置無效: $targetRow');
     }
 
-    final currentY = gameContext.currentTetromino.y;
-    if (currentY < 0 || currentY >= board.length) {
-      return RuneCastResult.failure(RuneCastError.systemError, '方塊位置無效');
+    // 檢查目標行在清除前的狀態
+    int blockCount = 0;
+    for (int col = 0; col < board[targetRow].length; col++) {
+      if (board[targetRow][col] != null) {
+        blockCount++;
+      }
     }
-
-    batchProcessor
-        .addOperation(ClearRowOperation(currentY, isSpellRemoval: true));
+    
+    debugPrint('[FlameBurst] Target row $targetRow has $blockCount blocks before clearing');
+    
+    // 直接執行清除操作
+    int clearedCount = 0;
+    for (int col = 0; col < board[targetRow].length; col++) {
+      if (board[targetRow][col] != null) {
+        board[targetRow][col] = null;
+        clearedCount++;
+      }
+    }
+    debugPrint('[FlameBurst] Cleared $clearedCount blocks from row $targetRow');
+    
+    // 觸發棋盤更新回調
+    batchProcessor.notifyBoardChanged();
+    debugPrint('[FlameBurst] Board change notification sent');
+    
     return RuneCastResult.success;
   }
 

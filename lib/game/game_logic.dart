@@ -18,10 +18,14 @@ class GameLogic {
   void onLogicFrameStart() {
     // 更新符文系統狀態
     gameState.runeSystem.onLogicFrameStart();
+    
+    // 執行符文系統的批處理操作
+    executeRuneBatch();
   }
 
   /// 執行符文系統的批處理操作
   void executeRuneBatch() {
+    debugPrint('GameLogic: executeRuneBatch called');
     gameState.runeSystem.executeBatch(gameState.board);
   }
 
