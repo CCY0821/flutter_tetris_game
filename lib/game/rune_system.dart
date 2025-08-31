@@ -9,6 +9,15 @@ import 'rune_loadout.dart';
 import 'rune_batch_processor.dart';
 import 'rune_energy_manager.dart';
 
+/// 重力模式枚舉
+enum GravityMode {
+  /// Row Gravity: 整列下移，保留列內空洞
+  row,
+
+  /// Column Gravity: 逐列壓實，消除縱向空洞
+  column,
+}
+
 /// 符文施法錯誤類型
 enum RuneCastError {
   success,
@@ -180,6 +189,95 @@ class RuneSlot {
   }
 }
 
+/// 重力處理器
+/// 負責執行清列後的重力效果，支援兩種重力模式
+class GravityProcessor {
+  /// 應用重力效果到指定的清除行
+  ///
+  /// [board] 遊戲棋盤
+  /// [clearedRows] 被清除的行號列表（必須由下而上排序）
+  /// [mode] 重力模式
+  /// 返回移動的方塊數量
+  static int applyGravity(
+    List<List<Color?>> board,
+    List<int> clearedRows,
+    GravityMode mode,
+  ) {
+    if (clearedRows.isEmpty || board.isEmpty) return 0;
+
+    // 確保由下而上處理（從最大row開始）
+    final sortedRows = List<int>.from(clearedRows)
+      ..sort((a, b) => b.compareTo(a));
+
+    switch (mode) {
+      case GravityMode.row:
+        return _applyRowGravity(board, sortedRows);
+      case GravityMode.column:
+        return _applyColumnGravity(board, sortedRows);
+    }
+  }
+
+  /// Row Gravity: 整列下移，保留列內空洞結構
+  static int _applyRowGravity(List<List<Color?>> board, List<int> sortedRows) {
+    int totalMoved = 0;
+    final boardHeight = board.length;
+    final boardWidth = board[0].length;
+
+    // 對每個被清除的行，從下往上處理
+    for (final clearedRow in sortedRows) {
+      if (clearedRow < 0 || clearedRow >= boardHeight) continue;
+
+      // 將該行之上的所有行整列下移
+      for (int row = clearedRow; row > 0; row--) {
+        for (int col = 0; col < boardWidth; col++) {
+          board[row][col] = board[row - 1][col];
+          if (board[row][col] != null) totalMoved++;
+        }
+      }
+
+      // 最上方補空行
+      for (int col = 0; col < boardWidth; col++) {
+        board[0][col] = null;
+      }
+    }
+
+    return totalMoved;
+  }
+
+  /// Column Gravity: 逐列壓實，消除所有縱向空洞
+  static int _applyColumnGravity(
+      List<List<Color?>> board, List<int> sortedRows) {
+    int totalMoved = 0;
+    final boardHeight = board.length;
+    final boardWidth = board[0].length;
+
+    // 對每一列進行壓實
+    for (int col = 0; col < boardWidth; col++) {
+      final columnBlocks = <Color?>[];
+
+      // 收集該列中所有非空的方塊
+      for (int row = boardHeight - 1; row >= 0; row--) {
+        if (board[row][col] != null) {
+          columnBlocks.add(board[row][col]);
+        }
+      }
+
+      // 清空該列
+      for (int row = 0; row < boardHeight; row++) {
+        board[row][col] = null;
+      }
+
+      // 將方塊從底部開始填回（壓實效果）
+      for (int i = 0; i < columnBlocks.length; i++) {
+        board[boardHeight - 1 - i][col] = columnBlocks[i];
+        totalMoved++;
+      }
+    }
+
+    return totalMoved;
+  }
+}
+
 /// 符文系統主類
 /// 管理3個符文槽的運行時狀態，處理施法邏輯、時間系互斥、單幀節流等
 class RuneSystem {
@@ -273,7 +371,8 @@ class RuneSystem {
 
   /// 執行批處理操作
   void executeBatch(List<List<Color?>> board) {
-    debugPrint('RuneSystem: executeBatch called, pending operations: ${batchProcessor.pendingOperationCount}');
+    debugPrint(
+        'RuneSystem: executeBatch called, pending operations: ${batchProcessor.pendingOperationCount}');
     batchProcessor.execute(board);
   }
 
@@ -434,10 +533,10 @@ class RuneSystem {
   int _pickBestRowToClear(List<List<Color?>> board) {
     int bestRow = -1;
     int maxBlocks = 0;
-    
+
     // 只檢查可見區域的行 (假設可見區域是底部20行)
     final startRow = math.max(0, board.length - 20);
-    
+
     for (int row = startRow; row < board.length; row++) {
       int blockCount = 0;
       for (int col = 0; col < board[row].length; col++) {
@@ -445,14 +544,14 @@ class RuneSystem {
           blockCount++;
         }
       }
-      
+
       // 選擇方塊數量最多的行（但不是滿行，滿行會自然清除）
       if (blockCount > maxBlocks && blockCount < board[row].length) {
         maxBlocks = blockCount;
         bestRow = row;
       }
     }
-    
+
     // 如果沒找到合適的行，選擇底部有方塊的行
     if (bestRow == -1) {
       for (int row = board.length - 1; row >= startRow; row--) {
@@ -463,7 +562,7 @@ class RuneSystem {
         }
       }
     }
-    
+
     return bestRow;
   }
 
@@ -472,19 +571,21 @@ class RuneSystem {
       List<List<Color?>> board, dynamic gameContext) {
     // 選擇最佳目標行（已落地方塊最多的行）
     final targetRow = _pickBestRowToClear(board);
-    
+
     // 添加詳細的調試日誌
-    debugPrint('[FlameBurst] boardH=${board.length}, boardW=${board[0].length}');
+    debugPrint(
+        '[FlameBurst] boardH=${board.length}, boardW=${board[0].length}');
     debugPrint('[FlameBurst] targetRow=$targetRow (best row with most blocks)');
-    
+
     if (targetRow < 0) {
       debugPrint('[FlameBurst] No suitable row found to clear');
       return RuneCastResult.failure(RuneCastError.systemError, '找不到合適的清除目標');
     }
-    
+
     if (targetRow >= board.length) {
       debugPrint('[FlameBurst] targetRow out of bounds: $targetRow');
-      return RuneCastResult.failure(RuneCastError.systemError, '目標行位置無效: $targetRow');
+      return RuneCastResult.failure(
+          RuneCastError.systemError, '目標行位置無效: $targetRow');
     }
 
     // 檢查目標行在清除前的狀態
@@ -494,10 +595,11 @@ class RuneSystem {
         blockCount++;
       }
     }
-    
-    debugPrint('[FlameBurst] Target row $targetRow has $blockCount blocks before clearing');
-    
-    // 直接執行清除操作
+
+    debugPrint(
+        '[FlameBurst] Target row $targetRow has $blockCount blocks before clearing');
+
+    // 階段1：直接執行清除操作
     int clearedCount = 0;
     for (int col = 0; col < board[targetRow].length; col++) {
       if (board[targetRow][col] != null) {
@@ -505,12 +607,24 @@ class RuneSystem {
         clearedCount++;
       }
     }
-    debugPrint('[FlameBurst] Cleared $clearedCount blocks from row $targetRow');
-    
+    debugPrint(
+        '[FlameBurst] Phase 1 - Cleared $clearedCount blocks from row $targetRow');
+
+    // 階段2：應用重力效果（Column模式，消除空洞）
+    final gravityStartTime = DateTime.now().millisecondsSinceEpoch;
+    final movedBlocks = GravityProcessor.applyGravity(
+        board, [targetRow], GravityMode.column);
+    final gravityEndTime = DateTime.now().millisecondsSinceEpoch;
+    final gravityDuration = gravityEndTime - gravityStartTime;
+
+    debugPrint(
+        '[FlameBurst] Phase 2 - Applied Column Gravity: moved $movedBlocks blocks in ${gravityDuration}ms');
+
     // 觸發棋盤更新回調
     batchProcessor.notifyBoardChanged();
-    debugPrint('[FlameBurst] Board change notification sent');
-    
+    debugPrint(
+        '[FlameBurst] Execution complete - Row cleared + Gravity applied');
+
     return RuneCastResult.success;
   }
 
