@@ -107,19 +107,13 @@ class RuneIntroductionPage extends StatelessWidget {
                 child: Column(
                   children: [
                     _buildRuneCategory(
-                        'CLEANSE', cyberpunkDanger, _getClearRunes()),
+                        '1 能量符文', cyberpunkSuccess, _getOneEnergyRunes()),
                     const SizedBox(height: 20),
                     _buildRuneCategory(
-                        'FIELD CONTROL', cyberpunkWarning, _getFieldRunes()),
+                        '2 能量符文', cyberpunkWarning, _getTwoEnergyRunes()),
                     const SizedBox(height: 20),
                     _buildRuneCategory(
-                        'SURVIVAL', cyberpunkPrimary, _getSurvivalRunes()),
-                    const SizedBox(height: 20),
-                    _buildRuneCategory(
-                        'TEMPORAL', cyberpunkAccent, _getTimeRunes()),
-                    const SizedBox(height: 20),
-                    _buildRuneCategory('ENHANCEMENT', cyberpunkSuccess,
-                        _getEnhancementRunes()),
+                        '3 能量符文', cyberpunkDanger, _getThreeEnergyRunes()),
                   ],
                 ),
               ),
@@ -356,112 +350,101 @@ class RuneIntroductionPage extends StatelessWidget {
     );
   }
 
-  List<RuneData> _getClearRunes() {
+  List<RuneData> _getOneEnergyRunes() {
     return [
-      // 1 格能量符文
       RuneData(
-        name: 'Flame Burst',
+        name: '🔥 Flame Burst',
         icon: Icons.local_fire_department,
         cost: 1,
         cooldown: '6s',
-        description: '立即清除當前方塊所在列',
-        categoryColor: cyberpunkDanger,
+        description: '精確選擇最有價值的目標清除',
+        categoryColor: cyberpunkSuccess,
       ),
       RuneData(
-        name: 'Thunder Strike',
-        icon: Icons.flash_on,
+        name: '🔄 Element Morph',
+        icon: Icons.transform,
         cost: 1,
-        cooldown: '8s',
-        description: '隨機清除 1 列（偏向高堆積區）',
-        categoryColor: cyberpunkDanger,
-      ),
-      // 3 格能量符文
-      RuneData(
-        name: 'Dragon Roar',
-        icon: Icons.whatshot,
-        cost: 3,
-        cooldown: '15s',
-        description: '清除當前列及上下各一行',
-        categoryColor: cyberpunkDanger,
-      ),
-      RuneData(
-        name: 'Column Breaker',
-        icon: Icons.view_column,
-        cost: 3,
-        cooldown: '8s',
-        description: '清除當前方塊影子所覆蓋的整條縱列',
-        categoryColor: cyberpunkDanger,
+        cooldown: '5s',
+        description: '當前方塊變形（隨機）',
+        categoryColor: cyberpunkSuccess,
       ),
     ];
   }
 
-  List<RuneData> _getFieldRunes() {
+  List<RuneData> _getTwoEnergyRunes() {
     return [
       RuneData(
-        name: 'Earthquake',
-        icon: Icons.terrain,
-        cost: 1,
-        cooldown: '10s',
-        description: '整個盤面下移 1 行，底行消失',
+        name: '⚡ Thunder Strike Right',
+        icon: Icons.flash_on,
+        cost: 2,
+        cooldown: '8s',
+        description: '清理棋盤最右側兩列',
+        categoryColor: cyberpunkWarning,
+      ),
+      RuneData(
+        name: '⚡ Thunder Strike Left',
+        icon: Icons.flash_off,
+        cost: 2,
+        cooldown: '8s',
+        description: '清理棋盤最左側兩列',
+        categoryColor: cyberpunkWarning,
+      ),
+      RuneData(
+        name: '⏸ Time Change',
+        icon: Icons.slow_motion_video,
+        cost: 2,
+        cooldown: '18s',
+        duration: '3s',
+        description: '下落速度 ×0.1，3秒後恢復',
+        categoryColor: cyberpunkWarning,
+      ),
+      RuneData(
+        name: '✨ Blessed Combo',
+        icon: Icons.star,
+        cost: 2,
+        cooldown: '20s',
+        duration: '10s',
+        description: '10秒內自然消行分數 ×3',
         categoryColor: cyberpunkWarning,
       ),
     ];
   }
 
-  List<RuneData> _getSurvivalRunes() {
+  List<RuneData> _getThreeEnergyRunes() {
     return [
       RuneData(
-        name: "Angel's Grace",
-        icon: Icons.flight,
-        cost: 2,
-        cooldown: '18s',
-        description: '刪除最頂端 2 行方塊',
-        categoryColor: cyberpunkPrimary,
-      ),
-      RuneData(
-        name: 'Gravity Reset',
-        icon: Icons.vertical_align_bottom,
+        name: '🐉 Dragon Roar',
+        icon: Icons.whatshot,
         cost: 3,
-        cooldown: '25s',
-        description: '整個棋盤壓縮到底部，消除所有空洞',
-        categoryColor: cyberpunkPrimary,
+        cooldown: '15s',
+        description: '清除最下方三列',
+        categoryColor: cyberpunkDanger,
       ),
-    ];
-  }
-
-  List<RuneData> _getTimeRunes() {
-    return [
       RuneData(
-        name: 'Time Slow',
-        icon: Icons.slow_motion_video,
-        cost: 1,
+        name: '😇 Angel\'s Grace',
+        icon: Icons.flight,
+        cost: 3,
+        cooldown: '60s',
+        description: '全部方塊清空',
+        categoryColor: cyberpunkDanger,
+      ),
+      RuneData(
+        name: '🕰 Time Slow',
+        icon: Icons.access_time,
+        cost: 3,
         cooldown: '12s',
         duration: '5s',
-        description: '5 秒內下落速度減半',
-        categoryColor: cyberpunkAccent,
+        description: '下落速度 ×0.8',
+        categoryColor: cyberpunkDanger,
       ),
       RuneData(
-        name: 'Time Stop',
-        icon: Icons.pause_circle,
-        cost: 2,
-        cooldown: '18s',
-        duration: '3s',
-        description: '3 秒完全暫停，可移動旋轉',
-        categoryColor: cyberpunkAccent,
-      ),
-    ];
-  }
-
-  List<RuneData> _getEnhancementRunes() {
-    return [
-      RuneData(
-        name: 'Blessed Combo',
-        icon: Icons.star,
-        cost: 2,
-        cooldown: '20s',
-        duration: '10s',
-        description: '10 秒內自然消除分數翻倍',
-        categoryColor: cyberpunkSuccess,
+        name: '🛡 Grace of Lines',
+        icon: Icons.view_agenda,
+        cost: 3,
+        cooldown: '25s',
+        duration: '5s',
+        description: '接下來五個方塊變成I型',
+        categoryColor: cyberpunkDanger,
       ),
     ];
   }
