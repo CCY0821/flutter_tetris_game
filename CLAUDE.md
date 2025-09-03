@@ -39,60 +39,36 @@ flutter build apk
 - Scoring system with combo mechanics
 - Various bug fixes and improvements
 
-## Known Issues and Solutions
+## 🐛 問題診斷指引
 
-### Rune System Debugging (SOLVED - Aug 30, 2025)
-**Problem**: Rune slots not lighting up despite full energy bars, clicking had no response.
+**遇到已知問題時，請閱讀詳細解決方案文檔**:
+- 符文系統問題 → 查看 `docs/troubleshooting/rune_system_debug.md`
+- UI 渲染問題 → 查看 `docs/troubleshooting/ui_overflow_fixes.md`  
+- 法術功能問題 → 查看 `docs/troubleshooting/spell_implementation.md`
 
-**Root Cause**: 
-- Rune loadout configuration was never persisted to storage
-- RuneSystem always initialized with empty slots (runeType: null)
-- Missing synchronization between rune selection and game state
+**常見問題快速診斷**:
+- 符文槽位不亮：檢查 runeType 是否為 null
+- UI 像素溢出：檢查動畫值是否超出 0.0-1.0 範圍
+- 法術無效果：確認使用正確的操作模式（直接操作 vs 批處理）
 
-**Solution Implemented**:
-1. **Added Rune Persistence** (`lib/core/game_persistence.dart`):
-   - `saveRuneLoadout()`, `loadRuneLoadout()`, `clearRuneLoadout()`
-   - SharedPreferences with version control
-   - Complete error handling and debug logging
+## 📋 程式碼模式
 
-2. **Fixed Game State Initialization** (`lib/game/game_state.dart`):
-   - Added `_loadRuneLoadout()` called during startup
-   - Added `saveRuneLoadout()` to save changes and reload system
-   - Correct initialization order: audio → high score → rune loadout → rune system
-   - Added UI update callback mechanism for energy changes
+**需要實作新功能時，請閱讀完整程式碼模式文檔**: `docs/patterns/coding_patterns.md`
 
-3. **Enhanced Rune System** (`lib/game/rune_system.dart`):
-   - Improved slot initialization debug output
-   - Changed throttling from frame-based to time-based (250ms)
-   - Added `reloadLoadout()` for configuration changes
-
-4. **Updated Touch Controls** (`lib/game/touch_controls.dart`):
-   - Added rune system initialization safety check
-   - Enhanced energy checking logic
-   - Comprehensive debug logging
-
-5. **Modified Settings Panel** (`lib/widgets/settings_panel.dart`):
-   - Updated rune selection callback to auto-save and reload
-
-**Verification**:
-- ✅ Rune slots load with correct runeTypes (not null)
-- ✅ Slots light up when energy is sufficient (ready state)
-- ✅ Clicking consumes energy and casts spells correctly
-- ✅ Configuration persists across app restarts
-- ✅ Real-time UI updates when energy changes
-
-**Debug Pattern for Future Issues**:
-1. Check logs for "RuneSystem: Initializing slots..."
-2. Look for "runeType: null" vs actual rune types
-3. Verify "GamePersistence: Rune loadout loaded/saved" messages
-4. Monitor slot states: empty vs ready vs cooling_down
+**核心模式速記**:
+- PAT-RUNE-001: 符文實作 → 使用直接操作模式
+- PAT-ANIM-001: 動畫安全 → 所有值 clamp(0.0, 1.0) 
+- PAT-PERSIST-001: 狀態持久化 → 正確初始化順序
+- PAT-SAFE-001: 系統整合 → null 檢查
+- PAT-DEBUG-001: 除錯日誌 → 統一格式
 
 ## Guidelines
 - Follow Flutter/Dart conventions and best practices
-- Maintain existing code style and patterns
+- **Apply Code Patterns**: 新功能必須遵循上述 5 個核心模式
 - Test changes when possible before committing
-- Focus on game mechanics, UI, and user experience improvements
+- Focus on game mechanics, UI, and user experience improvements  
 - When adding new features or refactoring code, maintain existing functionality as the top priority
+- **Simplicity First**: 優先選擇簡單方案（如 Dragon Roar: 174行→20行）
 
 ## Testing
 Before making commits, ensure:
@@ -101,38 +77,32 @@ Before making commits, ensure:
 3. App builds successfully (`flutter build apk`)
 4. Game functionality works as expected
 
-## Claude x Gemini 協作除錯機制
-當遇到複雜的 bug 無法獨自解決時，使用以下協作流程：
+## 🧙‍♂️ 符文法術開發指引
 
-### 設置 Gemini CLI
-1. 確保 Gemini CLI 已安裝：`npm install -g @google/gemini-cli`
-2. 設置身份驗證：
-   - 選項 1：Google 登入（推薦）- 免費額度
-   - 選項 2：API 金鑰 - 從 Google AI Studio 取得
-   - 設置環境變數：`GEMINI_API_KEY=your_api_key`
+**重要提醒**: 當需要開發新符文法術時，請先閱讀以下核心檔案以了解標準化流程：
 
-### 協作除錯流程
-使用協作腳本：`debug_collaboration.js`
+### 必讀檔案 (僅在開發符文時閱讀)
+1. `lib/game/rune_system.dart` - 查看 Flame Burst 和 Dragon Roar 的成功實現模式
+2. `lib/game/rune_batch_processor.dart` - 了解批處理操作系統
+3. `lib/core/rune_definitions.dart` - 符文配置定義
+
+### 核心開發原則
+- **直接操作模式**: 仿照 Flame Burst 的成功架構模式
+- **簡化優先**: 避免過度複雜的實現 (參考 Dragon Roar: 174行→20行)
+- **調試日誌**: 使用標準格式 `[SymbolName] 操作描述: 關鍵數據`
+- **UI 更新**: 直接操作後必須調用 `batchProcessor.notifyBoardChanged()`
+
+### 成功案例參考
+- **Flame Burst**: 智能目標選擇 + 直接操作
+- **Dragon Roar**: 固定目標選擇 + 簡化實現
+
+## 🤝 協作除錯
+
+**遇到複雜 bug 時，啟動 Claude x Gemini 協作**:
 
 ```bash
-# 啟動協作除錯
-node debug_collaboration.js "bug描述" "錯誤日志" "程式碼上下文" "堆疊追蹤"
-
-# 範例
-node debug_collaboration.js "遊戲暫停後無法恢復" "Error: setState called after dispose" "lib/game/game_logic.dart" "stack_trace_here"
+node debug_collaboration.js "bug描述" "錯誤日誌" "程式碼檔案" "堆疊追蹤"
 ```
 
-### 協作觸發條件
-當遇到以下情況時，啟動 Claude x Gemini 協作：
-- 複雜的狀態管理問題
-- Flutter 生命週期相關錯誤
-- 性能瓶頸分析
-- 多平台兼容性問題
-- 音頻播放問題
-- 觸控/手勢衝突
-- 複雜的演算法 bug
-
-### 協作輸出
-- bug-analysis.json：詳細的 bug 資訊
-- debug-session.log：協作會話記錄
-- Gemini 的分析建議和解決方案
+**觸發條件**: 狀態管理、生命週期、性能、音頻、觸控等複雜問題
+**設置說明**: 查看 `docs/collaboration/gemini_setup.md`
