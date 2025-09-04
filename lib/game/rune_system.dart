@@ -605,7 +605,7 @@ class RuneSystem {
     debugPrint(
         '[FlameBurst] Target row $targetRow has $blockCount blocks before clearing');
 
-    // 階段1：直接執行清除操作
+    // 直接執行清除操作（純清除，無重力壓實）
     int clearedCount = 0;
     for (int col = 0; col < board[targetRow].length; col++) {
       if (board[targetRow][col] != null) {
@@ -614,22 +614,12 @@ class RuneSystem {
       }
     }
     debugPrint(
-        '[FlameBurst] Phase 1 - Cleared $clearedCount blocks from row $targetRow');
-
-    // 階段2：應用重力效果（Column模式，消除空洞）
-    final gravityStartTime = DateTime.now().millisecondsSinceEpoch;
-    final movedBlocks = GravityProcessor.applyGravity(
-        board, [targetRow], GravityMode.column);
-    final gravityEndTime = DateTime.now().millisecondsSinceEpoch;
-    final gravityDuration = gravityEndTime - gravityStartTime;
-
-    debugPrint(
-        '[FlameBurst] Phase 2 - Applied Column Gravity: moved $movedBlocks blocks in ${gravityDuration}ms');
+        '[FlameBurst] Cleared $clearedCount blocks from row $targetRow');
 
     // 觸發棋盤更新回調
     batchProcessor.notifyBoardChanged();
     debugPrint(
-        '[FlameBurst] Execution complete - Row cleared + Gravity applied');
+        '[FlameBurst] Execution complete - Row cleared (no gravity compression)');
 
     return RuneCastResult.success;
   }
@@ -673,17 +663,9 @@ class RuneSystem {
       totalClearedBlocks += columnClearedCount;
     }
     
-    // 重力處理 + UI更新 (完全仿照 Flame Burst)
-    if (totalClearedBlocks > 0) {
-      final gravityStartTime = DateTime.now().millisecondsSinceEpoch;
-      final movedBlocks = GravityProcessor.applyGravity(board, targetColumns, GravityMode.column);
-      final gravityEndTime = DateTime.now().millisecondsSinceEpoch;
-      debugPrint('[ThunderStrike] Applied Column Gravity: moved $movedBlocks blocks in ${gravityEndTime - gravityStartTime}ms');
-    }
-    
-    // 觸發 UI 更新 (仿照 Flame Burst)
+    // 觸發 UI 更新（純清除，無重力壓實）
     batchProcessor.notifyBoardChanged();
-    debugPrint('[ThunderStrike] Execution complete - cleared $totalClearedBlocks blocks from 2 columns');
+    debugPrint('[ThunderStrike] Execution complete - cleared $totalClearedBlocks blocks from 2 columns (no gravity compression)');
     
     return RuneCastResult.success;
   }
@@ -755,7 +737,7 @@ class RuneSystem {
           clearedCount++;
         }
       }
-      debugPrint('[DragonRoar] Phase 1 - Cleared $clearedCount blocks from row $targetRow');
+      debugPrint('[DragonRoar] Cleared $clearedCount blocks from row $targetRow');
       
       // 驗證清除結果
       int remainingCount = 0;
@@ -768,18 +750,9 @@ class RuneSystem {
       totalClearedBlocks += clearedCount;
     }
     
-    // 階段2：應用重力效果（完全仿照 Flame Burst）
-    final gravityStartTime = DateTime.now().millisecondsSinceEpoch;
-    final movedBlocks = GravityProcessor.applyGravity(
-        board, targetRows, GravityMode.column);
-    final gravityEndTime = DateTime.now().millisecondsSinceEpoch;
-    final gravityDuration = gravityEndTime - gravityStartTime;
-    
-    debugPrint('[DragonRoar] Phase 2 - Applied Column Gravity: moved $movedBlocks blocks in ${gravityDuration}ms');
-    
-    // 觸發棋盤更新回調（仿照 Flame Burst）
+    // 觸發棋盤更新回調（純清除，無重力壓實）
     batchProcessor.notifyBoardChanged();
-    debugPrint('[DragonRoar] Execution complete - Rows cleared + Gravity applied');
+    debugPrint('[DragonRoar] Execution complete - cleared $totalClearedBlocks blocks from 3 rows (no gravity compression)');
     
     return RuneCastResult.success;
   }
