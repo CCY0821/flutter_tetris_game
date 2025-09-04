@@ -90,17 +90,19 @@ class RuneEnergyManager {
       return false;
     }
 
-    // 消耗能量：减少对应的分数
-    _currentScore -= bars * scorePerEnergyBar;
+    int oldBars = _currentBars;
+    int oldScore = _currentScore;
 
-    // 重新计算能量格数
-    int totalBars = _currentScore ~/ scorePerEnergyBar;
-    _currentBars = totalBars.clamp(0, maxEnergy);
+    // 消耗能量：设置为消耗指定格数后的分数
+    // 如果消耗N格，剩余能量应该是 (当前完整格数 - N) 格，且无部分进度
+    int remainingFullBars = (_currentBars - bars).clamp(0, maxEnergy);
+    _currentScore = remainingFullBars * scorePerEnergyBar;
+    _currentBars = remainingFullBars;
 
     _onEnergyChanged?.call();
 
-    debugPrint('RuneEnergy: Consumed $bars bars, '
-        'remaining: $_currentScore score, $_currentBars bars');
+    debugPrint('RuneEnergy: Consumed $bars bars '
+        '(from $oldScore->$_currentScore score, $oldBars->$_currentBars bars)');
     return true;
   }
 
