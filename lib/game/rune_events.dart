@@ -20,6 +20,7 @@ enum RuneType {
   flameBurst, // 🔥 Flame Burst (1格/6s)
   dragonRoar, // 🐉 Dragon Roar (3格/15s)
   thunderStrike, // ⚡ Thunder Strike (1格/8s)
+  thunderStrikeLeft, // ⚡ Thunder Strike Left (2格/8s)
   earthquake, // 🌍 Earthquake (1格/10s)
   angelsGrace, // 😇 Angel's Grace (2格/18s)
   timeSlow, // 🕰 Time Slow (1格/12s, 5s持續)

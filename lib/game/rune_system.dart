@@ -493,6 +493,10 @@ class RuneSystem {
         // Thunder Strike 在空盤時會退還能量，不算錯誤
         break;
 
+      case RuneType.thunderStrikeLeft:
+        // Thunder Strike Left 在空盤時會退還能量，不算錯誤
+        break;
+
       default:
         break;
     }
@@ -509,6 +513,8 @@ class RuneSystem {
           return _executeFlameBurst(board, gameContext);
         case RuneType.thunderStrike:
           return _executeThunderStrike(board, gameContext);
+        case RuneType.thunderStrikeLeft:
+          return _executeThunderStrikeLeft(board, gameContext);
         case RuneType.earthquake:
           return _executeEarthquake(board);
         case RuneType.angelsGrace:
@@ -666,6 +672,51 @@ class RuneSystem {
     // 觸發 UI 更新（純清除，無重力壓實）
     batchProcessor.notifyBoardChanged();
     debugPrint('[ThunderStrike] Execution complete - cleared $totalClearedBlocks blocks from 2 columns (no gravity compression)');
+    
+    return RuneCastResult.success;
+  }
+
+  /// 執行 Thunder Strike Left - 清除最左側兩列
+  RuneCastResult _executeThunderStrikeLeft(List<List<Color?>> board, dynamic gameContext) {
+    
+    // 基本驗證和日誌 (仿照 Thunder Strike)
+    final boardHeight = board.length;
+    final boardWidth = board[0].length;
+    debugPrint('[ThunderStrikeLeft] boardH=$boardHeight, boardW=$boardWidth');
+    
+    // 邊界檢查
+    if (boardWidth < 2) {
+      debugPrint('[ThunderStrikeLeft] Board too narrow: $boardWidth');
+      return RuneCastResult.failure(RuneCastError.systemError, '棋盤寬度不足');
+    }
+    
+    // 目標確定 - 最左側兩列
+    final targetColumns = [0, 1];
+    debugPrint('[ThunderStrikeLeft] Target columns: ${targetColumns.join(",")} (leftmost 2 columns)');
+    
+    // 可見區域範圍 (完全仿照 Thunder Strike)
+    final startRow = math.max(0, boardHeight - 20);
+    
+    // 直接清除操作 - 雙列版本
+    int totalClearedBlocks = 0;
+    for (int targetColumn in targetColumns) {
+      int columnClearedCount = 0;
+      
+      // 清除單列 (仿照 Thunder Strike 的雙列清除邏輯)
+      for (int row = startRow; row < boardHeight; row++) {
+        if (board[row][targetColumn] != null) {
+          board[row][targetColumn] = null;
+          columnClearedCount++;
+        }
+      }
+      
+      debugPrint('[ThunderStrikeLeft] Cleared $columnClearedCount blocks from column $targetColumn');
+      totalClearedBlocks += columnClearedCount;
+    }
+    
+    // 觸發 UI 更新（純清除，無重力壓實）
+    batchProcessor.notifyBoardChanged();
+    debugPrint('[ThunderStrikeLeft] Execution complete - cleared $totalClearedBlocks blocks from 2 left columns (no gravity compression)');
     
     return RuneCastResult.success;
   }

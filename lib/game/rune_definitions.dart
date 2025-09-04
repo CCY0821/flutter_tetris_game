@@ -97,6 +97,17 @@ class RuneConstants {
       category: RuneCategory.instant,
       themeColor: Colors.yellow,
     ),
+    RuneType.thunderStrikeLeft: RuneDefinition(
+      type: RuneType.thunderStrikeLeft,
+      name: "Thunder Strike Left",
+      icon: Icons.flash_on,
+      description: "清除棋盤最左側兩列",
+      energyCost: 2,
+      cooldownSeconds: 8,
+      durationSeconds: 0,
+      category: RuneCategory.instant,
+      themeColor: Colors.yellowAccent,
+    ),
     RuneType.earthquake: RuneDefinition(
       type: RuneType.earthquake,
       name: "Earthquake",
