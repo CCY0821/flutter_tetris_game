@@ -185,6 +185,17 @@ class RuneConstants {
       category: RuneCategory.instant,
       themeColor: Colors.indigo,
     ),
+    RuneType.titanGravity: RuneDefinition(
+      type: RuneType.titanGravity,
+      name: "Titan Gravity",
+      icon: Icons.landscape,
+      description: "分段壓實可視區域，消除縱向空洞",
+      energyCost: 2,
+      cooldownSeconds: 45,
+      durationSeconds: 0,
+      category: RuneCategory.instant,
+      themeColor: Colors.blueGrey,
+    ),
   };
 
   /// 獲取符文定義

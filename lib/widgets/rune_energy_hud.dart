@@ -133,7 +133,7 @@ class _EnergyCellState extends State<EnergyCell>
     );
 
     _updateAnimation();
-    _currentRatio = widget.ratio;
+    _currentRatio = widget.ratio.clamp(0.0, 1.0);
 
     if (widget.animate) {
       _controller.forward();
@@ -142,8 +142,8 @@ class _EnergyCellState extends State<EnergyCell>
 
   void _updateAnimation() {
     _animation = Tween<double>(
-      begin: _currentRatio,
-      end: widget.ratio,
+      begin: _currentRatio.clamp(0.0, 1.0),
+      end: widget.ratio.clamp(0.0, 1.0),
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: widget.curve,
@@ -160,7 +160,7 @@ class _EnergyCellState extends State<EnergyCell>
         _controller.reset();
         _controller.forward();
       } else {
-        _currentRatio = widget.ratio;
+        _currentRatio = widget.ratio.clamp(0.0, 1.0);
       }
     }
 
@@ -187,7 +187,8 @@ class _EnergyCellState extends State<EnergyCell>
             ? AnimatedBuilder(
                 animation: _animation,
                 builder: (context, child) {
-                  _currentRatio = _animation.value;
+                  // 防止动画溢出：限制动画值在有效范围内
+                  _currentRatio = _animation.value.clamp(0.0, 1.0);
                   return _buildImplementation(devicePixelRatio);
                 },
               )
@@ -257,7 +258,7 @@ class _EnergyCellState extends State<EnergyCell>
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: FractionallySizedBox(
-                    heightFactor: _currentRatio,
+                    heightFactor: _currentRatio.clamp(0.0, 1.0),
                     widthFactor: 1.0,
                     child: Container(
                       color: widget.fillColor,
@@ -315,6 +316,9 @@ class _EnergyCellCanvasPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // 防止溢出：确保比例值在有效范围内
+    final clampedRatio = ratio.clamp(0.0, 1.0);
+    
     // 1. 外框计算（像素对齐）
     final outerRect = snapRect(Offset.zero & size, devicePixelRatio);
 
@@ -351,14 +355,16 @@ class _EnergyCellCanvasPainter extends CustomPainter {
     canvas.drawRect(contentRect, backgroundPaint);
 
     // 7. 绘制填充
-    if (ratio > 0.0) {
-      final fillHeight = snap(contentRect.height * ratio, devicePixelRatio);
+    if (clampedRatio > 0.0) {
+      final fillHeight = snap(contentRect.height * clampedRatio, devicePixelRatio);
+      // 额外边界检查：确保fillHeight不超过内容区域高度
+      final safeFillHeight = fillHeight.clamp(0.0, contentRect.height);
       final fillRect = snapRect(
         Rect.fromLTWH(
           contentRect.left,
-          contentRect.bottom - fillHeight,
+          contentRect.bottom - safeFillHeight,
           contentRect.width,
-          fillHeight,
+          safeFillHeight,
         ),
         devicePixelRatio,
       );

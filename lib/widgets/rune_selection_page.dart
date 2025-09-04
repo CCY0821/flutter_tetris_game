@@ -38,10 +38,10 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
       backgroundColor: Colors.transparent,
       child: Container(
         width: MediaQuery.of(context).size.width * 0.95,
-        height: MediaQuery.of(context).size.height * 0.9,
-        constraints: const BoxConstraints(
+        constraints: BoxConstraints(
           maxWidth: 600,
-          maxHeight: 800,
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+          minHeight: 400,
         ),
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -69,6 +69,7 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
           ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             // 標題欄
             _buildHeader(),
@@ -92,7 +93,7 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
             ),
 
             // 符文選擇區
-            Expanded(
+            Flexible(
               child: _buildRuneGrid(),
             ),
 
@@ -341,19 +342,28 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
             ),
           ),
           const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 2.5,
-            ),
-            itemCount: RuneConstants.allTypes.length,
-            itemBuilder: (context, index) {
-              final runeType = RuneConstants.allTypes[index];
-              return _buildRuneCard(runeType);
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // 計算適合的 childAspectRatio
+              final screenWidth = constraints.maxWidth;
+              final itemWidth = (screenWidth - 12) / 2; // 2列，減去間距
+              final aspectRatio = (itemWidth / 100).clamp(1.8, 3.0); // 動態計算比例
+              
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: aspectRatio,
+                ),
+                itemCount: RuneConstants.allTypes.length,
+                itemBuilder: (context, index) {
+                  final runeType = RuneConstants.allTypes[index];
+                  return _buildRuneCard(runeType);
+                },
+              );
             },
           ),
         ],
@@ -432,11 +442,14 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
                       children: [
                         _buildEnergyIndicator(definition.energyCost),
                         const SizedBox(width: 8),
-                        Text(
-                          '${definition.cooldownSeconds}s CD',
-                          style: GameTheme.bodyStyle.copyWith(
-                            fontSize: 10,
-                            color: Colors.grey,
+                        Expanded(
+                          child: Text(
+                            '${definition.cooldownSeconds}s CD',
+                            style: GameTheme.bodyStyle.copyWith(
+                              fontSize: 10,
+                              color: Colors.grey,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],

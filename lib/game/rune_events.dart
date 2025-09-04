@@ -27,6 +27,7 @@ enum RuneType {
   columnBreaker, // 🧨 Column Breaker (3格/8s)
   gravityReset, // 💫 Gravity Reset (3格/25s)
   blessedCombo, // ✨ Blessed Combo (2格/20s, 10s持續)
+  titanGravity, // 🏔️ Titan Gravity (2格/45s)
 }
 
 /// 符文事件數據

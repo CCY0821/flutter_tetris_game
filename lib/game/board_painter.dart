@@ -175,7 +175,13 @@ class BoardPainter extends CustomPainter {
 
     // 繪製已鎖定的方塊（只繪製可見區域）
     for (int y = GameState.bufferRowCount; y < GameState.totalRowCount; y++) {
+      // 添加邊界檢查防止越界
+      if (y >= board.length) continue;
+      
       for (int x = 0; x < GameState.colCount; x++) {
+        // 添加邊界檢查防止越界
+        if (x >= board[y].length) continue;
+        
         if (board[y][x] != null) {
           // 將緩衝區座標轉換為可見區域座標
           final visibleY = y - GameState.bufferRowCount;

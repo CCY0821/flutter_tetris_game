@@ -519,6 +519,8 @@ class RuneSystem {
           return _executeDragonRoar(board, gameContext);
         case RuneType.gravityReset:
           return _executeGravityReset(board);
+        case RuneType.titanGravity:
+          return _executeTitanGravity(board, gameContext);
         case RuneType.timeSlow:
           return _executeTimeSlow();
         case RuneType.timeStop:
@@ -806,6 +808,63 @@ class RuneSystem {
   RuneCastResult _executeBlessedCombo() {
     // 時間系效果的具體實現由外部處理
     RuneEventBus.emitEffectStart(RuneType.blessedCombo);
+    return RuneCastResult.success;
+  }
+
+  /// 執行 Titan Gravity - 分段壓實可視區域
+  /// 逐列應用 Column Gravity，並在每列之間增加視覺延遲
+  RuneCastResult _executeTitanGravity(
+      List<List<Color?>> board, dynamic gameContext) {
+    final boardHeight = board.length;
+    final boardWidth = board[0].length;
+    
+    debugPrint('[TitanGravity] boardH=$boardHeight, boardW=$boardWidth');
+    
+    // 確定可視區域範圍（底部20行）
+    final startRow = math.max(0, boardHeight - 20);
+    debugPrint('[TitanGravity] Processing visible area: rows $startRow to ${boardHeight - 1}');
+    
+    int totalMovedBlocks = 0;
+    
+    // 分段壓實：逐列處理
+    for (int col = 0; col < boardWidth; col++) {
+      // 收集該列在可視區域的所有非空方塊
+      final columnBlocks = <Color?>[];
+      
+      for (int row = boardHeight - 1; row >= startRow; row--) {
+        if (board[row][col] != null) {
+          columnBlocks.add(board[row][col]);
+        }
+      }
+      
+      // 如果該列沒有方塊，跳過
+      if (columnBlocks.isEmpty) {
+        debugPrint('[TitanGravity] Column $col: no blocks to compress');
+        continue;
+      }
+      
+      // 清空該列的可視區域
+      for (int row = startRow; row < boardHeight; row++) {
+        board[row][col] = null;
+      }
+      
+      // 將方塊從底部開始填回（壓實效果）
+      for (int i = 0; i < columnBlocks.length; i++) {
+        board[boardHeight - 1 - i][col] = columnBlocks[i];
+        totalMovedBlocks++;
+      }
+      
+      debugPrint('[TitanGravity] Column $col: compressed ${columnBlocks.length} blocks');
+      
+      // 每處理完一列就觸發 UI 更新，創造分段視覺效果
+      batchProcessor.notifyBoardChanged();
+      
+      // TODO: 在實際游戲中可以加入短暫延遲來增強視覺效果
+      // await Future.delayed(Duration(milliseconds: 50));
+    }
+    
+    debugPrint('[TitanGravity] Execution complete - processed $boardWidth columns, moved $totalMovedBlocks blocks');
+    
     return RuneCastResult.success;
   }
 

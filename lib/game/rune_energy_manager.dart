@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 /// 基础符文能量管理器
 ///
 /// 能量规则：
-/// - 自然消除 1 行 = +10 分
+/// - 自然消除 1 行 = +50 分
 /// - 100 分 = 1 格能量
 /// - 最多 3 格能量
 /// - 可保留溢出进度 (例: 130分 = 1格 + 下一格30%)
@@ -52,12 +52,12 @@ class RuneEnergyManager {
   }
 
   /// 添加分数并转换为能量 (仅限自然消除)
-  /// 每消除 1 行 = +10 分，每 100 分 = 1 格能量
+  /// 每消除 1 行 = +50 分，每 100 分 = 1 格能量
   /// 注意: 法术造成的清除不可调用此方法
   void addScore(int linesCleared) {
     if (linesCleared <= 0) return;
 
-    int scoreToAdd = linesCleared * 10;
+    int scoreToAdd = linesCleared * 50;
     int oldBars = _currentBars;
 
     _currentScore += scoreToAdd;
