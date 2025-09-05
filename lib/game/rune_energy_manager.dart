@@ -66,6 +66,13 @@ class RuneEnergyManager {
     int totalBars = _currentScore ~/ scorePerEnergyBar;
     _currentBars = totalBars.clamp(0, maxEnergy);
 
+    // 🔧 修復：限制總分數不超過最大能量容量
+    // 防止累積超過 3 格的隱藏進度
+    int maxAllowedScore = maxEnergy * scorePerEnergyBar;
+    if (_currentScore > maxAllowedScore) {
+      _currentScore = maxAllowedScore;
+    }
+
     // 触发事件
     if (oldBars != _currentBars) {
       _onEnergyChanged?.call();

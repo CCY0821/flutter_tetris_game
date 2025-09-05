@@ -577,7 +577,6 @@ class RuneSystem {
     return bestRow;
   }
 
-
   /// 執行 Flame Burst
   RuneCastResult _executeFlameBurst(
       List<List<Color?>> board, dynamic gameContext) {
@@ -611,7 +610,7 @@ class RuneSystem {
     debugPrint(
         '[FlameBurst] Target row $targetRow has $blockCount blocks before clearing');
 
-    // 直接執行清除操作（純清除，無重力壓實）
+    // 階段1：直接執行清除操作
     int clearedCount = 0;
     for (int col = 0; col < board[targetRow].length; col++) {
       if (board[targetRow][col] != null) {
@@ -619,44 +618,66 @@ class RuneSystem {
         clearedCount++;
       }
     }
+    debugPrint('[FlameBurst] Cleared $clearedCount blocks from row $targetRow');
+
+    // 階段2：上方方塊整體下移重力效果
+    debugPrint('[FlameBurst] Applying upper block gravity effect...');
+    int movedBlocks = 0;
+
+    // 將消除行上方的所有行整體下移一行
+    for (int row = targetRow; row > 0; row--) {
+      for (int col = 0; col < board[row].length; col++) {
+        board[row][col] = board[row - 1][col]; // 上一行內容複製到當前行
+        if (board[row][col] != null) {
+          movedBlocks++;
+        }
+      }
+    }
+
+    // 最上方補一行空行
+    for (int col = 0; col < board[0].length; col++) {
+      board[0][col] = null;
+    }
+
     debugPrint(
-        '[FlameBurst] Cleared $clearedCount blocks from row $targetRow');
+        '[FlameBurst] Moved $movedBlocks blocks downward (upper gravity)');
 
     // 觸發棋盤更新回調
     batchProcessor.notifyBoardChanged();
     debugPrint(
-        '[FlameBurst] Execution complete - Row cleared (no gravity compression)');
+        '[FlameBurst] Execution complete - Row cleared with upper block gravity effect');
 
     return RuneCastResult.success;
   }
 
   /// 執行 Thunder Strike - 直接操作模式（完全仿照 Flame Burst）
   /// 清除可見區域最右側兩列
-  RuneCastResult _executeThunderStrike(List<List<Color?>> board, dynamic gameContext) {
-    
+  RuneCastResult _executeThunderStrike(
+      List<List<Color?>> board, dynamic gameContext) {
     // 基本驗證和日誌 (仿照 Flame Burst)
     final boardHeight = board.length;
     final boardWidth = board[0].length;
     debugPrint('[ThunderStrike] boardH=$boardHeight, boardW=$boardWidth');
-    
+
     // 邊界檢查
     if (boardWidth < 2) {
       debugPrint('[ThunderStrike] Board too narrow: $boardWidth');
       return RuneCastResult.failure(RuneCastError.systemError, '棋盤寬度不足');
     }
-    
+
     // 目標確定 - 最右側兩列
     final targetColumns = [boardWidth - 2, boardWidth - 1];
-    debugPrint('[ThunderStrike] Target columns: ${targetColumns.join(",")} (rightmost 2 columns)');
-    
+    debugPrint(
+        '[ThunderStrike] Target columns: ${targetColumns.join(",")} (rightmost 2 columns)');
+
     // 可見區域範圍 (完全仿照 Flame Burst)
     final startRow = math.max(0, boardHeight - 20);
-    
+
     // 直接清除操作 - 雙列版本
     int totalClearedBlocks = 0;
     for (int targetColumn in targetColumns) {
       int columnClearedCount = 0;
-      
+
       // 清除單列 (仿照 Flame Burst 的行清除邏輯)
       for (int row = startRow; row < boardHeight; row++) {
         if (board[row][targetColumn] != null) {
@@ -664,44 +685,47 @@ class RuneSystem {
           columnClearedCount++;
         }
       }
-      
-      debugPrint('[ThunderStrike] Cleared $columnClearedCount blocks from column $targetColumn');
+
+      debugPrint(
+          '[ThunderStrike] Cleared $columnClearedCount blocks from column $targetColumn');
       totalClearedBlocks += columnClearedCount;
     }
-    
+
     // 觸發 UI 更新（純清除，無重力壓實）
     batchProcessor.notifyBoardChanged();
-    debugPrint('[ThunderStrike] Execution complete - cleared $totalClearedBlocks blocks from 2 columns (no gravity compression)');
-    
+    debugPrint(
+        '[ThunderStrike] Execution complete - cleared $totalClearedBlocks blocks from 2 columns (no gravity compression)');
+
     return RuneCastResult.success;
   }
 
   /// 執行 Thunder Strike Left - 清除最左側兩列
-  RuneCastResult _executeThunderStrikeLeft(List<List<Color?>> board, dynamic gameContext) {
-    
+  RuneCastResult _executeThunderStrikeLeft(
+      List<List<Color?>> board, dynamic gameContext) {
     // 基本驗證和日誌 (仿照 Thunder Strike)
     final boardHeight = board.length;
     final boardWidth = board[0].length;
     debugPrint('[ThunderStrikeLeft] boardH=$boardHeight, boardW=$boardWidth');
-    
+
     // 邊界檢查
     if (boardWidth < 2) {
       debugPrint('[ThunderStrikeLeft] Board too narrow: $boardWidth');
       return RuneCastResult.failure(RuneCastError.systemError, '棋盤寬度不足');
     }
-    
+
     // 目標確定 - 最左側兩列
     final targetColumns = [0, 1];
-    debugPrint('[ThunderStrikeLeft] Target columns: ${targetColumns.join(",")} (leftmost 2 columns)');
-    
+    debugPrint(
+        '[ThunderStrikeLeft] Target columns: ${targetColumns.join(",")} (leftmost 2 columns)');
+
     // 可見區域範圍 (完全仿照 Thunder Strike)
     final startRow = math.max(0, boardHeight - 20);
-    
+
     // 直接清除操作 - 雙列版本
     int totalClearedBlocks = 0;
     for (int targetColumn in targetColumns) {
       int columnClearedCount = 0;
-      
+
       // 清除單列 (仿照 Thunder Strike 的雙列清除邏輯)
       for (int row = startRow; row < boardHeight; row++) {
         if (board[row][targetColumn] != null) {
@@ -709,15 +733,17 @@ class RuneSystem {
           columnClearedCount++;
         }
       }
-      
-      debugPrint('[ThunderStrikeLeft] Cleared $columnClearedCount blocks from column $targetColumn');
+
+      debugPrint(
+          '[ThunderStrikeLeft] Cleared $columnClearedCount blocks from column $targetColumn');
       totalClearedBlocks += columnClearedCount;
     }
-    
+
     // 觸發 UI 更新（純清除，無重力壓實）
     batchProcessor.notifyBoardChanged();
-    debugPrint('[ThunderStrikeLeft] Execution complete - cleared $totalClearedBlocks blocks from 2 left columns (no gravity compression)');
-    
+    debugPrint(
+        '[ThunderStrikeLeft] Execution complete - cleared $totalClearedBlocks blocks from 2 left columns (no gravity compression)');
+
     return RuneCastResult.success;
   }
 
@@ -727,10 +753,39 @@ class RuneSystem {
     return RuneCastResult.success;
   }
 
-  /// 執行 Angel's Grace
+  /// 執行 Angel's Grace - 清空可視區域所有方塊
   RuneCastResult _executeAngelsGrace(List<List<Color?>> board) {
-    batchProcessor
-        .addOperation(RemoveTopRowsOperation(2, isSpellRemoval: true));
+    // 基本驗證和日誌 (仿照其他直接操作法術)
+    final boardHeight = board.length;
+    final boardWidth = board[0].length;
+    debugPrint('[AngelsGrace] boardH=$boardHeight, boardW=$boardWidth');
+
+    // 可見區域範圍 (rows 20-39)
+    final startRow = math.max(0, boardHeight - 20);
+    debugPrint(
+        '[AngelsGrace] Clearing visible area: rows $startRow-${boardHeight - 1} (all columns)');
+
+    // 直接清除操作 - 清空所有可視區域方塊
+    int totalClearedBlocks = 0;
+
+    // 清除可視區域的所有方塊
+    for (int row = startRow; row < boardHeight; row++) {
+      for (int col = 0; col < boardWidth; col++) {
+        if (board[row][col] != null) {
+          board[row][col] = null;
+          totalClearedBlocks++;
+        }
+      }
+    }
+
+    debugPrint(
+        '[AngelsGrace] Cleared $totalClearedBlocks blocks from visible area');
+
+    // 觸發 UI 更新（純清除，無重力壓實）
+    batchProcessor.notifyBoardChanged();
+    debugPrint(
+        '[AngelsGrace] Execution complete - Angel\'s Grace cleared entire visible area (no gravity compression)');
+
     return RuneCastResult.success;
   }
 
@@ -753,20 +808,22 @@ class RuneSystem {
       debugPrint('[DragonRoar] No active tetromino');
       return RuneCastResult.failure(RuneCastError.systemError, '無活動方塊');
     }
-    
+
     // 添加詳細的調試日誌（仿照 Flame Burst）
-    debugPrint('[DragonRoar] boardH=${board.length}, boardW=${board[0].length}');
-    
+    debugPrint(
+        '[DragonRoar] boardH=${board.length}, boardW=${board[0].length}');
+
     // 清除可見遊戲區域的底部 3 行
     final visibleAreaBottom = board.length - 1; // 總板面最底行 (39)
     final targetRows = [
-      visibleAreaBottom - 2,  // 可見區域倒數第3行 (37)
-      visibleAreaBottom - 1,  // 可見區域倒數第2行 (38)
-      visibleAreaBottom       // 可見區域最底行 (39)
+      visibleAreaBottom - 2, // 可見區域倒數第3行 (37)
+      visibleAreaBottom - 1, // 可見區域倒數第2行 (38)
+      visibleAreaBottom // 可見區域最底行 (39)
     ];
-    
-    debugPrint('[DragonRoar] Targeting visible area bottom 3 rows: ${targetRows.join(",")} (rows ${targetRows[0]}-${targetRows[2]})');
-    
+
+    debugPrint(
+        '[DragonRoar] Targeting visible area bottom 3 rows: ${targetRows.join(",")} (rows ${targetRows[0]}-${targetRows[2]})');
+
     // 階段1：直接執行清除操作（仿照 Flame Burst）
     int totalClearedBlocks = 0;
     for (int targetRow in targetRows) {
@@ -777,10 +834,12 @@ class RuneSystem {
           blockCount++;
         }
       }
-      debugPrint('[DragonRoar] Target row $targetRow has $blockCount blocks before clearing');
-      
+      debugPrint(
+          '[DragonRoar] Target row $targetRow has $blockCount blocks before clearing');
+
       int clearedCount = 0;
-      debugPrint('[DragonRoar] Clearing row $targetRow: board width=${board[targetRow].length}');
+      debugPrint(
+          '[DragonRoar] Clearing row $targetRow: board width=${board[targetRow].length}');
       for (int col = 0; col < board[targetRow].length; col++) {
         if (board[targetRow][col] != null) {
           debugPrint('[DragonRoar] Clearing block at [$targetRow, $col]');
@@ -788,8 +847,9 @@ class RuneSystem {
           clearedCount++;
         }
       }
-      debugPrint('[DragonRoar] Cleared $clearedCount blocks from row $targetRow');
-      
+      debugPrint(
+          '[DragonRoar] Cleared $clearedCount blocks from row $targetRow');
+
       // 驗證清除結果
       int remainingCount = 0;
       for (int col = 0; col < board[targetRow].length; col++) {
@@ -797,14 +857,16 @@ class RuneSystem {
           remainingCount++;
         }
       }
-      debugPrint('[DragonRoar] After clearing row $targetRow: remaining blocks = $remainingCount');
+      debugPrint(
+          '[DragonRoar] After clearing row $targetRow: remaining blocks = $remainingCount');
       totalClearedBlocks += clearedCount;
     }
-    
+
     // 觸發棋盤更新回調（純清除，無重力壓實）
     batchProcessor.notifyBoardChanged();
-    debugPrint('[DragonRoar] Execution complete - cleared $totalClearedBlocks blocks from 3 rows (no gravity compression)');
-    
+    debugPrint(
+        '[DragonRoar] Execution complete - cleared $totalClearedBlocks blocks from 3 rows (no gravity compression)');
+
     return RuneCastResult.success;
   }
 
@@ -841,54 +903,57 @@ class RuneSystem {
       List<List<Color?>> board, dynamic gameContext) {
     final boardHeight = board.length;
     final boardWidth = board[0].length;
-    
+
     debugPrint('[TitanGravity] boardH=$boardHeight, boardW=$boardWidth');
-    
+
     // 確定可視區域範圍（底部20行）
     final startRow = math.max(0, boardHeight - 20);
-    debugPrint('[TitanGravity] Processing visible area: rows $startRow to ${boardHeight - 1}');
-    
+    debugPrint(
+        '[TitanGravity] Processing visible area: rows $startRow to ${boardHeight - 1}');
+
     int totalMovedBlocks = 0;
-    
+
     // 分段壓實：逐列處理
     for (int col = 0; col < boardWidth; col++) {
       // 收集該列在可視區域的所有非空方塊
       final columnBlocks = <Color?>[];
-      
+
       for (int row = boardHeight - 1; row >= startRow; row--) {
         if (board[row][col] != null) {
           columnBlocks.add(board[row][col]);
         }
       }
-      
+
       // 如果該列沒有方塊，跳過
       if (columnBlocks.isEmpty) {
         debugPrint('[TitanGravity] Column $col: no blocks to compress');
         continue;
       }
-      
+
       // 清空該列的可視區域
       for (int row = startRow; row < boardHeight; row++) {
         board[row][col] = null;
       }
-      
+
       // 將方塊從底部開始填回（壓實效果）
       for (int i = 0; i < columnBlocks.length; i++) {
         board[boardHeight - 1 - i][col] = columnBlocks[i];
         totalMovedBlocks++;
       }
-      
-      debugPrint('[TitanGravity] Column $col: compressed ${columnBlocks.length} blocks');
-      
+
+      debugPrint(
+          '[TitanGravity] Column $col: compressed ${columnBlocks.length} blocks');
+
       // 每處理完一列就觸發 UI 更新，創造分段視覺效果
       batchProcessor.notifyBoardChanged();
-      
+
       // TODO: 在實際游戲中可以加入短暫延遲來增強視覺效果
       // await Future.delayed(Duration(milliseconds: 50));
     }
-    
-    debugPrint('[TitanGravity] Execution complete - processed $boardWidth columns, moved $totalMovedBlocks blocks');
-    
+
+    debugPrint(
+        '[TitanGravity] Execution complete - processed $boardWidth columns, moved $totalMovedBlocks blocks');
+
     return RuneCastResult.success;
   }
 
@@ -982,22 +1047,24 @@ class RuneSystem {
   int _calculateSmartCenterRow(Tetromino tetromino, List<List<Color?>> board) {
     final positions = tetromino.getAbsolutePositions();
     if (positions.isEmpty) return board.length ~/ 2;
-    
-    final centerRow = positions.map((p) => p.dy.round()).reduce((a, b) => a + b) ~/ positions.length;
+
+    final centerRow =
+        positions.map((p) => p.dy.round()).reduce((a, b) => a + b) ~/
+            positions.length;
     return centerRow.clamp(1, board.length - 2);
   }
 
   /// 選擇目標行：中心±1行
   List<int> _selectOptimalTargetRows(int centerRow, List<List<Color?>> board) {
     final targets = <int>[];
-    
+
     for (int offset = -1; offset <= 1; offset++) {
       final row = centerRow + offset;
       if (row >= 0 && row < board.length) {
         targets.add(row);
       }
     }
-    
+
     return targets;
   }
 }
