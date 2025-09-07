@@ -348,7 +348,7 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
               final screenWidth = constraints.maxWidth;
               final itemWidth = (screenWidth - 12) / 2; // 2列，減去間距
               final aspectRatio = (itemWidth / 100).clamp(1.8, 3.0); // 動態計算比例
-              
+
               return GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),

@@ -4,10 +4,14 @@ import 'game/game_board.dart';
 import 'game/monotonic_timer.dart';
 import 'theme/game_theme.dart';
 import 'core/constants.dart';
+import 'core/dual_logger.dart';
 import 'widgets/scanline_overlay.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // 初始化雙路徑日誌系統
+  await DualLogger.instance.init();
 
   // 設置系統UI樣式
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(

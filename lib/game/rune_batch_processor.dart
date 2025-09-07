@@ -235,7 +235,7 @@ class RuneBatchProcessor {
   void setOnBoardChanged(VoidCallback callback) {
     _onBoardChanged = callback;
   }
-  
+
   /// 手動觸發棋盤變化通知
   void notifyBoardChanged() {
     _onBoardChanged?.call();

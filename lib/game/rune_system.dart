@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../models/tetromino.dart';
+import '../core/dual_logger.dart';
 import 'game_state.dart';
 import 'monotonic_timer.dart';
 import 'rune_events.dart';
@@ -105,17 +106,31 @@ class RuneSlot {
 
   /// 獲取冷卻剩餘時間（毫秒）
   int get cooldownRemaining =>
-      math.max(0, cooldownEndTime - MonotonicTimer.now);
+      _getCooldownRemaining(MonotonicTimer.now);
+  
+  /// 內部方法：用統一的 nowMs 計算剩餘時間
+  int _getCooldownRemaining(int nowMs) {
+    if (cooldownEndTime <= 0) return 0;
+    final raw = cooldownEndTime - nowMs;
+    const kCooldownEpsilonMs = 16; // 一幀誤差容忍
+    return (raw <= kCooldownEpsilonMs) ? 0 : raw;
+  }
 
   /// 獲取效果剩餘時間（毫秒）
   int get effectRemaining => math.max(0, effectEndTime - MonotonicTimer.now);
 
   /// 獲取冷卻進度 (0.0 - 1.0)
   double get cooldownProgress {
-    if (!isCooling || cooldownEndTime <= cooldownStartTime) return 1.0;
-    final elapsed = MonotonicTimer.now - cooldownStartTime;
+    return _getCooldownProgress(MonotonicTimer.now);
+  }
+  
+  /// 內部方法：用統一的邏輯計算冷卻進度
+  double _getCooldownProgress(int nowMs) {
     final total = cooldownEndTime - cooldownStartTime;
-    return (elapsed / total).clamp(0.0, 1.0);
+    if (total <= 0) return 1.0;
+    
+    final remaining = _getCooldownRemaining(nowMs);
+    return (1.0 - remaining / total).clamp(0.0, 1.0);
   }
 
   /// 獲取效果進度 (0.0 - 1.0)
@@ -141,18 +156,34 @@ class RuneSlot {
       effectStartTime = 0;
     }
 
-    // 檢查冷卻是否結束
-    if (cooldownEndTime > 0 && now >= cooldownEndTime) {
+    // 🔥 關鍵修復：用統一的 clamp 邏輯計算剩餘時間
+    final cooldownRemainingMs = _getCooldownRemaining(now);
+    
+    // 檢查冷卻是否結束（用 clamp 後的結果判斷）
+    if (cooldownEndTime > 0 && cooldownRemainingMs == 0) {
       cooldownEndTime = 0;
       cooldownStartTime = 0;
+      logCrit('RuneSlot.update: Cooldown completed, resetting times');
     }
 
-    // 更新狀態
+    // 更新狀態（用同一套邏輯：clamp 後的剩餘時間）
+    final oldState = state;
     if (effectEndTime > now) {
       state = RuneSlotState.active;
-    } else if (cooldownEndTime > now) {
+    } else if (cooldownRemainingMs > 0) {
       state = RuneSlotState.cooling;
     } else {
+      state = RuneSlotState.ready;
+    }
+    
+    // 調試日誌：狀態變化
+    if (oldState != state) {
+      logCrit('RuneSlot.update: State changed from $oldState to $state (remaining=${cooldownRemainingMs}ms)');
+    }
+    
+    // 自癒保險：防呆檢測（理論上不應該再觸發）
+    if (state == RuneSlotState.cooling && cooldownRemainingMs == 0) {
+      logCrit('RuneSlot.update: AUTO-HEAL - forcing cooling->ready');
       state = RuneSlotState.ready;
     }
   }
@@ -162,6 +193,7 @@ class RuneSlot {
     final now = MonotonicTimer.now;
     cooldownStartTime = now;
     cooldownEndTime = now + durationMs;
+    debugPrint('RuneSlot: Cooldown started - now=$now, endTime=$cooldownEndTime, duration=${durationMs}ms');
   }
 
   /// 開始效果
@@ -449,17 +481,24 @@ class RuneSystem {
 
       // 如果是退還能量的情況，不消耗能量和冷卻
       if (executeResult.energyRefunded) {
+        logCrit('RuneSystem: Energy refunded, skipping cooldown');
         return executeResult;
       }
 
       // 消耗能量
       if (_energyManager != null) {
         _energyManager!.consumeBars(definition.energyCost);
+        logCrit('RuneSystem: Energy consumed ${definition.energyCost} bars');
       }
 
       // 開始冷卻
-      slot.startCooldown(
-          RuneBalance.getAdjustedCooldown(slot.runeType!) * 1000);
+      final cooldownMs = RuneBalance.getAdjustedCooldown(slot.runeType!) * 1000;
+      logCrit('RuneSystem: Starting cooldown for ${slot.runeType} - ${cooldownMs}ms');
+      slot.startCooldown(cooldownMs);
+      
+      // 立即更新狀態，確保冷卻生效
+      slot.update();
+      logCrit('RuneSystem: Slot state after cooldown: ${slot.state}, isCooling=${slot.isCooling}');
 
       // 開始效果（如果是持續性符文）
       if (definition.isTemporal && definition.durationSeconds > 0) {

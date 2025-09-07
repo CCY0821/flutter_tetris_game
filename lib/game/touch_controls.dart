@@ -1,12 +1,19 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'game_logic.dart';
 import 'game_state.dart';
 import 'rune_system.dart';
 import 'rune_definitions.dart';
 import '../theme/game_theme.dart';
 import '../core/constants.dart';
+import '../core/dual_logger.dart';
+
+/// 關鍵事件同步日誌，避免被節流沖掉
+void logCritical(String msg) {
+  logCrit(msg);
+}
 
 class TouchControls extends StatefulWidget {
   final GameLogic gameLogic;
@@ -26,18 +33,66 @@ class TouchControls extends StatefulWidget {
 
 class _TouchControlsState extends State<TouchControls> {
   Timer? _repeatTimer;
+  Timer? _cooldownUpdateTimer;
   String? _activeButton;
+
+  void _attach() {
+    logCritical('TouchControls: Attaching listeners');
+    // 設置UI更新回調，當能量變化時觸發rebuild
+    widget.gameState.setUIUpdateCallback(() {
+      logCritical('TouchControls: UI update callback triggered!');
+      if (mounted) {
+        setState(() {
+          logCritical('TouchControls: setState called - rebuilding UI');
+        });
+      }
+    });
+    
+    // 啟動冷卻倒數更新定時器 - 每秒更新一次
+    _startCooldownUpdateTimer();
+  }
+
+  void _detach() {
+    logCritical('TouchControls: Detaching listeners');
+    _repeatTimer?.cancel();
+    _cooldownUpdateTimer?.cancel();
+  }
 
   @override
   void initState() {
     super.initState();
-    // 設置UI更新回調，當能量變化時觸發rebuild
-    widget.gameState.setUIUpdateCallback(() {
-      debugPrint('TouchControls: UI update callback triggered!');
+    _attach();
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    _detach();
+    _attach();
+    logCritical('TouchControls: reassemble - listeners reattached');
+  }
+
+  void _startCooldownUpdateTimer() {
+    _cooldownUpdateTimer?.cancel();
+    _cooldownUpdateTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) {
-        setState(() {
-          debugPrint('TouchControls: setState called - rebuilding UI');
-        });
+        // 檢查是否有任何符文槽在冷卻中
+        bool hasAnyCooling = false;
+        if (widget.gameState.hasRuneSystemInitialized) {
+          for (final slot in widget.gameState.runeSystem.slots) {
+            if (slot.isCooling) {
+              hasAnyCooling = true;
+              break;
+            }
+          }
+        }
+        
+        // 只有在有符文冷卻中時才更新UI，減少不必要的重繪
+        if (hasAnyCooling) {
+          setState(() {
+            // 冷卻倒數UI更新
+          });
+        }
       }
     });
   }
@@ -103,7 +158,7 @@ class _TouchControlsState extends State<TouchControls> {
 
   @override
   void dispose() {
-    _repeatTimer?.cancel();
+    _detach();
     super.dispose();
   }
 
@@ -126,17 +181,29 @@ class _TouchControlsState extends State<TouchControls> {
 
     final definition = RuneConstants.getDefinition(runeType);
     final isDisabled = widget.gameState.isPaused || widget.gameState.isGameOver;
-    final hasEnoughEnergy = widget.gameState.runeEnergyManager.canConsume(definition.energyCost);
+    final hasEnoughEnergy =
+        widget.gameState.runeEnergyManager.canConsume(definition.energyCost);
     final canCast = runeSlot.canCast && !isDisabled && hasEnoughEnergy;
-    
+
+    // 檢查 UI 與核心狀態是否同步
+    final coreEnergyBars = widget.gameState.runeEnergyManager.currentBars;
+    final coreCooldown = runeSlot.cooldownRemaining;
+    if (coreEnergyBars != widget.gameState.runeEnergyManager.currentBars) {
+      logCritical('Energy desync UI=$coreEnergyBars core=${widget.gameState.runeEnergyManager.currentBars}');
+    }
+
+    // 添加冷卻狀態調試日誌
     debugPrint('RuneSlot $index (${definition.name}): '
         'canCast=${runeSlot.canCast}, disabled=$isDisabled, '
         'hasEnoughEnergy=$hasEnoughEnergy (need ${definition.energyCost}), '
-        'final canCast=$canCast');
+        'final canCast=$canCast, '
+        'isCooling=${runeSlot.isCooling}, '
+        'cooldownRemaining=${runeSlot.cooldownRemaining}ms, '
+        'cooldownProgress=${runeSlot.cooldownProgress}');
 
     return GestureDetector(
       onTap: () {
-        debugPrint('RuneSlot $index clicked! canCast=$canCast');
+        logCritical('RuneSlot $index clicked! canCast=$canCast');
         if (canCast) {
           _castRune(index);
         } else {
@@ -188,41 +255,84 @@ class _TouchControlsState extends State<TouchControls> {
               ),
             ),
 
-            // 冷卻進度指示器
+            // 賽博龐克風格冷卻進度環
             if (runeSlot.isCooling)
               Positioned.fill(
                 child: CircularProgressIndicator(
                   value: runeSlot.cooldownProgress,
-                  strokeWidth: 2,
-                  backgroundColor: Colors.transparent,
+                  strokeWidth: 3,
+                  backgroundColor: Colors.black.withOpacity(0.3),
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    definition.themeColor.withOpacity(0.7),
+                    cyberpunkAccent.withOpacity(0.8),
                   ),
                 ),
               ),
 
-            // 冷卻時間文字
+            // 賽博龐克風格冷卻倒數文字
             if (runeSlot.isCooling)
               Positioned.fill(
                 child: Center(
-                  child: Text(
-                    '${(runeSlot.cooldownRemaining / 1000).ceil()}',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.8),
-                          blurRadius: 2,
-                        ),
-                      ],
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '${(runeSlot.cooldownRemaining / 1000).ceil()}',
+                      style: TextStyle(
+                        color: const Color(0xFF00FF88), // 賽博龐克綠色
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            color: Colors.white,
+                            blurRadius: 2,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
 
-            // 效果激活指示器
+            // 效果激活時的倒數顯示（用於 Time Slow 等持續性符文）
+            if (runeSlot.isActive)
+              Positioned.fill(
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: cyberpunkAccent.withOpacity(0.6),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      '${(runeSlot.effectRemaining / 1000).ceil()}',
+                      style: TextStyle(
+                        color: cyberpunkAccent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            color: cyberpunkAccent.withOpacity(0.7),
+                            blurRadius: 6,
+                          ),
+                          Shadow(
+                            color: Colors.black,
+                            blurRadius: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+            // 效果激活脈衝指示器（小圓點）
             if (runeSlot.isActive)
               Positioned(
                 top: 2,
@@ -235,8 +345,9 @@ class _TouchControlsState extends State<TouchControls> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: cyberpunkAccent.withOpacity(0.5),
-                        blurRadius: 4,
+                        color: cyberpunkAccent.withOpacity(0.8),
+                        blurRadius: 6,
+                        spreadRadius: 1,
                       ),
                     ],
                   ),
@@ -286,32 +397,45 @@ class _TouchControlsState extends State<TouchControls> {
   }
 
   void _castRune(int index) {
-    // 調試信息：打印當前狀態
-    final loadout = widget.gameState.runeLoadout;
-    final energyManager = widget.gameState.runeEnergyManager;
-    final runeType = loadout.getSlot(index);
+    logCritical('=== RUNE CAST DEBUG ===');
     
-    debugPrint('=== RUNE CAST DEBUG ===');
-    debugPrint('Slot $index: ${runeType?.toString() ?? "EMPTY"}');
-    debugPrint('Energy Status: ${energyManager.toString()}');
-    debugPrint('Energy canConsume(1): ${energyManager.canConsume(1)}');
-    debugPrint('Energy canConsume(2): ${energyManager.canConsume(2)}');
-    debugPrint('Energy canConsume(3): ${energyManager.canConsume(3)}');
-    
-    final result = widget.gameLogic.castRune(index);
-    
-    debugPrint('Cast Result: Success=${result.isSuccess}, Error=${result.error}, Message=${result.message}');
-    debugPrint('=======================');
+    try {
+      // 調試信息：打印當前狀態
+      final loadout = widget.gameState.runeLoadout;
+      logCritical('Step 1: Got loadout');
+      
+      final energyManager = widget.gameState.runeEnergyManager;
+      logCritical('Step 2: Got energy manager');
+      
+      final runeType = loadout.getSlot(index);
+      logCritical('Step 3: Got runeType for slot $index');
+      
+      logCritical('Slot $index: ${runeType?.toString() ?? "EMPTY"}');
+      logCritical('Energy Status: ${energyManager.toString()}');
+      logCritical('Energy canConsume(1): ${energyManager.canConsume(1)}');
+      logCritical('Energy canConsume(2): ${energyManager.canConsume(2)}');
+      logCritical('Energy canConsume(3): ${energyManager.canConsume(3)}');
+      
+      logCritical('Step 4: About to call castRune');
+      final result = widget.gameLogic.castRune(index);
+      logCritical('Step 5: castRune returned');
 
-    if (!result.isSuccess) {
-      _showRuneErrorByResult(result, index);
-    } else {
-      // 成功施法，觸覺反饋
-      HapticFeedback.mediumImpact();
+      logCritical(
+          'Cast Result: Success=${result.isSuccess}, Error=${result.error}, Message=${result.message}');
+      logCritical('=======================');
 
-      if (result.energyRefunded) {
-        _showRuneMessage('Energy Refunded', Colors.yellow);
+      if (!result.isSuccess) {
+        _showRuneErrorByResult(result, index);
+      } else {
+        // 成功施法，觸覺反饋
+        HapticFeedback.mediumImpact();
+
+        if (result.energyRefunded) {
+          _showRuneMessage('Energy Refunded', Colors.yellow);
+        }
       }
+    } catch (e) {
+      logCritical('ERROR in _castRune: $e');
     }
   }
 

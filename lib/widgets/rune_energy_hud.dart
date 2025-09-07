@@ -318,7 +318,7 @@ class _EnergyCellCanvasPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // 防止溢出：确保比例值在有效范围内
     final clampedRatio = ratio.clamp(0.0, 1.0);
-    
+
     // 1. 外框计算（像素对齐）
     final outerRect = snapRect(Offset.zero & size, devicePixelRatio);
 
@@ -356,7 +356,8 @@ class _EnergyCellCanvasPainter extends CustomPainter {
 
     // 7. 绘制填充
     if (clampedRatio > 0.0) {
-      final fillHeight = snap(contentRect.height * clampedRatio, devicePixelRatio);
+      final fillHeight =
+          snap(contentRect.height * clampedRatio, devicePixelRatio);
       // 额外边界检查：确保fillHeight不超过内容区域高度
       final safeFillHeight = fillHeight.clamp(0.0, contentRect.height);
       final fillRect = snapRect(

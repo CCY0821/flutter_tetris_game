@@ -44,7 +44,12 @@
       "Bash(del \"C:\\Users\\G512LV\\flutter_tetris_game\\test\\energy_bar_test.dart\")",
       "WebFetch(domain:github.com)",
       "Bash(git log:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(del debug_energy.dart)",
+      "Read(/C:\\Users\\G512LV\\flutter_tetris_game\\lib\\game/**)",
+      "Read(/C:\\Users\\G512LV\\flutter_tetris_game\\lib\\game/**)",
+      "Read(/C:\\Users\\G512LV\\flutter_tetris_game\\lib\\game/**)",
+      "Bash(/bashes)"
     ],
     "deny": [],
     "additionalDirectories": [

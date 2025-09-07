@@ -18,7 +18,7 @@ class GameLogic {
   void onLogicFrameStart() {
     // 更新符文系統狀態
     gameState.runeSystem.onLogicFrameStart();
-    
+
     // 執行符文系統的批處理操作
     executeRuneBatch();
   }
@@ -104,6 +104,9 @@ class GameLogic {
 
     if (clearedRows > 0) {
       gameState.score += scoringResult.points;
+
+      // 🔧 修復：添加消行能量獲得 (每消行1行 = +50分，每100分 = 1格能量)
+      gameState.runeEnergyManager.addScore(clearedRows);
 
       // 即時檢查高分更新
       _checkHighScoreRealtime();
