@@ -282,7 +282,7 @@ class GameUIComponents {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (combo > 0) ...[
-            Icon(
+            const Icon(
               Icons.flash_on,
               color: GameTheme.accentBlue,
               size: 16,
@@ -299,7 +299,7 @@ class GameUIComponents {
           ],
           if (combo > 0 && isBackToBackReady) const SizedBox(width: 8),
           if (isBackToBackReady) ...[
-            Icon(
+            const Icon(
               Icons.repeat,
               color: GameTheme.highlight,
               size: 16,

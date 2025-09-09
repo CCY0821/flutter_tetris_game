@@ -648,7 +648,7 @@ class _GameBoardState extends State<GameBoard>
                                         const EdgeInsets.symmetric(vertical: 5),
                                       ),
                                     ),
-                                    child: Icon(Icons.refresh, size: 12),
+                                    child: const Icon(Icons.refresh, size: 12),
                                   ),
                                 ),
                               ),
@@ -677,13 +677,13 @@ class _GameBoardState extends State<GameBoard>
                                     Column(
                                       children: [
                                         Text('LINES',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontSize: 8,
                                                 color:
                                                     GameTheme.textSecondary)),
                                         Text(
                                             '${gameState.marathonSystem.totalLinesCleared}',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontSize: 10,
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold)),
@@ -692,13 +692,13 @@ class _GameBoardState extends State<GameBoard>
                                     Column(
                                       children: [
                                         Text('LEVEL',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontSize: 8,
                                                 color:
                                                     GameTheme.textSecondary)),
                                         Text(
                                             '${gameState.marathonSystem.currentLevel}',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontSize: 10,
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold)),
@@ -707,13 +707,13 @@ class _GameBoardState extends State<GameBoard>
                                     Column(
                                       children: [
                                         Text('COMBO',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontSize: 8,
                                                 color:
                                                     GameTheme.textSecondary)),
                                         Text(
                                             '${gameState.scoringService.currentCombo}',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontSize: 10,
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold)),
@@ -747,7 +747,7 @@ class _GameBoardState extends State<GameBoard>
                                   children: [
                                     Text(
                                       'LAST SCORE',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontSize: 8,
                                           color: GameTheme.textSecondary),
                                     ),
