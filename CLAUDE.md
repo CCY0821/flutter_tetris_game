@@ -4,8 +4,15 @@ This is a Flutter-based Tetris game project. When working on this codebase, plea
 
 ## Project Structure
 - This is a Flutter application written in Dart
-- Main game logic and UI components are likely in the `lib/` directory
+- **📋 詳細檔案結構參考**: 查看 `PROJECT_STRUCTURE.md` 獲得完整的檔案功能對照表
+- **⚡ 快速定位指南**:
+  - 符文槽UI/冷卻動畫 → `lib/game/touch_controls.dart`
+  - 符文效果/施法邏輯 → `lib/game/rune_system.dart`
+  - 遊戲核心邏輯 → `lib/game/game_logic.dart`
+  - 遊戲狀態管理 → `lib/game/game_state.dart`
+  - 能量系統 → `lib/game/rune_energy_manager.dart`
 - Game features include:
+  - Complete rune system with energy management
   - Next piece preview
   - Game pause/restart functionality
   - Game Over detection and display
@@ -43,6 +50,7 @@ flutter build apk
 
 **遇到已知問題時，請閱讀詳細解決方案文檔**:
 - 符文系統問題 → 查看 `docs/troubleshooting/rune_system_debug.md`
+- **符文冷卻問題** → 查看 `docs/troubleshooting/rune_cooldown_fix.md` ⭐
 - UI 渲染問題 → 查看 `docs/troubleshooting/ui_overflow_fixes.md`  
 - 法術功能問題 → 查看 `docs/troubleshooting/spell_implementation.md`
 
