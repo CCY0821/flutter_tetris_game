@@ -549,7 +549,7 @@ class _GameBoardState extends State<GameBoard>
                   // 右側控制區
                   Flexible(
                     flex: 2,
-                    child: Container(
+                    child: SizedBox(
                       height: GameState.rowCount * cellSize, // 與遊戲場高度對齊
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
@@ -593,7 +593,7 @@ class _GameBoardState extends State<GameBoard>
                                         const EdgeInsets.symmetric(vertical: 5),
                                       ),
                                     ),
-                                    child: Icon(Icons.settings, size: 12),
+                                    child: const Icon(Icons.settings, size: 12),
                                   ),
                                 ),
                               ),
@@ -682,7 +682,7 @@ class _GameBoardState extends State<GameBoard>
                                                 color:
                                                     GameTheme.textSecondary)),
                                         Text(
-                                            '${gameState.marathonSystem?.totalLinesCleared ?? 0}',
+                                            '${gameState.marathonSystem.totalLinesCleared}',
                                             style: TextStyle(
                                                 fontSize: 10,
                                                 color: Colors.white,
@@ -697,7 +697,7 @@ class _GameBoardState extends State<GameBoard>
                                                 color:
                                                     GameTheme.textSecondary)),
                                         Text(
-                                            '${gameState.marathonSystem?.currentLevel ?? 1}',
+                                            '${gameState.marathonSystem.currentLevel}',
                                             style: TextStyle(
                                                 fontSize: 10,
                                                 color: Colors.white,

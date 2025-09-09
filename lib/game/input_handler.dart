@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'game_state.dart';
 import 'game_logic.dart';
-import 'game_ui_components.dart';
 
 class InputHandler {
   final GameState gameState;

@@ -7,7 +7,6 @@ import 'game_state.dart';
 import 'rune_system.dart';
 import 'rune_definitions.dart';
 import 'monotonic_timer.dart';
-import '../theme/game_theme.dart';
 import '../core/constants.dart';
 import '../core/dual_logger.dart';
 
@@ -77,15 +76,11 @@ class _TouchControlsState extends State<TouchControls> {
     _cooldownUpdateTimer?.cancel();
     _cooldownUpdateTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) {
-        // 檢查是否有任何符文槽在冷卻中
-        bool hasAnyCooling = false;
+        // 更新所有符文槽狀態
         if (widget.gameState.hasRuneSystemInitialized) {
           for (final slot in widget.gameState.runeSystem.slots) {
             // 🔥 關鍵修復：每次檢查時都更新槽位狀態
             slot.update();
-            if (slot.isCooling) {
-              hasAnyCooling = true;
-            }
           }
         }
 
@@ -192,7 +187,6 @@ class _TouchControlsState extends State<TouchControls> {
 
     // 檢查 UI 與核心狀態是否同步
     final coreEnergyBars = widget.gameState.runeEnergyManager.currentBars;
-    final coreCooldown = runeSlot.cooldownRemaining;
     if (coreEnergyBars != widget.gameState.runeEnergyManager.currentBars) {
       logCritical(
           'Energy desync UI=$coreEnergyBars core=${widget.gameState.runeEnergyManager.currentBars}');
@@ -489,12 +483,11 @@ class _TouchControlsState extends State<TouchControls> {
           widget.gameState.isPaused || widget.gameState.isGameOver;
       final hasEnoughEnergy =
           widget.gameState.runeEnergyManager.canConsume(definition.energyCost);
-      final finalCanCast = runeSlot.canCast && !isDisabled && hasEnoughEnergy;
 
       // 按優先級檢查錯誤原因
       if (!runeSlot.canCast && runeSlot.cooldownRemaining > 0) {
         _showRuneErrorFeedback(RuneCastError.cooldownActive, index);
-      } else if (runeSlot.isDisabled) {
+      } else if (runeSlot.isDisabled || isDisabled) {
         _showRuneErrorFeedback(RuneCastError.temporalMutualExclusive, index);
       } else if (!hasEnoughEnergy) {
         _showRuneErrorFeedback(RuneCastError.energyInsufficient, index);

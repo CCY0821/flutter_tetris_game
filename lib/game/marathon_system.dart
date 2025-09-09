@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 /// Marathon 模式速度曲線系統
 /// 基於 Tetris.wiki 的標準 Marathon 模式規格
 class MarathonSystem {

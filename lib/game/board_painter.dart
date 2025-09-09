@@ -14,11 +14,9 @@ class BoardPainter extends CustomPainter {
   static final Paint _backgroundPaint = Paint();
   static final Paint _gridPaint = Paint()..strokeWidth = 0.5;
   static final Paint _gridGlowPaint = Paint()..strokeWidth = 0.3; // 微光邊緣用更細線寬
-  static final Paint _blockPaint = Paint();
   static final Paint _highlightPaint = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1;
-  static final Paint _shadowPaint = Paint();
   static final Paint _glowPaint = Paint(); // 單格外發光效果
   static final Paint _gradientPaint = Paint(); // 垂直漸層高光
   static final Paint _innerBorderPaint = Paint() // 內描邊效果
