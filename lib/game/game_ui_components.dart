@@ -192,13 +192,10 @@ class GameUIComponents {
               Row(
                 children: [
                   const SizedBox(width: 40), // 對齊NEXT文字下方
-                  ...nextTetrominos
-                      .take(3)
-                      .map((tetromino) => Container(
-                            margin: const EdgeInsets.only(right: 2),
-                            child: _buildSmallPreview(tetromino),
-                          ))
-                      .toList(),
+                  ...nextTetrominos.take(3).map((tetromino) => Container(
+                        margin: const EdgeInsets.only(right: 2),
+                        child: _buildSmallPreview(tetromino),
+                      )),
                 ],
               ),
             ],
@@ -796,7 +793,7 @@ class GameUIComponents {
   }
 
   static Widget ghostPieceControlButton(bool isEnabled, VoidCallback onToggle) {
-    return Container(
+    return SizedBox(
       width: 20,
       child: Column(
         children: [
@@ -832,7 +829,7 @@ class GameUIComponents {
   }
 
   static Widget controlHelpButton(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 20,
       child: Column(
         children: [
