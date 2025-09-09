@@ -6,6 +6,7 @@ import 'game_logic.dart';
 import 'game_state.dart';
 import 'rune_system.dart';
 import 'rune_definitions.dart';
+import 'monotonic_timer.dart';
 import '../theme/game_theme.dart';
 import '../core/constants.dart';
 import '../core/dual_logger.dart';
@@ -47,7 +48,7 @@ class _TouchControlsState extends State<TouchControls> {
         });
       }
     });
-    
+
     // 啟動冷卻倒數更新定時器 - 每秒更新一次
     _startCooldownUpdateTimer();
   }
@@ -80,19 +81,18 @@ class _TouchControlsState extends State<TouchControls> {
         bool hasAnyCooling = false;
         if (widget.gameState.hasRuneSystemInitialized) {
           for (final slot in widget.gameState.runeSystem.slots) {
+            // 🔥 關鍵修復：每次檢查時都更新槽位狀態
+            slot.update();
             if (slot.isCooling) {
               hasAnyCooling = true;
-              break;
             }
           }
         }
-        
-        // 只有在有符文冷卻中時才更新UI，減少不必要的重繪
-        if (hasAnyCooling) {
-          setState(() {
-            // 冷卻倒數UI更新
-          });
-        }
+
+        // 🔥 修復：無論是否有冷卻都要更新UI，確保狀態同步
+        setState(() {
+          // 冷卻倒數UI更新
+        });
       }
     });
   }
@@ -181,30 +181,57 @@ class _TouchControlsState extends State<TouchControls> {
 
     final definition = RuneConstants.getDefinition(runeType);
     final isDisabled = widget.gameState.isPaused || widget.gameState.isGameOver;
+    final currentEnergyBars = widget.gameState.runeEnergyManager.currentBars;
     final hasEnoughEnergy =
         widget.gameState.runeEnergyManager.canConsume(definition.energyCost);
     final canCast = runeSlot.canCast && !isDisabled && hasEnoughEnergy;
+
+    // 🔥 檢查能量檢測是否有問題
+    debugPrint(
+        'ENERGY DEBUG: currentBars=$currentEnergyBars, needCost=${definition.energyCost}, canConsume=$hasEnoughEnergy');
 
     // 檢查 UI 與核心狀態是否同步
     final coreEnergyBars = widget.gameState.runeEnergyManager.currentBars;
     final coreCooldown = runeSlot.cooldownRemaining;
     if (coreEnergyBars != widget.gameState.runeEnergyManager.currentBars) {
-      logCritical('Energy desync UI=$coreEnergyBars core=${widget.gameState.runeEnergyManager.currentBars}');
+      logCritical(
+          'Energy desync UI=$coreEnergyBars core=${widget.gameState.runeEnergyManager.currentBars}');
     }
 
-    // 添加冷卻狀態調試日誌
+    // 🔥 詳細除錯：追蹤所有影響 canCast 的因子
     debugPrint('RuneSlot $index (${definition.name}): '
-        'canCast=${runeSlot.canCast}, disabled=$isDisabled, '
-        'hasEnoughEnergy=$hasEnoughEnergy (need ${definition.energyCost}), '
-        'final canCast=$canCast, '
-        'isCooling=${runeSlot.isCooling}, '
-        'cooldownRemaining=${runeSlot.cooldownRemaining}ms, '
-        'cooldownProgress=${runeSlot.cooldownProgress}');
+        'runeSlot.canCast=${runeSlot.canCast}, runeSlot.state=${runeSlot.state}, '
+        'disabled=$isDisabled, hasEnoughEnergy=$hasEnoughEnergy (need ${definition.energyCost}), '
+        'final canCast=$canCast, cooldownRemaining=${runeSlot.cooldownRemaining}ms, '
+        'cooldownEndTime=${runeSlot.cooldownEndTime}, now=${MonotonicTimer.now}');
 
     return GestureDetector(
       onTap: () {
-        logCritical('RuneSlot $index clicked! canCast=$canCast');
-        if (canCast) {
+        // 🔥 ChatGPT建議：強制重新計算最新狀態，確保UI狀態同步
+        widget.gameState.runeSystem.slots[index].update(); // 強制更新狀態
+        final clickTimeSlot = widget.gameState.runeSystem.slots[index];
+        final clickTimeDefinition = RuneConstants.getDefinition(runeType);
+        final clickTimeIsDisabled =
+            widget.gameState.isPaused || widget.gameState.isGameOver;
+        final clickTimeCurrentBars =
+            widget.gameState.runeEnergyManager.currentBars;
+        final clickTimeHasEnoughEnergy = widget.gameState.runeEnergyManager
+            .canConsume(clickTimeDefinition.energyCost);
+        final clickTimeCanCast = clickTimeSlot.canCast &&
+            !clickTimeIsDisabled &&
+            clickTimeHasEnoughEnergy;
+
+        logCritical('=== CLICK DEBUG (ChatGPT修復) ===');
+        logCritical('RuneSlot $index clicked!');
+        logCritical(
+            'UI build canCast=$canCast, currentBars=${currentEnergyBars}, hasEnoughEnergy=$hasEnoughEnergy');
+        logCritical(
+            'Click time (強制更新後) canCast=$clickTimeCanCast, currentBars=$clickTimeCurrentBars, hasEnoughEnergy=$clickTimeHasEnoughEnergy');
+        logCritical(
+            'Slot state: ${clickTimeSlot.state}, cooldownRemaining=${clickTimeSlot.cooldownRemaining}ms, needCost: ${clickTimeDefinition.energyCost}');
+        logCritical('=============================');
+
+        if (clickTimeCanCast) {
           _castRune(index);
         } else {
           _showRuneError(runeSlot, index);
@@ -255,8 +282,8 @@ class _TouchControlsState extends State<TouchControls> {
               ),
             ),
 
-            // 賽博龐克風格冷卻進度環
-            if (runeSlot.isCooling)
+            // 賽博龐克風格冷卻進度環 - 修復版本
+            if (!canCast && runeSlot.cooldownRemaining > 0)
               Positioned.fill(
                 child: CircularProgressIndicator(
                   value: runeSlot.cooldownProgress,
@@ -268,8 +295,8 @@ class _TouchControlsState extends State<TouchControls> {
                 ),
               ),
 
-            // 賽博龐克風格冷卻倒數文字
-            if (runeSlot.isCooling)
+            // 賽博龐克風格冷卻倒數文字 - 修復版本
+            if (!canCast && runeSlot.cooldownRemaining > 0)
               Positioned.fill(
                 child: Center(
                   child: Container(
@@ -278,19 +305,33 @@ class _TouchControlsState extends State<TouchControls> {
                       color: Colors.black.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Text(
-                      '${(runeSlot.cooldownRemaining / 1000).ceil()}',
-                      style: TextStyle(
-                        color: const Color(0xFF00FF88), // 賽博龐克綠色
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            color: Colors.white,
-                            blurRadius: 2,
+                    child: Builder(
+                      builder: (context) {
+                        final cooldownSeconds =
+                            (runeSlot.cooldownRemaining / 1000).ceil();
+
+                        // 除錯：檢測修復後的狀態
+                        if (cooldownSeconds <= 0) {
+                          logCritical('COOLDOWN FIXED! Slot $index: '
+                              'canCast=$canCast, cooldownRemaining=${runeSlot.cooldownRemaining}ms, '
+                              'cooldownSeconds=$cooldownSeconds, state=${runeSlot.state}');
+                        }
+
+                        return Text(
+                          '$cooldownSeconds',
+                          style: TextStyle(
+                            color: const Color(0xFF00FF88), // 賽博龐克綠色
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            shadows: [
+                              Shadow(
+                                color: Colors.white,
+                                blurRadius: 2,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -398,24 +439,24 @@ class _TouchControlsState extends State<TouchControls> {
 
   void _castRune(int index) {
     logCritical('=== RUNE CAST DEBUG ===');
-    
+
     try {
       // 調試信息：打印當前狀態
       final loadout = widget.gameState.runeLoadout;
       logCritical('Step 1: Got loadout');
-      
+
       final energyManager = widget.gameState.runeEnergyManager;
       logCritical('Step 2: Got energy manager');
-      
+
       final runeType = loadout.getSlot(index);
       logCritical('Step 3: Got runeType for slot $index');
-      
+
       logCritical('Slot $index: ${runeType?.toString() ?? "EMPTY"}');
       logCritical('Energy Status: ${energyManager.toString()}');
       logCritical('Energy canConsume(1): ${energyManager.canConsume(1)}');
       logCritical('Energy canConsume(2): ${energyManager.canConsume(2)}');
       logCritical('Energy canConsume(3): ${energyManager.canConsume(3)}');
-      
+
       logCritical('Step 4: About to call castRune');
       final result = widget.gameLogic.castRune(index);
       logCritical('Step 5: castRune returned');
@@ -440,10 +481,24 @@ class _TouchControlsState extends State<TouchControls> {
   }
 
   void _showRuneError(RuneSlot runeSlot, int index) {
-    if (runeSlot.isCooling) {
-      _showRuneErrorFeedback(RuneCastError.cooldownActive, index);
-    } else if (runeSlot.isDisabled) {
-      _showRuneErrorFeedback(RuneCastError.temporalMutualExclusive, index);
+    // 🔥 修復：使用統一的冷卻判斷邏輯，與UI顯示保持一致
+    final runeType = runeSlot.runeType;
+    if (runeType != null) {
+      final definition = RuneConstants.getDefinition(runeType);
+      final isDisabled =
+          widget.gameState.isPaused || widget.gameState.isGameOver;
+      final hasEnoughEnergy =
+          widget.gameState.runeEnergyManager.canConsume(definition.energyCost);
+      final finalCanCast = runeSlot.canCast && !isDisabled && hasEnoughEnergy;
+
+      // 按優先級檢查錯誤原因
+      if (!runeSlot.canCast && runeSlot.cooldownRemaining > 0) {
+        _showRuneErrorFeedback(RuneCastError.cooldownActive, index);
+      } else if (runeSlot.isDisabled) {
+        _showRuneErrorFeedback(RuneCastError.temporalMutualExclusive, index);
+      } else if (!hasEnoughEnergy) {
+        _showRuneErrorFeedback(RuneCastError.energyInsufficient, index);
+      }
     }
   }
 
