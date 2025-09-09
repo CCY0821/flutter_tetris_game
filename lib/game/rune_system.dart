@@ -105,9 +105,8 @@ class RuneSlot {
   bool get isDisabled => state == RuneSlotState.disabled;
 
   /// 獲取冷卻剩餘時間（毫秒）
-  int get cooldownRemaining =>
-      _getCooldownRemaining(MonotonicTimer.now);
-  
+  int get cooldownRemaining => _getCooldownRemaining(MonotonicTimer.now);
+
   /// 內部方法：用統一的 nowMs 計算剩餘時間
   int _getCooldownRemaining(int nowMs) {
     if (cooldownEndTime <= 0) return 0;
@@ -123,12 +122,12 @@ class RuneSlot {
   double get cooldownProgress {
     return _getCooldownProgress(MonotonicTimer.now);
   }
-  
+
   /// 內部方法：用統一的邏輯計算冷卻進度
   double _getCooldownProgress(int nowMs) {
     final total = cooldownEndTime - cooldownStartTime;
     if (total <= 0) return 1.0;
-    
+
     final remaining = _getCooldownRemaining(nowMs);
     return (1.0 - remaining / total).clamp(0.0, 1.0);
   }
@@ -158,7 +157,7 @@ class RuneSlot {
 
     // 🔥 關鍵修復：用統一的 clamp 邏輯計算剩餘時間
     final cooldownRemainingMs = _getCooldownRemaining(now);
-    
+
     // 檢查冷卻是否結束（用 clamp 後的結果判斷）
     if (cooldownEndTime > 0 && cooldownRemainingMs == 0) {
       cooldownEndTime = 0;
@@ -170,17 +169,25 @@ class RuneSlot {
     final oldState = state;
     if (effectEndTime > now) {
       state = RuneSlotState.active;
-    } else if (cooldownRemainingMs > 0) {
+    } else if (cooldownRemainingMs > 16) {
+      // 🔥 修復：必須有明顯剩餘時間才算冷卻中
       state = RuneSlotState.cooling;
     } else {
       state = RuneSlotState.ready;
+      // 🔥 ChatGPT核心修復：狀態轉換為ready時強制清除冷卻時間，確保完全同步
+      if (cooldownEndTime > 0) {
+        cooldownEndTime = 0;
+        cooldownStartTime = 0;
+        logCrit('RuneSlot.update: ChatGPT修復 + 邏輯修復 - 強制清除冷卻時間與狀態同步');
+      }
     }
-    
+
     // 調試日誌：狀態變化
     if (oldState != state) {
-      logCrit('RuneSlot.update: State changed from $oldState to $state (remaining=${cooldownRemainingMs}ms)');
+      logCrit(
+          'RuneSlot.update: State changed from $oldState to $state (remaining=${cooldownRemainingMs}ms)');
     }
-    
+
     // 自癒保險：防呆檢測（理論上不應該再觸發）
     if (state == RuneSlotState.cooling && cooldownRemainingMs == 0) {
       logCrit('RuneSlot.update: AUTO-HEAL - forcing cooling->ready');
@@ -193,7 +200,8 @@ class RuneSlot {
     final now = MonotonicTimer.now;
     cooldownStartTime = now;
     cooldownEndTime = now + durationMs;
-    debugPrint('RuneSlot: Cooldown started - now=$now, endTime=$cooldownEndTime, duration=${durationMs}ms');
+    debugPrint(
+        'RuneSlot: Cooldown started - now=$now, endTime=$cooldownEndTime, duration=${durationMs}ms');
   }
 
   /// 開始效果
@@ -493,12 +501,14 @@ class RuneSystem {
 
       // 開始冷卻
       final cooldownMs = RuneBalance.getAdjustedCooldown(slot.runeType!) * 1000;
-      logCrit('RuneSystem: Starting cooldown for ${slot.runeType} - ${cooldownMs}ms');
+      logCrit(
+          'RuneSystem: Starting cooldown for ${slot.runeType} - ${cooldownMs}ms');
       slot.startCooldown(cooldownMs);
-      
+
       // 立即更新狀態，確保冷卻生效
       slot.update();
-      logCrit('RuneSystem: Slot state after cooldown: ${slot.state}, isCooling=${slot.isCooling}');
+      logCrit(
+          'RuneSystem: Slot state after cooldown: ${slot.state}, isCooling=${slot.isCooling}');
 
       // 開始效果（如果是持續性符文）
       if (definition.isTemporal && definition.durationSeconds > 0) {
@@ -889,22 +899,43 @@ class RuneSystem {
       debugPrint(
           '[DragonRoar] Cleared $clearedCount blocks from row $targetRow');
 
-      // 驗證清除結果
-      int remainingCount = 0;
-      for (int col = 0; col < board[targetRow].length; col++) {
-        if (board[targetRow][col] != null) {
-          remainingCount++;
-        }
-      }
-      debugPrint(
-          '[DragonRoar] After clearing row $targetRow: remaining blocks = $remainingCount');
       totalClearedBlocks += clearedCount;
     }
 
-    // 觸發棋盤更新回調（純清除，無重力壓實）
+    // 階段2：上方方塊整體下移重力效果（與 Flame Burst 相同）
+    debugPrint(
+        '[DragonRoar] Applying upper block gravity effect for 3 cleared rows...');
+    int totalMovedBlocks = 0;
+
+    // 對每個清除的行都執行重力效果（從最上面的清除行開始）
+    for (int i = 0; i < targetRows.length; i++) {
+      int targetRow = targetRows[i];
+
+      // 將消除行上方的所有行整體下移一行
+      for (int row = targetRow; row > 0; row--) {
+        for (int col = 0; col < board[row].length; col++) {
+          board[row][col] = board[row - 1][col]; // 上一行內容複製到當前行
+          if (board[row][col] != null) {
+            totalMovedBlocks++;
+          }
+        }
+      }
+
+      // 最上方補一行空行
+      for (int col = 0; col < board[0].length; col++) {
+        board[0][col] = null;
+      }
+
+      debugPrint('[DragonRoar] Applied gravity for cleared row $targetRow');
+    }
+
+    debugPrint(
+        '[DragonRoar] Moved $totalMovedBlocks blocks downward (upper gravity)');
+
+    // 觸發棋盤更新回調
     batchProcessor.notifyBoardChanged();
     debugPrint(
-        '[DragonRoar] Execution complete - cleared $totalClearedBlocks blocks from 3 rows (no gravity compression)');
+        '[DragonRoar] Execution complete - cleared $totalClearedBlocks blocks from 3 rows with upper block gravity effect');
 
     return RuneCastResult.success;
   }
