@@ -25,6 +25,7 @@ enum RuneType {
   angelsGrace, // 😇 Angel's Grace (2格/18s)
   timeSlow, // 🕰 Time Slow (1格/12s, 5s持續)
   timeStop, // ⏸ Time Stop (2格/18s, 3s持續)
+  timeChange, // ⏸ Time Change (2格/18s, 10s持續)
   columnBreaker, // 🧨 Column Breaker (3格/8s)
   gravityReset, // 💫 Gravity Reset (3格/25s)
   blessedCombo, // ✨ Blessed Combo (2格/20s, 10s持續)

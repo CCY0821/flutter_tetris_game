@@ -180,6 +180,7 @@ class _TouchControlsState extends State<TouchControls> {
     final hasEnoughEnergy =
         widget.gameState.runeEnergyManager.canConsume(definition.energyCost);
     final canCast = runeSlot.canCast && !isDisabled && hasEnoughEnergy;
+    final isActive = runeSlot.state == RuneSlotState.active;
 
     // 🔥 檢查能量檢測是否有問題
     debugPrint(
@@ -241,29 +242,37 @@ class _TouchControlsState extends State<TouchControls> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              definition.themeColor.withOpacity(canCast ? 0.3 : 0.15),
-              definition.themeColor.withOpacity(canCast ? 0.2 : 0.1),
+              definition.themeColor.withOpacity(isActive ? 0.6 : (canCast ? 0.3 : 0.15)),
+              definition.themeColor.withOpacity(isActive ? 0.4 : (canCast ? 0.2 : 0.1)),
             ],
           ),
           border: Border.all(
-            color: definition.themeColor.withOpacity(canCast ? 0.8 : 0.4),
-            width: canCast ? 2 : 1,
+            color: definition.themeColor.withOpacity(isActive ? 1.0 : (canCast ? 0.8 : 0.4)),
+            width: isActive ? 3 : (canCast ? 2 : 1),
           ),
-          boxShadow: canCast
+          boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: definition.themeColor.withOpacity(0.4),
+                    color: definition.themeColor.withOpacity(0.8),
                     offset: const Offset(0, 0),
-                    blurRadius: 8,
+                    blurRadius: 12,
                   ),
                 ]
-              : [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    offset: const Offset(2, 2),
-                    blurRadius: 4,
-                  ),
-                ],
+              : canCast
+                  ? [
+                      BoxShadow(
+                        color: definition.themeColor.withOpacity(0.4),
+                        offset: const Offset(0, 0),
+                        blurRadius: 8,
+                      ),
+                    ]
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        offset: const Offset(2, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
         ),
         child: Stack(
           children: [
@@ -271,7 +280,7 @@ class _TouchControlsState extends State<TouchControls> {
             Center(
               child: Icon(
                 definition.icon,
-                color: definition.themeColor.withOpacity(canCast ? 1.0 : 0.5),
+                color: definition.themeColor.withOpacity(isActive ? 1.0 : (canCast ? 1.0 : 0.5)),
                 size: 24,
               ),
             ),

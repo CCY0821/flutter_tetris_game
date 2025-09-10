@@ -15,6 +15,7 @@ import '../widgets/ad_banner.dart';
 import '../widgets/rune_energy_hud.dart';
 import '../core/pixel_snap.dart';
 import '../core/constants.dart';
+import 'rune_events.dart';
 
 class GameBoard extends StatefulWidget {
   const GameBoard({super.key});
@@ -43,6 +44,10 @@ class _GameBoardState extends State<GameBoard>
   late AnimationController _shakeController;
   late Animation<double> _shakeAnimation;
   Timer? _shakeTimer;
+  Timer? _timeChangeTimer;
+
+  // RuneEventBus 訂閱
+  StreamSubscription<RuneEvent>? _runeEventSubscription;
 
   @override
   void initState() {
@@ -88,6 +93,9 @@ class _GameBoardState extends State<GameBoard>
     });
 
     await gameState.initializeAudio();
+
+    // 設置符文事件監聽
+    _setupRuneEventListeners();
 
     // 嘗試從本地存儲載入遊戲狀態
     bool stateLoaded = false;
@@ -154,12 +162,64 @@ class _GameBoardState extends State<GameBoard>
     }
   }
 
+  /// 設置符文事件監聽器
+  void _setupRuneEventListeners() {
+    // 監聽所有符文事件並過濾 Time Change
+    _runeEventSubscription = RuneEventBus.events.listen((event) {
+      if (!mounted) return;
+      
+      if (event.runeType == RuneType.timeChange && event.type == RuneEventType.effectStart) {
+          gameState.activateTimeChange();
+          // 更新遊戲計時器速度
+          if (!gameState.isPaused && !gameState.isGameOver) {
+            _restartTimerWithCurrentSpeed();
+          }
+          
+          // 設置10秒自動結束計時器
+          _timeChangeTimer?.cancel();
+          _timeChangeTimer = Timer(const Duration(seconds: 10), () {
+            if (mounted) {
+              RuneEventBus.emitEffectEnd(RuneType.timeChange);
+            }
+            _timeChangeTimer = null;
+          });
+          
+          debugPrint('GameBoard: Time Change effect activated for 10 seconds');
+      } else if (event.runeType == RuneType.timeChange && event.type == RuneEventType.effectEnd) {
+        // 取消計時器
+        _timeChangeTimer?.cancel();
+        _timeChangeTimer = null;
+        
+        gameState.deactivateTimeChange();
+        // 恢復正常遊戲計時器速度
+        if (!gameState.isPaused && !gameState.isGameOver) {
+          _restartTimerWithCurrentSpeed();
+        }
+        debugPrint('GameBoard: Time Change effect deactivated');
+      }
+    });
+
+  }
+
+  @override
+  /// 以當前速度重啟計時器
+  void _restartTimerWithCurrentSpeed() {
+    _currentSpeed = gameState.dropSpeed;
+    _startGameTimer();
+    debugPrint('GameBoard: Timer restarted with speed: ${_currentSpeed}ms');
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _dropTimer?.cancel();
     _shakeTimer?.cancel();
+    _timeChangeTimer?.cancel();
     _shakeController.dispose();
+    
+    // 清理符文事件監聽器
+    _runeEventSubscription?.cancel();
+    
     controllerHandler.dispose();
     gameState.dispose();
     super.dispose();

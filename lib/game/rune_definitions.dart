@@ -152,6 +152,17 @@ class RuneConstants {
       category: RuneCategory.temporal,
       themeColor: Colors.purple,
     ),
+    RuneType.timeChange: RuneDefinition(
+      type: RuneType.timeChange,
+      name: "Time Change",
+      icon: Icons.schedule,
+      description: "10秒內下落速度減半",
+      energyCost: 2,
+      cooldownSeconds: 18,
+      durationSeconds: 10,
+      category: RuneCategory.temporal,
+      themeColor: Colors.deepPurple,
+    ),
     RuneType.blessedCombo: RuneDefinition(
       type: RuneType.blessedCombo,
       name: "Blessed Combo",

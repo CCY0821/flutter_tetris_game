@@ -579,6 +579,8 @@ class RuneSystem {
           return _executeTimeSlow();
         case RuneType.timeStop:
           return _executeTimeStop();
+        case RuneType.timeChange:
+          return _executeTimeChange();
         case RuneType.blessedCombo:
           return _executeBlessedCombo();
       }
@@ -956,6 +958,13 @@ class RuneSystem {
   RuneCastResult _executeTimeStop() {
     // 時間系效果的具體實現由外部處理
     RuneEventBus.emitEffectStart(RuneType.timeStop);
+    return RuneCastResult.success;
+  }
+
+  /// 執行 Time Change
+  RuneCastResult _executeTimeChange() {
+    // 時間系效果的具體實現由外部處理
+    RuneEventBus.emitEffectStart(RuneType.timeChange);
     return RuneCastResult.success;
   }
 

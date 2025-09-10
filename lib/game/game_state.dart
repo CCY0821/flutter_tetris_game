@@ -75,6 +75,10 @@ class GameState {
   // UI更新回調
   VoidCallback? _notifyUIUpdate;
 
+  // Time Change 效果狀態
+  bool _isTimeChangeActive = false;
+  int _originalDropSpeed = 0;
+
   // 遊戲模式：固定使用 Marathon 模式
 
   void initBoard() {
@@ -214,13 +218,36 @@ class GameState {
 
   // 獲取當前遊戲速度 (毫秒)
   int get dropSpeed {
-    return marathonSystem.getDropInterval();
+    int baseSpeed = marathonSystem.getDropInterval();
+    
+    // 如果 Time Change 效果激活，速度變為 0.5 倍（間隔變為 2 倍）
+    if (_isTimeChangeActive) {
+      return baseSpeed * 2;
+    }
+    
+    return baseSpeed;
   }
 
   // 獲取當前速度等級
   int get speedLevel {
     return marathonSystem.currentLevel;
   }
+
+  /// 激活 Time Change 效果
+  void activateTimeChange() {
+    _isTimeChangeActive = true;
+    _originalDropSpeed = marathonSystem.getDropInterval();
+    debugPrint('GameState: Time Change activated - speed multiplier: ×10');
+  }
+
+  /// 停用 Time Change 效果
+  void deactivateTimeChange() {
+    _isTimeChangeActive = false;
+    debugPrint('GameState: Time Change deactivated - speed restored');
+  }
+
+  /// 檢查 Time Change 是否激活
+  bool get isTimeChangeActive => _isTimeChangeActive;
 
   // 獲取下一個速度等級所需分數 (Marathon 模式不基於分數升級)
   int get nextLevelScore {
