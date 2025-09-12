@@ -19,17 +19,14 @@ enum RuneEventType {
 enum RuneType {
   flameBurst, // 🔥 Flame Burst (1格/6s)
   dragonRoar, // 🐉 Dragon Roar (3格/15s)
-  thunderStrike, // ⚡ Thunder Strike (1格/8s)
+  thunderStrike, // ⚡ Thunder Strike Right (2格/8s)
   thunderStrikeLeft, // ⚡ Thunder Strike Left (2格/8s)
-  earthquake, // 🌍 Earthquake (1格/10s)
-  angelsGrace, // 😇 Angel's Grace (2格/18s)
-  timeSlow, // 🕰 Time Slow (1格/12s, 5s持續)
-  timeStop, // ⏸ Time Stop (2格/18s, 3s持續)
+  angelsGrace, // 😇 Angel's Grace (3格/60s)
   timeChange, // ⏸ Time Change (2格/18s, 10s持續)
-  columnBreaker, // 🧨 Column Breaker (3格/8s)
-  gravityReset, // 💫 Gravity Reset (3格/25s)
-  blessedCombo, // ✨ Blessed Combo (2格/20s, 10s持續)
   titanGravity, // 🏔️ Titan Gravity (2格/45s)
+  blessedCombo, // ✨ Blessed Combo (2格/20s, 10s持續)
+  gravityReset, // 💫 Gravity Reset (3格/25s) - Grace of Lines
+  elementMorph, // 🔄 Element Morph (1格/3s)
 }
 
 /// 符文事件數據

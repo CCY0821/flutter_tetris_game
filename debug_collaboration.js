@@ -8,9 +8,10 @@ const fs = require('fs');
 const path = require('path');
 
 class DebugCollaborator {
-  constructor() {
+  constructor(apiKey = null) {
     this.projectRoot = process.cwd();
     this.debugLogPath = path.join(this.projectRoot, 'debug-session.log');
+    this.apiKey = apiKey;
   }
 
   /**
@@ -34,14 +35,22 @@ class DebugCollaborator {
   }
 
   /**
-   * 啟動與 Gemini 的協作會話
+   * 啟動與 ChatGPT 的協作會話
    */
-  async collaborateWithGemini(bugInfoPath) {
-    const prompt = `
-你好 Gemini！我是 Claude，正在協助開發一個 Flutter 俄羅斯方塊遊戲。
+  async collaborateWithChatGPT(bugInfoPath) {
+    const bugInfo = JSON.parse(fs.readFileSync(bugInfoPath, 'utf8'));
+    
+    const prompt = `你好 ChatGPT！我是 Claude，正在協助開發一個 Flutter 俄羅斯方塊遊戲。
 我遇到了一個複雜的 bug 需要你的協助分析。
 
-請幫我分析以下 bug 資訊檔案：${bugInfoPath}
+Bug 資訊：
+- 時間戳: ${bugInfo.timestamp}
+- 描述: ${bugInfo.description}
+- 錯誤日誌: ${bugInfo.errorLogs}
+- 程式碼上下文: ${bugInfo.codeContext}
+- 堆疊追蹤: ${bugInfo.stackTrace}
+- 專案類型: ${bugInfo.projectType}
+- 環境: ${bugInfo.environment}
 
 請提供：
 1. 可能的根本原因分析
@@ -49,48 +58,57 @@ class DebugCollaborator {
 3. 可能的解決方案
 4. 預防類似問題的建議
 
-讓我們一起解決這個問題！
-    `;
+讓我們一起解決這個問題！`;
 
-    console.log('🤝 正在啟動 Claude x Gemini 協作會話...');
+    console.log('🤝 正在啟動 Claude x ChatGPT 協作會話...');
     console.log('📝 Bug 資訊已準備：', bugInfoPath);
     
-    // 設置環境變數並使用 Gemini CLI 分析
-    const env = { ...process.env, GEMINI_API_KEY: process.env.GEMINI_API_KEY };
+    const apiKey = process.env.OPENAI_API_KEY || this.apiKey;
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY 環境變數未設定，請設定環境變數或通過參數傳入');
+    }
     
     try {
-      // 使用 cmd 在 Windows 上執行
-      const isWindows = process.platform === 'win32';
-      const geminiCmd = isWindows ? 'cmd' : 'bash';
-      const geminiArgs = isWindows 
-        ? ['/c', `set GEMINI_API_KEY=${env.GEMINI_API_KEY} && gemini -p "${prompt}"`]
-        : ['-c', `GEMINI_API_KEY=${env.GEMINI_API_KEY} gemini -p "${prompt}"`];
-
-      const geminiProcess = spawn(geminiCmd, geminiArgs, {
-        cwd: this.projectRoot,
-        stdio: 'inherit',
-        env: env
+      // 使用 node 內建的 fetch API 調用 OpenAI
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4',
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          max_tokens: 2000,
+          temperature: 0.7
+        })
       });
 
-      return new Promise((resolve, reject) => {
-        geminiProcess.on('close', (code) => {
-          if (code === 0) {
-            console.log('✅ Gemini 分析完成');
-            resolve();
-          } else {
-            console.error('❌ Gemini 分析失敗，退出碼：', code);
-            reject(new Error(`Gemini process exited with code ${code}`));
-          }
-        });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ OpenAI API 詳細錯誤: ${response.status} ${response.statusText}`);
+        console.error(`錯誤內容: ${errorText}`);
+        throw new Error(`OpenAI API 請求失敗: ${response.status} ${response.statusText} - ${errorText}`);
+      }
 
-        geminiProcess.on('error', (error) => {
-          console.error('❌ 啟動 Gemini 時發生錯誤：', error.message);
-          reject(error);
-        });
-      });
+      const data = await response.json();
+      const analysis = data.choices[0].message.content;
+
+      console.log('\n🤖 ChatGPT 分析結果：');
+      console.log('=' .repeat(50));
+      console.log(analysis);
+      console.log('=' .repeat(50));
+      console.log('✅ ChatGPT 分析完成');
+      
+      return analysis;
       
     } catch (error) {
-      console.error('❌ 執行 Gemini 命令時發生錯誤：', error.message);
+      console.error('❌ 調用 ChatGPT API 時發生錯誤：', error.message);
       throw error;
     }
   }
@@ -104,7 +122,7 @@ class DebugCollaborator {
       type: 'COLLABORATION',
       bug: bugDescription,
       resolution: resolution,
-      participants: ['Claude', 'Gemini']
+      participants: ['Claude', 'ChatGPT']
     };
 
     const existingLog = fs.existsSync(this.debugLogPath) 
@@ -120,17 +138,17 @@ class DebugCollaborator {
    */
   async startCollaboration(bugDescription, errorLogs = '', codeContext = '', stackTrace = '') {
     try {
-      console.log('🚀 Claude x Gemini 協作除錯開始');
+      console.log('🚀 Claude x ChatGPT 協作除錯開始');
       console.log('🐛 Bug 描述：', bugDescription);
 
       // 準備 bug 資訊
       const bugInfoPath = this.prepareBugInfo(bugDescription, errorLogs, codeContext, stackTrace);
 
-      // 與 Gemini 協作
-      await this.collaborateWithGemini(bugInfoPath);
+      // 與 ChatGPT 協作
+      await this.collaborateWithChatGPT(bugInfoPath);
 
       // 記錄協作會話
-      this.logCollaborationSession(bugDescription, 'Gemini 分析完成，請查看上方輸出');
+      this.logCollaborationSession(bugDescription, 'ChatGPT 分析完成，請查看上方輸出');
 
       console.log('📊 協作會話已記錄到：', this.debugLogPath);
 

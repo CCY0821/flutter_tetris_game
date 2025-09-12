@@ -526,17 +526,6 @@ class RuneSystem {
   RuneCastResult _performSpecialChecks(
       RuneType runeType, List<List<Color?>> board, dynamic gameContext) {
     switch (runeType) {
-      case RuneType.columnBreaker:
-        // Column Breaker 需要檢查影子是否有效
-        if (gameContext?.calculateGhostPiece == null) {
-          return RuneCastResult.failure(RuneCastError.ghostInvalid, '無法獲取影子位置');
-        }
-        final ghostPiece = gameContext.calculateGhostPiece();
-        if (ghostPiece == null) {
-          return RuneCastResult.failure(RuneCastError.ghostInvalid, '影子位置無效');
-        }
-        break;
-
       case RuneType.thunderStrike:
         // Thunder Strike 在空盤時會退還能量，不算錯誤
         break;
@@ -546,6 +535,7 @@ class RuneSystem {
         break;
 
       default:
+        // 其他符文不需要特殊檢查
         break;
     }
 
@@ -563,26 +553,28 @@ class RuneSystem {
           return _executeThunderStrike(board, gameContext);
         case RuneType.thunderStrikeLeft:
           return _executeThunderStrikeLeft(board, gameContext);
-        case RuneType.earthquake:
-          return _executeEarthquake(board);
+        // case RuneType.earthquake: // 已移除
+        //   return _executeEarthquake(board);
         case RuneType.angelsGrace:
           return _executeAngelsGrace(board);
-        case RuneType.columnBreaker:
-          return _executeColumnBreaker(board, gameContext);
+        // case RuneType.columnBreaker: // 已移除
+        //   return _executeColumnBreaker(board, gameContext);
         case RuneType.dragonRoar:
           return _executeDragonRoar(board, gameContext);
         case RuneType.gravityReset:
           return _executeGravityReset(board);
         case RuneType.titanGravity:
           return _executeTitanGravity(board, gameContext);
-        case RuneType.timeSlow:
-          return _executeTimeSlow();
-        case RuneType.timeStop:
-          return _executeTimeStop();
+        // case RuneType.timeSlow: // 已移除
+        //   return _executeTimeSlow();
+        // case RuneType.timeStop: // 已移除
+        //   return _executeTimeStop();
         case RuneType.timeChange:
           return _executeTimeChange();
         case RuneType.blessedCombo:
           return _executeBlessedCombo();
+        case RuneType.elementMorph:
+          return _executeElementMorph(board, gameContext);
       }
     } catch (e) {
       debugPrint('RuneSystem: Execute error - $e');
@@ -950,14 +942,14 @@ class RuneSystem {
   /// 執行 Time Slow
   RuneCastResult _executeTimeSlow() {
     // 時間系效果的具體實現由外部處理
-    RuneEventBus.emitEffectStart(RuneType.timeSlow);
+    RuneEventBus.emitEffectStart(RuneType.timeChange);
     return RuneCastResult.success;
   }
 
   /// 執行 Time Stop
   RuneCastResult _executeTimeStop() {
     // 時間系效果的具體實現由外部處理
-    RuneEventBus.emitEffectStart(RuneType.timeStop);
+    RuneEventBus.emitEffectStart(RuneType.timeChange);
     return RuneCastResult.success;
   }
 
@@ -1144,5 +1136,99 @@ class RuneSystem {
     }
 
     return targets;
+  }
+
+  /// 執行 Element Morph - 當前方塊隨機變形
+  RuneCastResult _executeElementMorph(List<List<Color?>> board, dynamic gameContext) {
+    debugPrint('[ElementMorph] Starting morph execution');
+
+    // 檢查是否有當前方塊
+    if (gameContext?.currentTetromino == null) {
+      debugPrint('[ElementMorph] Failed: No active tetromino');
+      return RuneCastResult.failure(
+        RuneCastError.systemError, 
+        '無法變形 - 沒有活躍方塊'
+      );
+    }
+
+    final currentTetro = gameContext.currentTetromino;
+    final currentType = currentTetro.type;
+    debugPrint('[ElementMorph] Current piece: $currentType');
+
+    // 獲取所有其他方塊類型（排除當前）
+    final allTypes = TetrominoType.values;
+    final otherTypes = allTypes.where((type) => type != currentType).toList();
+    
+    if (otherTypes.isEmpty) {
+      debugPrint('[ElementMorph] Failed: No alternative types available');
+      return RuneCastResult.failure(
+        RuneCastError.systemError, 
+        '系統錯誤 - 無可用變形類型'
+      );
+    }
+
+    // 隨機選擇新類型
+    final random = math.Random();
+    final newType = otherTypes[random.nextInt(otherTypes.length)];
+    debugPrint('[ElementMorph] Selected new type: $newType');
+
+    // 創建新方塊（保持當前位置）
+    final boardWidth = board[0].length;
+    final newTetromino = Tetromino.fromType(newType, boardWidth);
+    newTetromino.x = currentTetro.x;
+    newTetromino.y = currentTetro.y;
+
+    // 嘗試在當前位置放置新方塊
+    if (_canPlaceTetrominoAt(newTetromino, board)) {
+      // 直接替換當前方塊
+      gameContext.gameState.currentTetromino = newTetromino;
+      debugPrint('[ElementMorph] Success: Morphed $currentType -> $newType at (${newTetromino.x}, ${newTetromino.y})');
+      return RuneCastResult.success;
+    }
+
+    // 如果無法放置，嘗試位置調整（±2格水平，-1/-2格垂直）
+    debugPrint('[ElementMorph] Trying position adjustments');
+    
+    for (int dx = -2; dx <= 2; dx++) {
+      for (int dy = 0; dy >= -2; dy--) {
+        if (dx == 0 && dy == 0) continue; // 已經測試過原位置
+        
+        final testTetromino = Tetromino.fromType(newType, boardWidth);
+        testTetromino.x = currentTetro.x + dx;
+        testTetromino.y = currentTetro.y + dy;
+        
+        if (_canPlaceTetrominoAt(testTetromino, board)) {
+          gameContext.gameState.currentTetromino = testTetromino;
+          debugPrint('[ElementMorph] Success with adjustment: $currentType -> $newType at (${testTetromino.x}, ${testTetromino.y})');
+          return RuneCastResult.success;
+        }
+      }
+    }
+
+    // 所有位置都失敗
+    debugPrint('[ElementMorph] Failed: No valid position found');
+    return RuneCastResult.failure(
+      RuneCastError.systemError, 
+      '無法變形 - 空間不足'
+    );
+  }
+
+  /// 檢查方塊是否可以放置在指定位置
+  bool _canPlaceTetrominoAt(Tetromino tetromino, List<List<Color?>> board) {
+    for (final point in tetromino.shape) {
+      final x = tetromino.x + point.dx.toInt();
+      final y = tetromino.y + point.dy.toInt();
+      
+      // 檢查邊界
+      if (x < 0 || x >= board[0].length || y < 0 || y >= board.length) {
+        return false;
+      }
+      
+      // 檢查與現有方塊衝突
+      if (board[y][x] != null) {
+        return false;
+      }
+    }
+    return true;
   }
 }
