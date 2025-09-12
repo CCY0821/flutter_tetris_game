@@ -538,47 +538,115 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
         children: [
           // 清空按鈕
           Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () {
-                setState(() {
-                  _currentLoadout.clear();
-                  _selectedSlot = null;
-                });
-                HapticFeedback.lightImpact();
-              },
-              icon: const Icon(Icons.clear_all),
-              label: const Text('CLEAR ALL'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.withOpacity(0.2),
-                foregroundColor: Colors.red,
-                side: BorderSide(color: Colors.red.withOpacity(0.5)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+            child: Container(
+              height: 50,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.red.withOpacity(0.15),
+                    Colors.red.withOpacity(0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+                border: Border.all(
+                  color: Colors.red.withOpacity(0.4),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.red.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _currentLoadout.clear();
+                    _selectedSlot = null;
+                  });
+                  HapticFeedback.lightImpact();
+                },
+                icon: const Icon(Icons.clear_all, size: 20),
+                label: Text(
+                  'CLEAR',
+                  style: GameTheme.subtitleStyle.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.red[300],
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
             ),
           ),
 
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
 
           // 確認按鈕
           Expanded(
-            flex: 2,
-            child: ElevatedButton.icon(
-              onPressed: validation.isValid ? _onConfirm : null,
-              icon: const Icon(Icons.check),
-              label: const Text('CONFIRM'),
-              style: GameTheme.primaryButtonStyle.copyWith(
-                backgroundColor:
-                    WidgetStateProperty.resolveWith<Color>((states) {
-                  if (states.contains(WidgetState.disabled)) {
-                    return Colors.grey.withOpacity(0.3);
-                  }
-                  return cyberpunkPrimary.withOpacity(0.8);
-                }),
-                foregroundColor: WidgetStateProperty.all(Colors.white),
-                side: WidgetStateProperty.all(
-                  BorderSide(color: cyberpunkPrimary.withOpacity(0.5)),
+            child: Container(
+              height: 50,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: validation.isValid
+                      ? [
+                          cyberpunkPrimary.withOpacity(0.8),
+                          cyberpunkPrimary.withOpacity(0.6),
+                        ]
+                      : [
+                          Colors.grey.withOpacity(0.3),
+                          Colors.grey.withOpacity(0.1),
+                        ],
+                ),
+                borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+                border: Border.all(
+                  color: validation.isValid
+                      ? cyberpunkPrimary.withOpacity(0.8)
+                      : Colors.grey.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                boxShadow: validation.isValid
+                    ? [
+                        BoxShadow(
+                          color: cyberpunkPrimary.withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: ElevatedButton.icon(
+                onPressed: validation.isValid ? _onConfirm : null,
+                icon: Icon(
+                  validation.isValid ? Icons.check_circle : Icons.error_outline,
+                  size: 20,
+                ),
+                label: Text(
+                  'CONFIRM',
+                  style: GameTheme.subtitleStyle.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: validation.isValid ? Colors.white : Colors.grey[400],
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
             ),
