@@ -342,27 +342,15 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
             ),
           ),
           const SizedBox(height: 16),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              // 計算適合的 childAspectRatio
-              final screenWidth = constraints.maxWidth;
-              final itemWidth = (screenWidth - 12) / 2; // 2列，減去間距
-              final aspectRatio = (itemWidth / 100).clamp(1.8, 3.0); // 動態計算比例
-
-              return GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: aspectRatio,
-                ),
-                itemCount: RuneConstants.allTypes.length,
-                itemBuilder: (context, index) {
-                  final runeType = RuneConstants.allTypes[index];
-                  return _buildRuneCard(runeType);
-                },
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: RuneConstants.allTypes.length,
+            itemBuilder: (context, index) {
+              final runeType = RuneConstants.allTypes[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildRuneCard(runeType),
               );
             },
           ),
@@ -379,7 +367,7 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
     return GestureDetector(
       onTap: isDisabled ? null : () => _onRuneCardTap(runeType),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -409,19 +397,19 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
           child: Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   color: definition.themeColor.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   definition.icon,
                   color: definition.themeColor,
-                  size: 20,
+                  size: 28,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -430,38 +418,56 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
                     Text(
                       definition.name,
                       style: GameTheme.subtitleStyle.copyWith(
-                        fontSize: 12,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: definition.themeColor,
                       ),
-                      maxLines: 1,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      definition.description,
+                      style: GameTheme.bodyStyle.copyWith(
+                        fontSize: 12,
+                        color: Colors.grey[300],
+                      ),
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 6),
                     Row(
                       children: [
                         _buildEnergyIndicator(definition.energyCost),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            '${definition.cooldownSeconds}s CD',
-                            style: GameTheme.bodyStyle.copyWith(
-                              fontSize: 10,
-                              color: Colors.grey,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                        const SizedBox(width: 12),
+                        Text(
+                          '${definition.cooldownSeconds}s CD',
+                          style: GameTheme.bodyStyle.copyWith(
+                            fontSize: 11,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
+                        if (definition.durationSeconds > 0) ...[
+                          const SizedBox(width: 12),
+                          Text(
+                            '${definition.durationSeconds}s Duration',
+                            style: GameTheme.bodyStyle.copyWith(
+                              fontSize: 11,
+                              color: Colors.amber[300],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               if (isInLoadout)
                 Icon(
                   Icons.check_circle,
                   color: definition.themeColor,
-                  size: 18,
+                  size: 24,
                 ),
             ],
           ),
