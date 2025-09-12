@@ -1181,7 +1181,7 @@ class RuneSystem {
     // 嘗試在當前位置放置新方塊
     if (_canPlaceTetrominoAt(newTetromino, board)) {
       // 直接替換當前方塊
-      gameContext.gameState.currentTetromino = newTetromino;
+      gameContext.gameLogic.gameState.currentTetromino = newTetromino;
       debugPrint('[ElementMorph] Success: Morphed $currentType -> $newType at (${newTetromino.x}, ${newTetromino.y})');
       return RuneCastResult.success;
     }
@@ -1198,7 +1198,7 @@ class RuneSystem {
         testTetromino.y = currentTetro.y + dy;
         
         if (_canPlaceTetrominoAt(testTetromino, board)) {
-          gameContext.gameState.currentTetromino = testTetromino;
+          gameContext.gameLogic.gameState.currentTetromino = testTetromino;
           debugPrint('[ElementMorph] Success with adjustment: $currentType -> $newType at (${testTetromino.x}, ${testTetromino.y})');
           return RuneCastResult.success;
         }
