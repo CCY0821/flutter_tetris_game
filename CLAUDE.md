@@ -51,6 +51,7 @@ flutter build apk
 **遇到已知問題時，請閱讀詳細解決方案文檔**:
 - 符文系統問題 → 查看 `docs/troubleshooting/rune_system_debug.md`
 - **符文冷卻問題** → 查看 `docs/troubleshooting/rune_cooldown_fix.md` ⭐
+- **Gravity Reset 類型錯誤** → 查看 `docs/troubleshooting/gravity_reset_type_error_fix.md` ⭐
 - UI 渲染問題 → 查看 `docs/troubleshooting/ui_overflow_fixes.md`  
 - 法術功能問題 → 查看 `docs/troubleshooting/spell_implementation.md`
 
@@ -58,6 +59,7 @@ flutter build apk
 - 符文槽位不亮：檢查 runeType 是否為 null
 - UI 像素溢出：檢查動畫值是否超出 0.0-1.0 範圍
 - 法術無效果：確認使用正確的操作模式（直接操作 vs 批處理）
+- **類型錯誤**：檢查是否混淆了管理器與接口實現（如 PieceProviderStack vs IPieceProvider）
 
 ## 📋 程式碼模式
 

@@ -49,7 +49,10 @@
       "Read(/C:\\Users\\G512LV\\flutter_tetris_game\\lib\\game/**)",
       "Read(/C:\\Users\\G512LV\\flutter_tetris_game\\lib\\game/**)",
       "Read(/C:\\Users\\G512LV\\flutter_tetris_game\\lib\\game/**)",
-      "Bash(/bashes)"
+      "Bash(/bashes)",
+      "Bash(where gemini)",
+      "Bash(sed:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "additionalDirectories": [

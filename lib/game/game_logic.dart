@@ -159,6 +159,7 @@ class GameLogic {
 
   void spawnTetromino() {
     final newTetro = gameState.nextTetromino!;
+    debugPrint('[GameLogic] Spawning tetromino type: ${newTetro.type}');
 
     // 在緩衝區中設置生成位置
     newTetro.x = GameState.colCount ~/ 2;
@@ -169,15 +170,16 @@ class GameLogic {
     if (canMove(newTetro)) {
       gameState.currentTetromino = newTetro;
 
-      // 從隊列中取出下一個方塊
-      if (gameState.nextTetrominos.isNotEmpty) {
-        gameState.nextTetromino = gameState.nextTetrominos.removeAt(0);
-        // 在隊列末尾添加新的隨機方塊
-        gameState.nextTetrominos.add(Tetromino.random(GameState.colCount));
-      } else {
-        // 如果隊列為空，使用原來的邏輯
-        gameState.nextTetromino = Tetromino.random(GameState.colCount);
-      }
+      // 使用方塊供應器系統生成下一個方塊
+      final nextType = gameState.pieceProviderStack.getNext();
+      debugPrint('[GameLogic] Generated next piece type: $nextType');
+      gameState.nextTetromino = Tetromino.fromType(
+        nextType,
+        GameState.colCount
+      );
+      
+      // 更新預覽隊列
+      gameState.updatePreviewQueue();
     } else {
       gameState.isGameOver = true;
       // 播放遊戲結束音效

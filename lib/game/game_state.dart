@@ -11,6 +11,7 @@ import 'rune_system.dart';
 import 'rune_loadout.dart';
 import 'rune_events.dart';
 import 'monotonic_timer.dart';
+import 'piece_provider.dart';
 
 class GameState {
   // 單例模式
@@ -21,7 +22,10 @@ class GameState {
   }
 
   // 私有構造函數
-  GameState._internal();
+  GameState._internal() {
+    // 初始化方塊供應器系統
+    pieceProviderStack = PieceProviderStack(baseProvider: BagProvider());
+  }
 
   // 工廠構造函數
   factory GameState() => instance;
@@ -43,6 +47,9 @@ class GameState {
   Tetromino? currentTetromino;
   Tetromino? nextTetromino;
   List<Tetromino> nextTetrominos = []; // 下三個方塊預覽隊列
+  
+  // 方塊供應器系統（用於實現 Gravity Reset 等符文）
+  late PieceProviderStack pieceProviderStack;
   final AudioService audioService = AudioService();
   final MarathonSystem marathonSystem = MarathonSystem();
   final ScoringService scoringService = ScoringService();
@@ -193,13 +200,24 @@ class GameState {
     score = 0;
     isGameOver = false;
     isPaused = false;
-    currentTetromino = Tetromino.random(colCount);
-    nextTetromino = Tetromino.random(colCount);
+    
+    // 重置方塊供應器系統（清除所有攔截器）
+    pieceProviderStack.clear();
+    
+    // 使用方塊供應器系統生成初始方塊
+    currentTetromino = _createTetrominoFromType(pieceProviderStack.getNext());
+    nextTetromino = _createTetrominoFromType(pieceProviderStack.getNext());
 
     // 初始化下三個方塊預覽隊列
     nextTetrominos.clear();
+    final previewTypes = pieceProviderStack.preview(3);
     for (int i = 0; i < 3; i++) {
-      nextTetrominos.add(Tetromino.random(colCount));
+      if (i < previewTypes.length) {
+        nextTetrominos.add(_createTetrominoFromType(previewTypes[i]));
+      } else {
+        // 備用逆向兼容
+        nextTetrominos.add(Tetromino.random(colCount));
+      }
     }
 
     // 重置 Marathon 系統、得分系統和符文能量系統
@@ -214,6 +232,28 @@ class GameState {
     if (audioService.isMusicEnabled) {
       await audioService.playBackgroundMusic();
     }
+  }
+
+  /// 從方塊供應器系統生成一個 Tetromino 實例
+  Tetromino _createTetrominoFromType(TetrominoType type) {
+    return Tetromino.fromType(type, colCount);
+  }
+  
+  /// 更新預覽隊列（當有新的攔截器時調用）
+  void updatePreviewQueue() {
+    final previewTypes = pieceProviderStack.preview(3);
+    nextTetrominos.clear();
+    
+    for (int i = 0; i < 3; i++) {
+      if (i < previewTypes.length) {
+        nextTetrominos.add(_createTetrominoFromType(previewTypes[i]));
+      } else {
+        // 備用逆向兼容
+        nextTetrominos.add(Tetromino.random(colCount));
+      }
+    }
+    
+    debugPrint('GameState: Updated preview queue: ${previewTypes.map((t) => t.name).join(', ')}');
   }
 
   // 獲取當前遊戲速度 (毫秒)

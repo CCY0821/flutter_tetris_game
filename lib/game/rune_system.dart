@@ -10,6 +10,7 @@ import 'rune_definitions.dart';
 import 'rune_loadout.dart';
 import 'rune_batch_processor.dart';
 import 'rune_energy_manager.dart';
+import 'piece_provider.dart';
 
 /// 重力模式枚舉
 enum GravityMode {
@@ -562,7 +563,7 @@ class RuneSystem {
         case RuneType.dragonRoar:
           return _executeDragonRoar(board, gameContext);
         case RuneType.gravityReset:
-          return _executeGravityReset(board);
+          return _executeGravityReset(board, gameContext);
         case RuneType.titanGravity:
           return _executeTitanGravity(board, gameContext);
         // case RuneType.timeSlow: // 已移除
@@ -934,9 +935,37 @@ class RuneSystem {
   }
 
   /// 執行 Gravity Reset
-  RuneCastResult _executeGravityReset(List<List<Color?>> board) {
-    batchProcessor.addOperation(CompressBoardOperation(isSpellRemoval: true));
-    return RuneCastResult.success;
+  RuneCastResult _executeGravityReset(List<List<Color?>> board, dynamic gameContext) {
+    try {
+      // 添加詳細的調試日誌（仿照 Dragon Roar）
+      debugPrint('[GravityReset] boardH=${board.length}, boardW=${board[0].length}');
+      
+      // 創建強制 I 型方塊攔截器，接下來5個都是I型
+      // 使用新的 BagProvider 作為基礎提供器（符合標準做法）
+      final interceptor = ForcedSequenceProvider(
+        forcedType: TetrominoType.I,
+        remaining: 5,
+        baseProvider: BagProvider(),
+      );
+
+      // 推送到攔截器堆疊
+      gameContext.gameLogic.gameState.pieceProviderStack.push(interceptor);
+      debugPrint('[GravityReset] Interceptor pushed to piece provider stack');
+      
+      // 更新預覽隊列
+      gameContext.gameLogic.gameState.updatePreviewQueue();
+      debugPrint('[GravityReset] Preview queue updated');
+      
+      // 觸發棋盤更新回調（仿照成功法術的關鍵調用）
+      batchProcessor.notifyBoardChanged();
+      
+      debugPrint('[GravityReset] Execution complete - next 5 pieces will be I-type tetrominoes');
+      debugPrint('[GravityReset] Interceptor remaining: ${interceptor.remaining}');
+      return RuneCastResult.success;
+    } catch (e) {
+      debugPrint('[GravityReset] Error: $e');
+      return RuneCastResult.failure(RuneCastError.systemError, '重力重設失敗: $e');
+    }
   }
 
   /// 執行 Time Slow
