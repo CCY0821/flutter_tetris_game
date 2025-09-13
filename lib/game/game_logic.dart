@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/tetromino.dart';
 import '../services/high_score_service.dart';
+import '../services/scoring_service.dart';
 import 'game_state.dart';
 import 'srs_system.dart';
 import 'rune_system.dart';
@@ -100,6 +101,7 @@ class GameLogic {
           lastRotationWasWallKick && gameState.currentTetromino?.isT == true,
       tSpinType: _determineTSpinType(),
       tetromino: gameState.currentTetromino,
+      origin: ScoreOrigin.natural, // 🎯 標記為自然消行
     );
 
     if (clearedRows > 0) {

@@ -45,6 +45,7 @@ class _GameBoardState extends State<GameBoard>
   late Animation<double> _shakeAnimation;
   Timer? _shakeTimer;
   Timer? _timeChangeTimer;
+  Timer? _blessedComboTimer;
 
   // RuneEventBus 訂閱
   StreamSubscription<RuneEvent>? _runeEventSubscription;
@@ -169,6 +170,11 @@ class _GameBoardState extends State<GameBoard>
       if (!mounted) return;
       
       if (event.runeType == RuneType.timeChange && event.type == RuneEventType.effectStart) {
+          // 🎯 時間類符文互斥：結束任何其他正在進行的時間效果
+          if (gameState.isBlessedComboActive) {
+            RuneEventBus.emitEffectEnd(RuneType.blessedCombo);
+          }
+          
           gameState.activateTimeChange();
           // 更新遊戲計時器速度
           if (!gameState.isPaused && !gameState.isGameOver) {
@@ -184,7 +190,7 @@ class _GameBoardState extends State<GameBoard>
             _timeChangeTimer = null;
           });
           
-          debugPrint('GameBoard: Time Change effect activated for 10 seconds');
+          debugPrint('GameBoard: Time Change effect activated for 10 seconds (mutually exclusive with other time effects)');
       } else if (event.runeType == RuneType.timeChange && event.type == RuneEventType.effectEnd) {
         // 取消計時器
         _timeChangeTimer?.cancel();
@@ -196,12 +202,36 @@ class _GameBoardState extends State<GameBoard>
           _restartTimerWithCurrentSpeed();
         }
         debugPrint('GameBoard: Time Change effect deactivated');
+      } else if (event.runeType == RuneType.blessedCombo && event.type == RuneEventType.effectStart) {
+        // 🎯 時間類符文互斥：結束任何其他正在進行的時間效果
+        if (gameState.isTimeChangeActive) {
+          RuneEventBus.emitEffectEnd(RuneType.timeChange);
+        }
+        
+        gameState.activateBlessedCombo();
+        
+        // 設置10秒自動結束計時器
+        _blessedComboTimer?.cancel();
+        _blessedComboTimer = Timer(const Duration(seconds: 10), () {
+          if (mounted) {
+            RuneEventBus.emitEffectEnd(RuneType.blessedCombo);
+          }
+          _blessedComboTimer = null;
+        });
+        
+        debugPrint('GameBoard: Blessed Combo effect activated for 10 seconds (mutually exclusive with other time effects)');
+      } else if (event.runeType == RuneType.blessedCombo && event.type == RuneEventType.effectEnd) {
+        // 取消計時器
+        _blessedComboTimer?.cancel();
+        _blessedComboTimer = null;
+        
+        gameState.deactivateBlessedCombo();
+        debugPrint('GameBoard: Blessed Combo effect deactivated');
       }
     });
 
   }
 
-  @override
   /// 以當前速度重啟計時器
   void _restartTimerWithCurrentSpeed() {
     _currentSpeed = gameState.dropSpeed;
@@ -215,6 +245,7 @@ class _GameBoardState extends State<GameBoard>
     _dropTimer?.cancel();
     _shakeTimer?.cancel();
     _timeChangeTimer?.cancel();
+    _blessedComboTimer?.cancel();
     _shakeController.dispose();
     
     // 清理符文事件監聽器

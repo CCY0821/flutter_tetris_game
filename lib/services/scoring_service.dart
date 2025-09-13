@@ -2,9 +2,59 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/tetromino.dart';
 
+/// 分數來源類型
+enum ScoreOrigin {
+  /// 自然消行（正常遊戲中的消行）
+  natural,
+  
+  /// 法術消行（符文效果造成的消行）
+  spell,
+}
+
+/// 分數修改器抽象類（攔截器模式）
+abstract class ScoreModifier {
+  /// 修改分數
+  /// [origin] 分數來源（自然/法術）
+  /// [baseScore] 原始分數
+  /// 返回修改後的分數
+  double modifyScore(ScoreOrigin origin, double baseScore);
+  
+  /// 檢查修改器是否激活
+  bool get isActive;
+  
+  /// 修改器描述（用於調試）
+  String get description;
+}
+
+/// Blessed Combo 分數修改器
+/// 10 秒內自然消行分數 ×3
+class BlessedComboModifier extends ScoreModifier {
+  final bool Function() _isActiveCallback;
+  
+  BlessedComboModifier(this._isActiveCallback);
+  
+  @override
+  double modifyScore(ScoreOrigin origin, double baseScore) {
+    // 只影響自然消行，法術消行保持不變
+    if (origin == ScoreOrigin.natural && isActive) {
+      return baseScore * 3.0;
+    }
+    return baseScore;
+  }
+  
+  @override
+  bool get isActive => _isActiveCallback();
+  
+  @override
+  String get description => 'Blessed Combo (×3 natural score)';
+}
+
 /// 官方俄羅斯方塊得分系統服務
 /// 基於 https://tetris.wiki/Scoring 的現代指導原則
 class ScoringService {
+  // 分數修改器列表（攔截器鏈）
+  final List<ScoreModifier> _modifiers = [];
+  
   // 基礎消行得分（乘以等級）
   static const Map<int, int> _baseLineScores = {
     1: 100, // Single
@@ -66,6 +116,7 @@ class ScoringService {
     bool isTSpin = false,
     String tSpinType = 'normal', // 'normal' 或 'mini'
     Tetromino? tetromino,
+    ScoreOrigin origin = ScoreOrigin.natural, // 新增：分數來源
   }) {
     if (linesCleared == 0) {
       // 無消行時重置 Combo（根據官方規範重置為 -1）
@@ -150,8 +201,18 @@ class ScoringService {
     _lastWasDifficultClear = isDifficultClear;
     _totalLinesCleared += linesCleared;
 
+    // 應用分數修改器（攔截器鏈）
+    double finalPoints = totalPoints.toDouble();
+    for (final modifier in _modifiers) {
+      if (modifier.isActive) {
+        double modifiedPoints = modifier.modifyScore(origin, finalPoints);
+        debugPrint('ScoringService: ${modifier.description} - ${finalPoints.toInt()} -> ${modifiedPoints.toInt()}');
+        finalPoints = modifiedPoints;
+      }
+    }
+
     return ScoringResult(
-      points: totalPoints,
+      points: finalPoints.toInt(),
       description: achievements.join(', '),
       breakdown: breakdown,
       achievements: achievements,
@@ -263,6 +324,31 @@ class ScoringService {
 
   /// 總消行數
   int get totalLinesCleared => _totalLinesCleared;
+
+  /// 添加分數修改器
+  void addModifier(ScoreModifier modifier) {
+    if (!_modifiers.contains(modifier)) {
+      _modifiers.add(modifier);
+      debugPrint('ScoringService: Added modifier - ${modifier.description}');
+    }
+  }
+  
+  /// 移除分數修改器
+  void removeModifier(ScoreModifier modifier) {
+    if (_modifiers.remove(modifier)) {
+      debugPrint('ScoringService: Removed modifier - ${modifier.description}');
+    }
+  }
+  
+  /// 清除所有修改器
+  void clearModifiers() {
+    final count = _modifiers.length;
+    _modifiers.clear();
+    debugPrint('ScoringService: Cleared $count modifiers');
+  }
+  
+  /// 獲取激活的修改器數量
+  int get activeModifierCount => _modifiers.where((m) => m.isActive).length;
 
   /// 恢復得分系統狀態（用於載入存檔）
   void restoreState({

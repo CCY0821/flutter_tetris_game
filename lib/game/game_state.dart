@@ -85,6 +85,10 @@ class GameState {
   // Time Change 效果狀態
   bool _isTimeChangeActive = false;
   int _originalDropSpeed = 0;
+  
+  // Blessed Combo 效果狀態
+  bool _isBlessedComboActive = false;
+  late BlessedComboModifier _blessedComboModifier;
 
   // 遊戲模式：固定使用 Marathon 模式
 
@@ -162,6 +166,11 @@ class GameState {
 
     // 啟動單調時鐘
     MonotonicTimer.start();
+
+    // 初始化 Blessed Combo 修改器
+    _blessedComboModifier = BlessedComboModifier(() => _isBlessedComboActive);
+    scoringService.addModifier(_blessedComboModifier);
+    debugPrint('GameState: Blessed Combo modifier initialized');
 
     _runeSystemInitialized = true;
     debugPrint('GameState: Rune system initialized');
@@ -288,6 +297,21 @@ class GameState {
 
   /// 檢查 Time Change 是否激活
   bool get isTimeChangeActive => _isTimeChangeActive;
+  
+  /// 激活 Blessed Combo 效果
+  void activateBlessedCombo() {
+    _isBlessedComboActive = true;
+    debugPrint('GameState: Blessed Combo activated - natural line clear score ×3 for 10 seconds');
+  }
+
+  /// 停用 Blessed Combo 效果
+  void deactivateBlessedCombo() {
+    _isBlessedComboActive = false;
+    debugPrint('GameState: Blessed Combo deactivated - score multiplier restored');
+  }
+
+  /// 檢查 Blessed Combo 是否激活
+  bool get isBlessedComboActive => _isBlessedComboActive;
 
   // 獲取下一個速度等級所需分數 (Marathon 模式不基於分數升級)
   int get nextLevelScore {
