@@ -20,6 +20,7 @@ abstract class BoardOperation {
 class ClearCellOperation extends BoardOperation {
   final int row;
   final int col;
+  @override
   final bool isSpellRemoval;
 
   ClearCellOperation(this.row, this.col, {this.isSpellRemoval = false});
@@ -47,6 +48,7 @@ class ClearCellOperation extends BoardOperation {
 /// 清除整行操作
 class ClearRowOperation extends BoardOperation {
   final int row;
+  @override
   final bool isSpellRemoval;
 
   ClearRowOperation(this.row, {this.isSpellRemoval = false});
@@ -76,6 +78,7 @@ class ClearRowOperation extends BoardOperation {
 /// 清除整列操作
 class ClearColumnOperation extends BoardOperation {
   final int col;
+  @override
   final bool isSpellRemoval;
 
   ClearColumnOperation(this.col, {this.isSpellRemoval = false});
@@ -103,6 +106,7 @@ class ClearColumnOperation extends BoardOperation {
 
 /// 下移盤面操作（Earthquake 用）
 class ShiftBoardDownOperation extends BoardOperation {
+  @override
   final bool isSpellRemoval;
   final int shiftRows;
 
@@ -142,6 +146,7 @@ class ShiftBoardDownOperation extends BoardOperation {
 
 /// 壓縮盤面操作（Gravity Reset 用）
 class CompressBoardOperation extends BoardOperation {
+  @override
   final bool isSpellRemoval;
 
   CompressBoardOperation({this.isSpellRemoval = true});
@@ -188,6 +193,7 @@ class CompressBoardOperation extends BoardOperation {
 /// 移除頂部行操作（Angel's Grace 用）
 class RemoveTopRowsOperation extends BoardOperation {
   final int rowsToRemove;
+  @override
   final bool isSpellRemoval;
 
   RemoveTopRowsOperation(this.rowsToRemove, {this.isSpellRemoval = true});

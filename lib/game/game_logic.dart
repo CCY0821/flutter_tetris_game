@@ -372,16 +372,6 @@ class GameLogic {
         gameState.currentTetromino != null;
   }
 
-  /// 檢查並更新高分
-  Future<void> _checkAndUpdateHighScore() async {
-    final isNewRecord =
-        await HighScoreService.instance.updateHighScore(gameState.score);
-    if (isNewRecord) {
-      // 更新 GameState 中的高分快取
-      gameState.highScore = gameState.score;
-      // TODO: 可以在這裡添加新紀錄的特效或音效
-    }
-  }
 
   /// 即時檢查並更新高分（非阻塞，用於遊戲進行中）
   void _checkHighScoreRealtime() {

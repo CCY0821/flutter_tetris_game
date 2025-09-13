@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
-import '../lib/services/scoring_service.dart';
+import 'package:flutter_tetris_game/services/scoring_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

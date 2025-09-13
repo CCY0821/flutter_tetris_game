@@ -767,8 +767,8 @@ class _GameBoardState extends State<GameBoard>
                                   children: [
                                     Column(
                                       children: [
-                                        Text('LINES',
-                                            style: const TextStyle(
+                                        const Text('LINES',
+                                            style: TextStyle(
                                                 fontSize: 8,
                                                 color:
                                                     GameTheme.textSecondary)),

@@ -84,7 +84,6 @@ class GameState {
 
   // Time Change 效果狀態
   bool _isTimeChangeActive = false;
-  int _originalDropSpeed = 0;
   
   // Blessed Combo 效果狀態
   bool _isBlessedComboActive = false;
@@ -285,7 +284,7 @@ class GameState {
   /// 激活 Time Change 效果
   void activateTimeChange() {
     _isTimeChangeActive = true;
-    _originalDropSpeed = marathonSystem.getDropInterval();
+    // 原始速度由 marathonSystem 管理，不需要額外存儲
     debugPrint('GameState: Time Change activated - speed multiplier: ×10');
   }
 
