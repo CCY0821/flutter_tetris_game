@@ -322,8 +322,8 @@ class _TouchControlsState extends State<TouchControls> {
 
                         return Text(
                           '$cooldownSeconds',
-                          style: TextStyle(
-                            color: const Color(0xFF00FF88), // 賽博龐克綠色
+                          style: const TextStyle(
+                            color: Color(0xFF00FF88), // 賽博龐克綠色
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             shadows: [
@@ -365,7 +365,7 @@ class _TouchControlsState extends State<TouchControls> {
                             color: cyberpunkAccent.withOpacity(0.7),
                             blurRadius: 6,
                           ),
-                          Shadow(
+                          const Shadow(
                             color: Colors.black,
                             blurRadius: 1,
                           ),

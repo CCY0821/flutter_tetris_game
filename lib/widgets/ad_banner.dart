@@ -257,7 +257,7 @@ class _AdBannerState extends State<AdBanner> with WidgetsBindingObserver {
 
   /// Build container for the actual ad widget.
   Widget _buildAdContainer(Widget adWidget) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: AdConfig.bannerHeight,
       child: Stack(

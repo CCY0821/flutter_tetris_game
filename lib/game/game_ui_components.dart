@@ -608,13 +608,13 @@ class GameUIComponents {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Points',
-                style: const TextStyle(color: Colors.white, fontSize: 10),
+                style: TextStyle(color: Colors.white, fontSize: 10),
               ),
               Text(
                 '+$points',
-                style: TextStyle(
+                style: const TextStyle(
                   color: GameTheme.highlight,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -696,7 +696,7 @@ class GameUIComponents {
                           overlayColor: GameTheme.accentBlue.withOpacity(0.2),
                           trackHeight: 4,
                           thumbShape:
-                              RoundSliderThumbShape(enabledThumbRadius: 8),
+                              const RoundSliderThumbShape(enabledThumbRadius: 8),
                         ),
                         child: Slider(
                           value: AudioService().musicVolume,
@@ -766,7 +766,7 @@ class GameUIComponents {
                           overlayColor: GameTheme.accentBlue.withOpacity(0.2),
                           trackHeight: 4,
                           thumbShape:
-                              RoundSliderThumbShape(enabledThumbRadius: 8),
+                              const RoundSliderThumbShape(enabledThumbRadius: 8),
                         ),
                         child: Slider(
                           value: AudioService().sfxVolume,
@@ -872,7 +872,7 @@ class GameUIComponents {
             '🎮 遊戲控制說明',
             style: GameTheme.titleStyle.copyWith(fontSize: 20),
           ),
-          content: Container(
+          content: SizedBox(
             width: 400,
             child: SingleChildScrollView(
               child: Column(

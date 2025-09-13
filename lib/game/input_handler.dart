@@ -47,7 +47,7 @@ class InputHandler {
                 '🎮 遊戲控制說明',
                 style: TextStyle(color: Colors.white),
               ),
-              content: Container(
+              content: SizedBox(
                 width: 400,
                 child: const SingleChildScrollView(
                   child: Text(

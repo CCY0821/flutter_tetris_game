@@ -1185,7 +1185,7 @@ class RuneSystem {
     debugPrint('[ElementMorph] Current piece: $currentType');
 
     // 獲取所有其他方塊類型（排除當前）
-    final allTypes = TetrominoType.values;
+    const allTypes = TetrominoType.values;
     final otherTypes = allTypes.where((type) => type != currentType).toList();
     
     if (otherTypes.isEmpty) {
