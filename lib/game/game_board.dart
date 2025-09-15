@@ -688,13 +688,13 @@ class _GameBoardState extends State<GameBoard>
                           Align(
                             alignment: Alignment.centerRight,
                             child: SizedBox(
-                              width: 60, // 固定寬度，適合按鈕大小
+                              width: 50, // 統一寬度
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   // 設置按鈕
                                   Container(
-                                    margin: const EdgeInsets.only(bottom: 6),
+                                    margin: const EdgeInsets.only(bottom: 2),
                                     child: ElevatedButton(
                                       onPressed: () => _showSettingsPanel(),
                                       style:
@@ -704,16 +704,16 @@ class _GameBoardState extends State<GameBoard>
                                           GameTheme.accentBlue.withOpacity(0.8),
                                         ),
                                         padding: MaterialStateProperty.all(
-                                          const EdgeInsets.symmetric(vertical: 8),
+                                          const EdgeInsets.symmetric(vertical: 2),
                                         ),
                                       ),
-                                      child: const Icon(Icons.settings, size: 16),
+                                      child: const Icon(Icons.settings, size: 14),
                                     ),
                                   ),
 
                                   // 暫停/繼續按鈕
                                   Container(
-                                    margin: const EdgeInsets.only(bottom: 6),
+                                    margin: const EdgeInsets.only(bottom: 2),
                                     child: ElevatedButton(
                                       onPressed: () => setState(() {
                                         gameState.isPaused = !gameState.isPaused;
@@ -730,14 +730,14 @@ class _GameBoardState extends State<GameBoard>
                                               : GameTheme.primaryButtonStyle)
                                           .copyWith(
                                         padding: MaterialStateProperty.all(
-                                          const EdgeInsets.symmetric(vertical: 8),
+                                          const EdgeInsets.symmetric(vertical: 2),
                                         ),
                                       ),
                                       child: Icon(
                                         gameState.isPaused
                                             ? Icons.play_arrow
                                             : Icons.pause,
-                                        size: 16,
+                                        size: 14,
                                       ),
                                     ),
                                   ),
@@ -753,10 +753,10 @@ class _GameBoardState extends State<GameBoard>
                                           GameTheme.buttonDanger,
                                         ),
                                         padding: MaterialStateProperty.all(
-                                          const EdgeInsets.symmetric(vertical: 8),
+                                          const EdgeInsets.symmetric(vertical: 2),
                                         ),
                                       ),
-                                      child: const Icon(Icons.refresh, size: 16),
+                                      child: const Icon(Icons.refresh, size: 14),
                                     ),
                                   ),
                                 ],
@@ -764,149 +764,44 @@ class _GameBoardState extends State<GameBoard>
                             ),
                           ),
 
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 4),
 
-                          // 合併的統計與得分結果面板 (固定在控制按鈕下方)
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: GameTheme.primaryDark.withOpacity(0.8),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                  color: GameTheme.gridLine.withOpacity(0.3)),
-                            ),
-                            child: Column(
-                              children: [
-                                // 第一行：統計數據
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Column(
-                                      children: [
-                                        const Text('LINES',
-                                            style: TextStyle(
-                                                fontSize: 8,
-                                                color:
-                                                    GameTheme.textSecondary)),
-                                        Text(
-                                            '${gameState.marathonSystem.totalLinesCleared}',
-                                            style: const TextStyle(
-                                                fontSize: 10,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
-                                    Column(
-                                      children: [
-                                        Text('LEVEL',
-                                            style: const TextStyle(
-                                                fontSize: 8,
-                                                color:
-                                                    GameTheme.textSecondary)),
-                                        Text(
-                                            '${gameState.marathonSystem.currentLevel}',
-                                            style: const TextStyle(
-                                                fontSize: 10,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
-                                    Column(
-                                      children: [
-                                        Text('COMBO',
-                                            style: const TextStyle(
-                                                fontSize: 8,
-                                                color:
-                                                    GameTheme.textSecondary)),
-                                        Text(
-                                            '${gameState.scoringService.currentCombo}',
-                                            style: const TextStyle(
-                                                fontSize: 10,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 6),
-
-                                // 分隔線
-                                Container(
-                                  height: 1,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.transparent,
-                                        GameTheme.gridLine.withOpacity(0.3),
-                                        Colors.transparent,
-                                      ],
-                                    ),
+                          // 獨立統計組件 (直列排列，靠右對齊)
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: SizedBox(
+                              width: 50, // 統一寬度，與控制按鈕保持一致
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // 消除行數
+                                  GameUIComponents.linesStatComponent(
+                                    gameState.marathonSystem.totalLinesCleared,
                                   ),
-                                ),
+                                  const SizedBox(height: 2),
 
-                                const SizedBox(height: 6),
+                                  // 關卡
+                                  GameUIComponents.levelStatComponent(
+                                    gameState.marathonSystem.currentLevel,
+                                  ),
+                                  const SizedBox(height: 2),
 
-                                // 第二行：最後得分結果 (固定顯示)
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'LAST SCORE',
-                                      style: const TextStyle(
-                                          fontSize: 8,
-                                          color: GameTheme.textSecondary),
-                                    ),
-                                    Expanded(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          Flexible(
-                                            child: Text(
-                                              gameState.lastScoringResult
-                                                      ?.description ??
-                                                  'None',
-                                              style: TextStyle(
-                                                  color: gameState
-                                                              .lastScoringResult !=
-                                                          null
-                                                      ? Colors.yellow
-                                                      : GameTheme.textSecondary,
-                                                  fontSize: 9,
-                                                  fontWeight: FontWeight.bold),
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            gameState.lastScoringResult != null
-                                                ? '+${gameState.lastScoringResult?.points ?? 0}'
-                                                : '+0',
-                                            style: TextStyle(
-                                                color: gameState
-                                                            .lastScoringResult !=
-                                                        null
-                                                    ? GameTheme.highlight
-                                                    : GameTheme.textSecondary,
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                  // Combo
+                                  GameUIComponents.comboStatComponent(
+                                    gameState.scoringService.currentCombo,
+                                  ),
+                                  const SizedBox(height: 2),
+
+                                  // 最後得分
+                                  GameUIComponents.lastScoreStatComponent(
+                                    gameState.lastScoringResult?.description,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
 
-                          // 使用 Spacer 推到底部
-                          const Spacer(),
+                          const SizedBox(height: 4),
 
                           // 符文能量 HUD (右侧欄最下方，触控区上方)
                           RuneEnergyHUD(

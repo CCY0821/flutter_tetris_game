@@ -73,7 +73,7 @@ class GameUIComponents {
 
               // 主要 NEXT 方塊（第一個）
               Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
                   color: GameTheme.gameBoardBg.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(6),
@@ -344,7 +344,7 @@ class GameUIComponents {
 
                   // 主要 NEXT 方塊（第一個）
                   Container(
-                    padding: const EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
                       color: GameTheme.gameBoardBg.withOpacity(0.7),
                       borderRadius: BorderRadius.circular(6),
@@ -836,6 +836,187 @@ class GameUIComponents {
     return IntegratedStatsPanel(
       scoringService: scoringService,
       marathonSystem: marathonSystem,
+    );
+  }
+
+  // 獨立統計組件 - 消除行數
+  static Widget linesStatComponent(int totalLinesCleared) {
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: cyberpunkPanel,
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+        border: Border.all(
+          color: cyberpunkPrimary,
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: cyberpunkPrimary.withOpacity(0.1),
+            blurRadius: cyberpunkGlowSoft / 3,
+            offset: const Offset(0, 0),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'LINES',
+            style: GameTheme.accentStyle.copyWith(
+              fontSize: 7,
+              letterSpacing: 1.0,
+              color: cyberpunkSecondary,
+            ),
+          ),
+          const SizedBox(height: 1),
+          Text(
+            '$totalLinesCleared',
+            style: GameTheme.titleStyle.copyWith(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: cyberpunkPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 獨立統計組件 - 關卡
+  static Widget levelStatComponent(int currentLevel) {
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: cyberpunkPanel,
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+        border: Border.all(
+          color: cyberpunkAccent,
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: cyberpunkAccent.withOpacity(0.1),
+            blurRadius: cyberpunkGlowSoft / 3,
+            offset: const Offset(0, 0),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'LEVEL',
+            style: GameTheme.accentStyle.copyWith(
+              fontSize: 7,
+              letterSpacing: 1.0,
+              color: cyberpunkSecondary,
+            ),
+          ),
+          const SizedBox(height: 1),
+          Text(
+            '$currentLevel',
+            style: GameTheme.titleStyle.copyWith(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: cyberpunkAccent,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 獨立統計組件 - Combo
+  static Widget comboStatComponent(int currentCombo) {
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: cyberpunkPanel,
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+        border: Border.all(
+          color: cyberpunkCaution,
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: cyberpunkCaution.withOpacity(0.1),
+            blurRadius: cyberpunkGlowSoft / 3,
+            offset: const Offset(0, 0),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'COMBO',
+            style: GameTheme.accentStyle.copyWith(
+              fontSize: 7,
+              letterSpacing: 1.0,
+              color: cyberpunkSecondary,
+            ),
+          ),
+          const SizedBox(height: 1),
+          Text(
+            '$currentCombo',
+            style: GameTheme.titleStyle.copyWith(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: cyberpunkCaution,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 獨立統計組件 - 最後得分
+  static Widget lastScoreStatComponent(String? lastScoringDescription) {
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: cyberpunkPanel,
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+        border: Border.all(
+          color: cyberpunkSecondary,
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: cyberpunkSecondary.withOpacity(0.1),
+            blurRadius: cyberpunkGlowSoft / 3,
+            offset: const Offset(0, 0),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'LAST',
+            style: GameTheme.accentStyle.copyWith(
+              fontSize: 7,
+              letterSpacing: 1.0,
+              color: cyberpunkSecondary,
+            ),
+          ),
+          const SizedBox(height: 1),
+          Text(
+            lastScoringDescription ?? 'None',
+            style: GameTheme.titleStyle.copyWith(
+              fontSize: 8,
+              fontWeight: FontWeight.bold,
+              color: lastScoringDescription != null
+                  ? cyberpunkCaution
+                  : cyberpunkSecondary.withOpacity(0.7),
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 
