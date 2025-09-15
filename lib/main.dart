@@ -126,48 +126,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // 遊戲標題
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 24),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  GameTheme.highlight.withOpacity(0.1),
-                                  GameTheme.brightAccent.withOpacity(0.1),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                  cyberpunkBorderRadiusLarge),
-                              border: Border.all(
-                                color: GameTheme.textAccent.withOpacity(0.3),
-                                width: cyberpunkBorderWidthBold,
-                              ),
-                              boxShadow: cyberpunkPrimaryGlow,
-                            ),
-                            child: Text(
-                              'TETRIS',
-                              style: GameTheme.titleStyle.copyWith(
-                                fontSize: 36,
-                                letterSpacing: 4,
-                                color: cyberpunkPrimary, // 霓虹青色標題
-                                shadows: [
-                                  Shadow(
-                                    color: cyberpunkPrimary.withOpacity(0.5),
-                                    blurRadius: cyberpunkGlowMed,
-                                    offset: const Offset(2, 2),
-                                  ),
-                                  Shadow(
-                                    color: cyberpunkSecondary.withOpacity(0.3),
-                                    blurRadius: cyberpunkGlowStrong,
-                                    offset: const Offset(0, 0),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
                           // 遊戲板
                           const GameBoard(),
                         ],

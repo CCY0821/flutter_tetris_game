@@ -12,7 +12,203 @@ import '../services/audio_service.dart';
 class GameUIComponents {
   static const double cellSize = 6;
 
-  // 合併的 NEXT 和 SCORE 組件
+  // 獨立的下個方塊預覽組件
+  static Widget nextPiecePreview(Tetromino? nextTetromino, List<Tetromino> nextTetrominos) {
+    const previewSize = 6;
+    const offsetX = 2;
+    const offsetY = 2;
+
+    final preview = List.generate(
+      previewSize,
+      (_) => List.generate(previewSize, (_) => null as Color?),
+    );
+
+    if (nextTetromino != null) {
+      for (final p in nextTetromino.shape) {
+        int px = p.dx.toInt() + offsetX;
+        int py = p.dy.toInt() + offsetY;
+        if (py >= 0 && py < previewSize && px >= 0 && px < previewSize) {
+          preview[py][px] = nextTetromino.color;
+        }
+      }
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: cyberpunkPanel,
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+        border: Border.all(
+          color: cyberpunkPrimary,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: cyberpunkPrimary.withOpacity(0.2),
+            blurRadius: cyberpunkGlowSoft,
+            offset: const Offset(0, 0),
+          ),
+          BoxShadow(
+            color: cyberpunkSecondary.withOpacity(0.1),
+            blurRadius: cyberpunkGlowSoft / 2,
+            offset: const Offset(1, 1),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // NEXT 標題和主要方塊
+          Row(
+            children: [
+              Text(
+                'NEXT',
+                style: GameTheme.accentStyle.copyWith(
+                  fontSize: 11,
+                  letterSpacing: 1.5,
+                  color: cyberpunkPrimary,
+                ),
+              ),
+              const SizedBox(width: 6),
+
+              // 主要 NEXT 方塊（第一個）
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: GameTheme.gameBoardBg.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Column(
+                  children: preview
+                      .map((row) => Row(
+                            children: row
+                                .map(
+                                  (c) => Container(
+                                    width: cellSize * 0.8,
+                                    height: cellSize * 0.8,
+                                    margin: const EdgeInsets.all(0.4),
+                                    decoration: BoxDecoration(
+                                      color: c ??
+                                          GameTheme.gridLine
+                                              .withOpacity(0.1),
+                                      borderRadius:
+                                          BorderRadius.circular(2),
+                                      border: c != null
+                                          ? null
+                                          : Border.all(
+                                              color: GameTheme.gridLine
+                                                  .withOpacity(0.2),
+                                              width: 0.3,
+                                            ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ))
+                      .toList(),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 6),
+
+          // 下三個方塊預覽（第二行）
+          Row(
+            children: [
+              const SizedBox(width: 40), // 對齊NEXT文字下方
+              ...nextTetrominos.take(3).map((tetromino) => Container(
+                    margin: const EdgeInsets.only(right: 2),
+                    child: _buildSmallPreview(tetromino),
+                  )),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 獨立的分數資訊組件
+  static Widget scoreInfoPanel(int score, int highScore) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: cyberpunkPanel,
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+        border: Border.all(
+          color: cyberpunkPrimary,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: cyberpunkPrimary.withOpacity(0.2),
+            blurRadius: cyberpunkGlowSoft,
+            offset: const Offset(0, 0),
+          ),
+          BoxShadow(
+            color: cyberpunkSecondary.withOpacity(0.1),
+            blurRadius: cyberpunkGlowSoft / 2,
+            offset: const Offset(1, 1),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // High Score 區域
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'HIGH SCORE',
+                style: GameTheme.accentStyle.copyWith(
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                  color: cyberpunkAccent,
+                ),
+              ),
+              Text(
+                '$highScore',
+                style: GameTheme.titleStyle.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.8,
+                  color: cyberpunkAccent,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 6),
+
+          // 分數區域
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'SCORE',
+                style: GameTheme.accentStyle.copyWith(
+                  fontSize: 12,
+                  letterSpacing: 1.5,
+                  color: cyberpunkPrimary,
+                ),
+              ),
+              Text(
+                '$score',
+                style: GameTheme.titleStyle.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                  color: cyberpunkCaution,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 合併的 NEXT 和 SCORE 組件 (保留向後兼容)
   static Widget nextAndScorePanel(Tetromino? nextTetromino, int score,
       List<Tetromino> nextTetrominos, int highScore) {
     const previewSize = 6;

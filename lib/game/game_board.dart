@@ -521,6 +521,34 @@ class _GameBoardState extends State<GameBoard>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // 頂部信息面板 - 預覽和分數左右並排
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                // 左側：下個方塊預覽
+                Expanded(
+                  flex: 1,
+                  child: GameUIComponents.nextPiecePreview(
+                    gameState.nextTetromino,
+                    gameState.nextTetrominos,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // 右側：分數資訊
+                Expanded(
+                  flex: 1,
+                  child: GameUIComponents.scoreInfoPanel(
+                    gameState.score,
+                    gameState.highScore,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
           // 主遊戲區域
           LayoutBuilder(
             builder: (context, constraints) {
@@ -646,15 +674,7 @@ class _GameBoardState extends State<GameBoard>
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // NEXT 和 SCORE 面板 (頂部固定)
-                          GameUIComponents.nextAndScorePanel(
-                              gameState.nextTetromino,
-                              gameState.score,
-                              gameState.nextTetrominos,
-                              gameState.highScore),
-                          const SizedBox(height: 8),
-
-                          // 遊戲狀態指示器 (緊貼NEXT面板，固定位置)
+                          // 遊戲狀態指示器 (頂部固定位置)
                           GameUIComponents.gameStatusIndicators(
                             combo: gameState.scoringService.currentCombo,
                             isBackToBackReady:
@@ -664,86 +684,84 @@ class _GameBoardState extends State<GameBoard>
                           ),
                           const SizedBox(height: 6),
 
-                          // 控制按鈕 (緊貼遊戲狀態指示器下方)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              // 設置按鈕
-                              Expanded(
-                                child: Container(
-                                  margin: const EdgeInsets.only(right: 2),
-                                  child: ElevatedButton(
-                                    onPressed: () => _showSettingsPanel(),
-                                    style:
-                                        GameTheme.primaryButtonStyle.copyWith(
-                                      backgroundColor:
-                                          MaterialStateProperty.all(
-                                        GameTheme.accentBlue.withOpacity(0.8),
+                          // 控制按鈕 (直列排列，靠右對齊)
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: SizedBox(
+                              width: 60, // 固定寬度，適合按鈕大小
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // 設置按鈕
+                                  Container(
+                                    margin: const EdgeInsets.only(bottom: 6),
+                                    child: ElevatedButton(
+                                      onPressed: () => _showSettingsPanel(),
+                                      style:
+                                          GameTheme.primaryButtonStyle.copyWith(
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                          GameTheme.accentBlue.withOpacity(0.8),
+                                        ),
+                                        padding: MaterialStateProperty.all(
+                                          const EdgeInsets.symmetric(vertical: 8),
+                                        ),
                                       ),
-                                      padding: MaterialStateProperty.all(
-                                        const EdgeInsets.symmetric(vertical: 5),
-                                      ),
+                                      child: const Icon(Icons.settings, size: 16),
                                     ),
-                                    child: const Icon(Icons.settings, size: 12),
                                   ),
-                                ),
-                              ),
 
-                              // 暫停/繼續按鈕
-                              Expanded(
-                                child: Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(horizontal: 1),
-                                  child: ElevatedButton(
-                                    onPressed: () => setState(() {
-                                      gameState.isPaused = !gameState.isPaused;
-                                      if (gameState.isPaused) {
-                                        gameState.audioService
-                                            .pauseBackgroundMusic();
-                                      } else {
-                                        gameState.audioService
-                                            .resumeBackgroundMusic();
-                                      }
-                                    }),
-                                    style: (gameState.isPaused
-                                            ? GameTheme.secondaryButtonStyle
-                                            : GameTheme.primaryButtonStyle)
-                                        .copyWith(
-                                      padding: MaterialStateProperty.all(
-                                        const EdgeInsets.symmetric(vertical: 5),
+                                  // 暫停/繼續按鈕
+                                  Container(
+                                    margin: const EdgeInsets.only(bottom: 6),
+                                    child: ElevatedButton(
+                                      onPressed: () => setState(() {
+                                        gameState.isPaused = !gameState.isPaused;
+                                        if (gameState.isPaused) {
+                                          gameState.audioService
+                                              .pauseBackgroundMusic();
+                                        } else {
+                                          gameState.audioService
+                                              .resumeBackgroundMusic();
+                                        }
+                                      }),
+                                      style: (gameState.isPaused
+                                              ? GameTheme.secondaryButtonStyle
+                                              : GameTheme.primaryButtonStyle)
+                                          .copyWith(
+                                        padding: MaterialStateProperty.all(
+                                          const EdgeInsets.symmetric(vertical: 8),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        gameState.isPaused
+                                            ? Icons.play_arrow
+                                            : Icons.pause,
+                                        size: 16,
                                       ),
                                     ),
-                                    child: Icon(
-                                      gameState.isPaused
-                                          ? Icons.play_arrow
-                                          : Icons.pause,
-                                      size: 12,
-                                    ),
                                   ),
-                                ),
-                              ),
 
-                              // 重新開始按鈕
-                              Expanded(
-                                child: Container(
-                                  margin: const EdgeInsets.only(left: 2),
-                                  child: ElevatedButton(
-                                    onPressed: _startGame,
-                                    style:
-                                        GameTheme.primaryButtonStyle.copyWith(
-                                      backgroundColor:
-                                          MaterialStateProperty.all(
-                                        GameTheme.buttonDanger,
+                                  // 重新開始按鈕
+                                  Container(
+                                    child: ElevatedButton(
+                                      onPressed: _startGame,
+                                      style:
+                                          GameTheme.primaryButtonStyle.copyWith(
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                          GameTheme.buttonDanger,
+                                        ),
+                                        padding: MaterialStateProperty.all(
+                                          const EdgeInsets.symmetric(vertical: 8),
+                                        ),
                                       ),
-                                      padding: MaterialStateProperty.all(
-                                        const EdgeInsets.symmetric(vertical: 5),
-                                      ),
+                                      child: const Icon(Icons.refresh, size: 16),
                                     ),
-                                    child: const Icon(Icons.refresh, size: 12),
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
 
                           const SizedBox(height: 6),
