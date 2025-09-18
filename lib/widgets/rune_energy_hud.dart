@@ -12,7 +12,7 @@ enum EnergyCellImplementation {
 }
 
 /// 符文能量HUD - 3格水平排列能量条
-/// 定位: 右侧栏最下方，且在底部触控按钮区域上方
+/// 定位: 右侧栏最下方，且在底部触控按钮区域上方 (已調整)
 class RuneEnergyHUD extends StatelessWidget {
   final RuneEnergyStatus energyStatus;
   final double gap;
@@ -22,7 +22,7 @@ class RuneEnergyHUD extends StatelessWidget {
   const RuneEnergyHUD({
     super.key,
     required this.energyStatus,
-    this.gap = 4.0,
+    this.gap = 2.0,
     this.implementation = EnergyCellImplementation.canvas,
     this.debugOverlay = false,
   });
@@ -33,20 +33,22 @@ class RuneEnergyHUD extends StatelessWidget {
     final snappedGap = snap(gap, devicePixelRatio);
 
     return RepaintBoundary(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          for (int i = 0; i < RuneEnergyManager.maxEnergy; i++) ...[
-            EnergyCell(
-              ratio: _getCellRatio(i),
-              implementation: implementation,
-              debugOverlay: debugOverlay,
-            ),
-            if (i < RuneEnergyManager.maxEnergy - 1)
-              SizedBox(width: snappedGap),
+      child: ClipRect(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (int i = 0; i < RuneEnergyManager.maxEnergy; i++) ...[
+              EnergyCell(
+                ratio: _getCellRatio(i),
+                implementation: implementation,
+                debugOverlay: debugOverlay,
+              ),
+              if (i < RuneEnergyManager.maxEnergy - 1)
+                SizedBox(width: snappedGap),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -104,7 +106,7 @@ class EnergyCell extends StatefulWidget {
     this.animate = true,
     this.duration = const Duration(milliseconds: 220),
     this.curve = Curves.easeOutCubic,
-    this.size = const Size(16, 40),
+    this.size = const Size(13, 40), // 調整寬度避免像素溢出
     this.borderColor = const Color(0xFFDBDBDB),
     this.fillBackground = const Color(0xFF101214),
     this.fillColor = const Color(0xFF44D17A),

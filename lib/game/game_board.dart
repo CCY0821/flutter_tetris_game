@@ -168,48 +168,52 @@ class _GameBoardState extends State<GameBoard>
     // 監聽所有符文事件並過濾 Time Change
     _runeEventSubscription = RuneEventBus.events.listen((event) {
       if (!mounted) return;
-      
-      if (event.runeType == RuneType.timeChange && event.type == RuneEventType.effectStart) {
-          // 🎯 時間類符文互斥：結束任何其他正在進行的時間效果
-          if (gameState.isBlessedComboActive) {
-            RuneEventBus.emitEffectEnd(RuneType.blessedCombo);
+
+      if (event.runeType == RuneType.timeChange &&
+          event.type == RuneEventType.effectStart) {
+        // 🎯 時間類符文互斥：結束任何其他正在進行的時間效果
+        if (gameState.isBlessedComboActive) {
+          RuneEventBus.emitEffectEnd(RuneType.blessedCombo);
+        }
+
+        gameState.activateTimeChange();
+        // 更新遊戲計時器速度
+        if (!gameState.isPaused && !gameState.isGameOver) {
+          _restartTimerWithCurrentSpeed();
+        }
+
+        // 設置10秒自動結束計時器
+        _timeChangeTimer?.cancel();
+        _timeChangeTimer = Timer(const Duration(seconds: 10), () {
+          if (mounted) {
+            RuneEventBus.emitEffectEnd(RuneType.timeChange);
           }
-          
-          gameState.activateTimeChange();
-          // 更新遊戲計時器速度
-          if (!gameState.isPaused && !gameState.isGameOver) {
-            _restartTimerWithCurrentSpeed();
-          }
-          
-          // 設置10秒自動結束計時器
-          _timeChangeTimer?.cancel();
-          _timeChangeTimer = Timer(const Duration(seconds: 10), () {
-            if (mounted) {
-              RuneEventBus.emitEffectEnd(RuneType.timeChange);
-            }
-            _timeChangeTimer = null;
-          });
-          
-          debugPrint('GameBoard: Time Change effect activated for 10 seconds (mutually exclusive with other time effects)');
-      } else if (event.runeType == RuneType.timeChange && event.type == RuneEventType.effectEnd) {
+          _timeChangeTimer = null;
+        });
+
+        debugPrint(
+            'GameBoard: Time Change effect activated for 10 seconds (mutually exclusive with other time effects)');
+      } else if (event.runeType == RuneType.timeChange &&
+          event.type == RuneEventType.effectEnd) {
         // 取消計時器
         _timeChangeTimer?.cancel();
         _timeChangeTimer = null;
-        
+
         gameState.deactivateTimeChange();
         // 恢復正常遊戲計時器速度
         if (!gameState.isPaused && !gameState.isGameOver) {
           _restartTimerWithCurrentSpeed();
         }
         debugPrint('GameBoard: Time Change effect deactivated');
-      } else if (event.runeType == RuneType.blessedCombo && event.type == RuneEventType.effectStart) {
+      } else if (event.runeType == RuneType.blessedCombo &&
+          event.type == RuneEventType.effectStart) {
         // 🎯 時間類符文互斥：結束任何其他正在進行的時間效果
         if (gameState.isTimeChangeActive) {
           RuneEventBus.emitEffectEnd(RuneType.timeChange);
         }
-        
+
         gameState.activateBlessedCombo();
-        
+
         // 設置10秒自動結束計時器
         _blessedComboTimer?.cancel();
         _blessedComboTimer = Timer(const Duration(seconds: 10), () {
@@ -218,18 +222,19 @@ class _GameBoardState extends State<GameBoard>
           }
           _blessedComboTimer = null;
         });
-        
-        debugPrint('GameBoard: Blessed Combo effect activated for 10 seconds (mutually exclusive with other time effects)');
-      } else if (event.runeType == RuneType.blessedCombo && event.type == RuneEventType.effectEnd) {
+
+        debugPrint(
+            'GameBoard: Blessed Combo effect activated for 10 seconds (mutually exclusive with other time effects)');
+      } else if (event.runeType == RuneType.blessedCombo &&
+          event.type == RuneEventType.effectEnd) {
         // 取消計時器
         _blessedComboTimer?.cancel();
         _blessedComboTimer = null;
-        
+
         gameState.deactivateBlessedCombo();
         debugPrint('GameBoard: Blessed Combo effect deactivated');
       }
     });
-
   }
 
   /// 以當前速度重啟計時器
@@ -247,10 +252,10 @@ class _GameBoardState extends State<GameBoard>
     _timeChangeTimer?.cancel();
     _blessedComboTimer?.cancel();
     _shakeController.dispose();
-    
+
     // 清理符文事件監聽器
     _runeEventSubscription?.cancel();
-    
+
     controllerHandler.dispose();
     gameState.dispose();
     super.dispose();
@@ -700,14 +705,16 @@ class _GameBoardState extends State<GameBoard>
                                       style:
                                           GameTheme.primaryButtonStyle.copyWith(
                                         backgroundColor:
-                                            MaterialStateProperty.all(
+                                            WidgetStateProperty.all(
                                           GameTheme.accentBlue.withOpacity(0.8),
                                         ),
-                                        padding: MaterialStateProperty.all(
-                                          const EdgeInsets.symmetric(vertical: 2),
+                                        padding: WidgetStateProperty.all(
+                                          const EdgeInsets.symmetric(
+                                              vertical: 2),
                                         ),
                                       ),
-                                      child: const Icon(Icons.settings, size: 14),
+                                      child:
+                                          const Icon(Icons.settings, size: 14),
                                     ),
                                   ),
 
@@ -716,7 +723,8 @@ class _GameBoardState extends State<GameBoard>
                                     margin: const EdgeInsets.only(bottom: 2),
                                     child: ElevatedButton(
                                       onPressed: () => setState(() {
-                                        gameState.isPaused = !gameState.isPaused;
+                                        gameState.isPaused =
+                                            !gameState.isPaused;
                                         if (gameState.isPaused) {
                                           gameState.audioService
                                               .pauseBackgroundMusic();
@@ -729,8 +737,9 @@ class _GameBoardState extends State<GameBoard>
                                               ? GameTheme.secondaryButtonStyle
                                               : GameTheme.primaryButtonStyle)
                                           .copyWith(
-                                        padding: MaterialStateProperty.all(
-                                          const EdgeInsets.symmetric(vertical: 2),
+                                        padding: WidgetStateProperty.all(
+                                          const EdgeInsets.symmetric(
+                                              vertical: 2),
                                         ),
                                       ),
                                       child: Icon(
@@ -749,14 +758,16 @@ class _GameBoardState extends State<GameBoard>
                                       style:
                                           GameTheme.primaryButtonStyle.copyWith(
                                         backgroundColor:
-                                            MaterialStateProperty.all(
+                                            WidgetStateProperty.all(
                                           GameTheme.buttonDanger,
                                         ),
-                                        padding: MaterialStateProperty.all(
-                                          const EdgeInsets.symmetric(vertical: 2),
+                                        padding: WidgetStateProperty.all(
+                                          const EdgeInsets.symmetric(
+                                              vertical: 2),
                                         ),
                                       ),
-                                      child: const Icon(Icons.refresh, size: 14),
+                                      child:
+                                          const Icon(Icons.refresh, size: 14),
                                     ),
                                   ),
                                 ],
@@ -803,12 +814,18 @@ class _GameBoardState extends State<GameBoard>
 
                           const SizedBox(height: 4),
 
-                          // 符文能量 HUD (右侧欄最下方，触控区上方)
-                          RuneEnergyHUD(
-                            energyStatus:
-                                gameState.runeEnergyManager.getStatus(),
-                            gap: snap(
-                                4.0, MediaQuery.of(context).devicePixelRatio),
+                          // 符文能量 HUD (右侧欄最下方，触控区上方) - 已調整為靠右對齊
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: SizedBox(
+                              width: 50, // 統一寬度，與控制按鈕和統計面板保持一致
+                              child: RuneEnergyHUD(
+                                energyStatus:
+                                    gameState.runeEnergyManager.getStatus(),
+                                gap: snap(3.0,
+                                    MediaQuery.of(context).devicePixelRatio),
+                              ),
+                            ),
                           ),
 
                           // 保留与触控按钮区的安全间距

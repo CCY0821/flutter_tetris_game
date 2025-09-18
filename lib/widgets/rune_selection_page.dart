@@ -584,7 +584,8 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
             ),
@@ -641,12 +642,14 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
-                  foregroundColor: validation.isValid ? Colors.white : Colors.grey[400],
+                  foregroundColor:
+                      validation.isValid ? Colors.white : Colors.grey[400],
                   shadowColor: Colors.transparent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
             ),

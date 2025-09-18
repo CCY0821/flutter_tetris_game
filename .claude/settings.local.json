@@ -52,7 +52,10 @@
       "Bash(/bashes)",
       "Bash(where gemini)",
       "Bash(sed:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(nc localhost 1595)",
+      "Bash(findstr:*)",
+      "Bash(nc localhost 2566)"
     ],
     "deny": [],
     "additionalDirectories": [

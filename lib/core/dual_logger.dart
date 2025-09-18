@@ -19,7 +19,7 @@ class DualLogger {
   /// 初始化文件日誌
   Future<void> init() async {
     if (_initialized) return;
-    
+
     try {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/rune_debug.log');
@@ -34,10 +34,10 @@ class DualLogger {
   /// 記錄關鍵事件
   void crit(String msg) {
     final line = '[CRIT] ${DateTime.now().toIso8601String()} $msg';
-    
+
     // 路徑1：同步控制台輸出（避免節流）
     debugPrintSynchronously(line);
-    
+
     // 路徑2：文件輸出（避免被 logcat 吃掉）
     if (_initialized && _sink != null) {
       try {

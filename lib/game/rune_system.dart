@@ -935,11 +935,13 @@ class RuneSystem {
   }
 
   /// 執行 Gravity Reset
-  RuneCastResult _executeGravityReset(List<List<Color?>> board, dynamic gameContext) {
+  RuneCastResult _executeGravityReset(
+      List<List<Color?>> board, dynamic gameContext) {
     try {
       // 添加詳細的調試日誌（仿照 Dragon Roar）
-      debugPrint('[GravityReset] boardH=${board.length}, boardW=${board[0].length}');
-      
+      debugPrint(
+          '[GravityReset] boardH=${board.length}, boardW=${board[0].length}');
+
       // 創建強制 I 型方塊攔截器，接下來5個都是I型
       // 使用新的 BagProvider 作為基礎提供器（符合標準做法）
       final interceptor = ForcedSequenceProvider(
@@ -951,16 +953,18 @@ class RuneSystem {
       // 推送到攔截器堆疊
       gameContext.gameLogic.gameState.pieceProviderStack.push(interceptor);
       debugPrint('[GravityReset] Interceptor pushed to piece provider stack');
-      
+
       // 更新預覽隊列
       gameContext.gameLogic.gameState.updatePreviewQueue();
       debugPrint('[GravityReset] Preview queue updated');
-      
+
       // 觸發棋盤更新回調（仿照成功法術的關鍵調用）
       batchProcessor.notifyBoardChanged();
-      
-      debugPrint('[GravityReset] Execution complete - next 5 pieces will be I-type tetrominoes');
-      debugPrint('[GravityReset] Interceptor remaining: ${interceptor.remaining}');
+
+      debugPrint(
+          '[GravityReset] Execution complete - next 5 pieces will be I-type tetrominoes');
+      debugPrint(
+          '[GravityReset] Interceptor remaining: ${interceptor.remaining}');
       return RuneCastResult.success;
     } catch (e) {
       debugPrint('[GravityReset] Error: $e');
@@ -1168,16 +1172,14 @@ class RuneSystem {
   }
 
   /// 執行 Element Morph - 當前方塊隨機變形
-  RuneCastResult _executeElementMorph(List<List<Color?>> board, dynamic gameContext) {
+  RuneCastResult _executeElementMorph(
+      List<List<Color?>> board, dynamic gameContext) {
     debugPrint('[ElementMorph] Starting morph execution');
 
     // 檢查是否有當前方塊
     if (gameContext?.currentTetromino == null) {
       debugPrint('[ElementMorph] Failed: No active tetromino');
-      return RuneCastResult.failure(
-        RuneCastError.systemError, 
-        '無法變形 - 沒有活躍方塊'
-      );
+      return RuneCastResult.failure(RuneCastError.systemError, '無法變形 - 沒有活躍方塊');
     }
 
     final currentTetro = gameContext.currentTetromino;
@@ -1187,13 +1189,11 @@ class RuneSystem {
     // 獲取所有其他方塊類型（排除當前）
     const allTypes = TetrominoType.values;
     final otherTypes = allTypes.where((type) => type != currentType).toList();
-    
+
     if (otherTypes.isEmpty) {
       debugPrint('[ElementMorph] Failed: No alternative types available');
       return RuneCastResult.failure(
-        RuneCastError.systemError, 
-        '系統錯誤 - 無可用變形類型'
-      );
+          RuneCastError.systemError, '系統錯誤 - 無可用變形類型');
     }
 
     // 隨機選擇新類型
@@ -1211,24 +1211,26 @@ class RuneSystem {
     if (_canPlaceTetrominoAt(newTetromino, board)) {
       // 直接替換當前方塊
       gameContext.gameLogic.gameState.currentTetromino = newTetromino;
-      debugPrint('[ElementMorph] Success: Morphed $currentType -> $newType at (${newTetromino.x}, ${newTetromino.y})');
+      debugPrint(
+          '[ElementMorph] Success: Morphed $currentType -> $newType at (${newTetromino.x}, ${newTetromino.y})');
       return RuneCastResult.success;
     }
 
     // 如果無法放置，嘗試位置調整（±2格水平，-1/-2格垂直）
     debugPrint('[ElementMorph] Trying position adjustments');
-    
+
     for (int dx = -2; dx <= 2; dx++) {
       for (int dy = 0; dy >= -2; dy--) {
         if (dx == 0 && dy == 0) continue; // 已經測試過原位置
-        
+
         final testTetromino = Tetromino.fromType(newType, boardWidth);
         testTetromino.x = currentTetro.x + dx;
         testTetromino.y = currentTetro.y + dy;
-        
+
         if (_canPlaceTetrominoAt(testTetromino, board)) {
           gameContext.gameLogic.gameState.currentTetromino = testTetromino;
-          debugPrint('[ElementMorph] Success with adjustment: $currentType -> $newType at (${testTetromino.x}, ${testTetromino.y})');
+          debugPrint(
+              '[ElementMorph] Success with adjustment: $currentType -> $newType at (${testTetromino.x}, ${testTetromino.y})');
           return RuneCastResult.success;
         }
       }
@@ -1236,10 +1238,7 @@ class RuneSystem {
 
     // 所有位置都失敗
     debugPrint('[ElementMorph] Failed: No valid position found');
-    return RuneCastResult.failure(
-      RuneCastError.systemError, 
-      '無法變形 - 空間不足'
-    );
+    return RuneCastResult.failure(RuneCastError.systemError, '無法變形 - 空間不足');
   }
 
   /// 檢查方塊是否可以放置在指定位置
@@ -1247,12 +1246,12 @@ class RuneSystem {
     for (final point in tetromino.shape) {
       final x = tetromino.x + point.dx.toInt();
       final y = tetromino.y + point.dy.toInt();
-      
+
       // 檢查邊界
       if (x < 0 || x >= board[0].length || y < 0 || y >= board.length) {
         return false;
       }
-      
+
       // 檢查與現有方塊衝突
       if (board[y][x] != null) {
         return false;

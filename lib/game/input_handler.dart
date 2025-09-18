@@ -18,8 +18,8 @@ class InputHandler {
     this.context,
   });
 
-  void handleKey(RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
+  void handleKey(KeyEvent event) {
+    if (event is KeyDownEvent) {
       final key = event.logicalKey.keyLabel.toLowerCase();
 
       if (key == 'p' && !gameState.isGameOver) {

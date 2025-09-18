@@ -47,7 +47,7 @@ class GameState {
   Tetromino? currentTetromino;
   Tetromino? nextTetromino;
   List<Tetromino> nextTetrominos = []; // 下三個方塊預覽隊列
-  
+
   // 方塊供應器系統（用於實現 Gravity Reset 等符文）
   late PieceProviderStack pieceProviderStack;
   final AudioService audioService = AudioService();
@@ -84,7 +84,7 @@ class GameState {
 
   // Time Change 效果狀態
   bool _isTimeChangeActive = false;
-  
+
   // Blessed Combo 效果狀態
   bool _isBlessedComboActive = false;
   late BlessedComboModifier _blessedComboModifier;
@@ -208,10 +208,10 @@ class GameState {
     score = 0;
     isGameOver = false;
     isPaused = false;
-    
+
     // 重置方塊供應器系統（清除所有攔截器）
     pieceProviderStack.clear();
-    
+
     // 使用方塊供應器系統生成初始方塊
     currentTetromino = _createTetrominoFromType(pieceProviderStack.getNext());
     nextTetromino = _createTetrominoFromType(pieceProviderStack.getNext());
@@ -246,12 +246,12 @@ class GameState {
   Tetromino _createTetrominoFromType(TetrominoType type) {
     return Tetromino.fromType(type, colCount);
   }
-  
+
   /// 更新預覽隊列（當有新的攔截器時調用）
   void updatePreviewQueue() {
     final previewTypes = pieceProviderStack.preview(3);
     nextTetrominos.clear();
-    
+
     for (int i = 0; i < 3; i++) {
       if (i < previewTypes.length) {
         nextTetrominos.add(_createTetrominoFromType(previewTypes[i]));
@@ -260,19 +260,20 @@ class GameState {
         nextTetrominos.add(Tetromino.random(colCount));
       }
     }
-    
-    debugPrint('GameState: Updated preview queue: ${previewTypes.map((t) => t.name).join(', ')}');
+
+    debugPrint(
+        'GameState: Updated preview queue: ${previewTypes.map((t) => t.name).join(', ')}');
   }
 
   // 獲取當前遊戲速度 (毫秒)
   int get dropSpeed {
     int baseSpeed = marathonSystem.getDropInterval();
-    
+
     // 如果 Time Change 效果激活，速度變為 0.5 倍（間隔變為 2 倍）
     if (_isTimeChangeActive) {
       return baseSpeed * 2;
     }
-    
+
     return baseSpeed;
   }
 
@@ -296,17 +297,19 @@ class GameState {
 
   /// 檢查 Time Change 是否激活
   bool get isTimeChangeActive => _isTimeChangeActive;
-  
+
   /// 激活 Blessed Combo 效果
   void activateBlessedCombo() {
     _isBlessedComboActive = true;
-    debugPrint('GameState: Blessed Combo activated - natural line clear score ×3 for 10 seconds');
+    debugPrint(
+        'GameState: Blessed Combo activated - natural line clear score ×3 for 10 seconds');
   }
 
   /// 停用 Blessed Combo 效果
   void deactivateBlessedCombo() {
     _isBlessedComboActive = false;
-    debugPrint('GameState: Blessed Combo deactivated - score multiplier restored');
+    debugPrint(
+        'GameState: Blessed Combo deactivated - score multiplier restored');
   }
 
   /// 檢查 Blessed Combo 是否激活

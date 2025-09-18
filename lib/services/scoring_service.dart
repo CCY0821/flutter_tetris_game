@@ -6,7 +6,7 @@ import '../models/tetromino.dart';
 enum ScoreOrigin {
   /// 自然消行（正常遊戲中的消行）
   natural,
-  
+
   /// 法術消行（符文效果造成的消行）
   spell,
 }
@@ -18,10 +18,10 @@ abstract class ScoreModifier {
   /// [baseScore] 原始分數
   /// 返回修改後的分數
   double modifyScore(ScoreOrigin origin, double baseScore);
-  
+
   /// 檢查修改器是否激活
   bool get isActive;
-  
+
   /// 修改器描述（用於調試）
   String get description;
 }
@@ -30,9 +30,9 @@ abstract class ScoreModifier {
 /// 10 秒內自然消行分數 ×3
 class BlessedComboModifier extends ScoreModifier {
   final bool Function() _isActiveCallback;
-  
+
   BlessedComboModifier(this._isActiveCallback);
-  
+
   @override
   double modifyScore(ScoreOrigin origin, double baseScore) {
     // 只影響自然消行，法術消行保持不變
@@ -41,10 +41,10 @@ class BlessedComboModifier extends ScoreModifier {
     }
     return baseScore;
   }
-  
+
   @override
   bool get isActive => _isActiveCallback();
-  
+
   @override
   String get description => 'Blessed Combo (×3 natural score)';
 }
@@ -54,7 +54,7 @@ class BlessedComboModifier extends ScoreModifier {
 class ScoringService {
   // 分數修改器列表（攔截器鏈）
   final List<ScoreModifier> _modifiers = [];
-  
+
   // 基礎消行得分（乘以等級）
   static const Map<int, int> _baseLineScores = {
     1: 100, // Single
@@ -206,7 +206,8 @@ class ScoringService {
     for (final modifier in _modifiers) {
       if (modifier.isActive) {
         double modifiedPoints = modifier.modifyScore(origin, finalPoints);
-        debugPrint('ScoringService: ${modifier.description} - ${finalPoints.toInt()} -> ${modifiedPoints.toInt()}');
+        debugPrint(
+            'ScoringService: ${modifier.description} - ${finalPoints.toInt()} -> ${modifiedPoints.toInt()}');
         finalPoints = modifiedPoints;
       }
     }
@@ -332,21 +333,21 @@ class ScoringService {
       debugPrint('ScoringService: Added modifier - ${modifier.description}');
     }
   }
-  
+
   /// 移除分數修改器
   void removeModifier(ScoreModifier modifier) {
     if (_modifiers.remove(modifier)) {
       debugPrint('ScoringService: Removed modifier - ${modifier.description}');
     }
   }
-  
+
   /// 清除所有修改器
   void clearModifiers() {
     final count = _modifiers.length;
     _modifiers.clear();
     debugPrint('ScoringService: Cleared $count modifiers');
   }
-  
+
   /// 獲取激活的修改器數量
   int get activeModifierCount => _modifiers.where((m) => m.isActive).length;
 

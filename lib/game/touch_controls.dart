@@ -242,12 +242,15 @@ class _TouchControlsState extends State<TouchControls> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              definition.themeColor.withOpacity(isActive ? 0.6 : (canCast ? 0.3 : 0.15)),
-              definition.themeColor.withOpacity(isActive ? 0.4 : (canCast ? 0.2 : 0.1)),
+              definition.themeColor
+                  .withOpacity(isActive ? 0.6 : (canCast ? 0.3 : 0.15)),
+              definition.themeColor
+                  .withOpacity(isActive ? 0.4 : (canCast ? 0.2 : 0.1)),
             ],
           ),
           border: Border.all(
-            color: definition.themeColor.withOpacity(isActive ? 1.0 : (canCast ? 0.8 : 0.4)),
+            color: definition.themeColor
+                .withOpacity(isActive ? 1.0 : (canCast ? 0.8 : 0.4)),
             width: isActive ? 3 : (canCast ? 2 : 1),
           ),
           boxShadow: isActive
@@ -280,7 +283,8 @@ class _TouchControlsState extends State<TouchControls> {
             Center(
               child: Icon(
                 definition.icon,
-                color: definition.themeColor.withOpacity(isActive ? 1.0 : (canCast ? 1.0 : 0.5)),
+                color: definition.themeColor
+                    .withOpacity(isActive ? 1.0 : (canCast ? 1.0 : 0.5)),
                 size: 24,
               ),
             ),

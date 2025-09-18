@@ -13,7 +13,8 @@ class GameUIComponents {
   static const double cellSize = 6;
 
   // 獨立的下個方塊預覽組件
-  static Widget nextPiecePreview(Tetromino? nextTetromino, List<Tetromino> nextTetrominos) {
+  static Widget nextPiecePreview(
+      Tetromino? nextTetromino, List<Tetromino> nextTetrominos) {
     const previewSize = 6;
     const offsetX = 2;
     const offsetY = 2;
@@ -89,10 +90,8 @@ class GameUIComponents {
                                     margin: const EdgeInsets.all(0.4),
                                     decoration: BoxDecoration(
                                       color: c ??
-                                          GameTheme.gridLine
-                                              .withOpacity(0.1),
-                                      borderRadius:
-                                          BorderRadius.circular(2),
+                                          GameTheme.gridLine.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(2),
                                       border: c != null
                                           ? null
                                           : Border.all(
@@ -1072,8 +1071,8 @@ class GameUIComponents {
                           thumbColor: GameTheme.brightAccent,
                           overlayColor: GameTheme.accentBlue.withOpacity(0.2),
                           trackHeight: 4,
-                          thumbShape:
-                              const RoundSliderThumbShape(enabledThumbRadius: 8),
+                          thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 8),
                         ),
                         child: Slider(
                           value: AudioService().musicVolume,
@@ -1142,8 +1141,8 @@ class GameUIComponents {
                           thumbColor: GameTheme.brightAccent,
                           overlayColor: GameTheme.accentBlue.withOpacity(0.2),
                           trackHeight: 4,
-                          thumbShape:
-                              const RoundSliderThumbShape(enabledThumbRadius: 8),
+                          thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 8),
                         ),
                         child: Slider(
                           value: AudioService().sfxVolume,

@@ -9,7 +9,7 @@ import 'widgets/scanline_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // 初始化雙路徑日誌系統
   await DualLogger.instance.init();
 

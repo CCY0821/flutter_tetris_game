@@ -19,8 +19,8 @@ class ControllerHandler {
   });
 
   /// 處理手把輸入事件
-  void handleGamepadInput(RawKeyEvent event) {
-    if (event is! RawKeyDownEvent) return;
+  void handleGamepadInput(KeyEvent event) {
+    if (event is! KeyDownEvent) return;
 
     final key = event.logicalKey;
     final now = DateTime.now();

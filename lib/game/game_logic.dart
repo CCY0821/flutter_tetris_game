@@ -175,11 +175,9 @@ class GameLogic {
       // 使用方塊供應器系統生成下一個方塊
       final nextType = gameState.pieceProviderStack.getNext();
       debugPrint('[GameLogic] Generated next piece type: $nextType');
-      gameState.nextTetromino = Tetromino.fromType(
-        nextType,
-        GameState.colCount
-      );
-      
+      gameState.nextTetromino =
+          Tetromino.fromType(nextType, GameState.colCount);
+
       // 更新預覽隊列
       gameState.updatePreviewQueue();
     } else {
@@ -371,7 +369,6 @@ class GameLogic {
         !gameState.isGameOver &&
         gameState.currentTetromino != null;
   }
-
 
   /// 即時檢查並更新高分（非阻塞，用於遊戲進行中）
   void _checkHighScoreRealtime() {
