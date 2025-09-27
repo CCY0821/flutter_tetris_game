@@ -12,12 +12,12 @@ import '../services/audio_service.dart';
 class GameUIComponents {
   static const double cellSize = 6;
 
-  // 獨立的下個方塊預覽組件
+  // 獨立的下個方塊預覽組件 - 水平緊湊布局
   static Widget nextPiecePreview(
       Tetromino? nextTetromino, List<Tetromino> nextTetrominos) {
-    const previewSize = 6;
-    const offsetX = 2;
-    const offsetY = 2;
+    const previewSize = 4;
+    const offsetX = 1;
+    const offsetY = 1;
 
     final preview = List.generate(
       previewSize,
@@ -35,7 +35,7 @@ class GameUIComponents {
     }
 
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: cyberpunkPanel,
         borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
@@ -49,78 +49,72 @@ class GameUIComponents {
             blurRadius: cyberpunkGlowSoft,
             offset: const Offset(0, 0),
           ),
-          BoxShadow(
-            color: cyberpunkSecondary.withOpacity(0.1),
-            blurRadius: cyberpunkGlowSoft / 2,
-            offset: const Offset(1, 1),
-          ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // NEXT 標題和主要方塊
-          Row(
-            children: [
-              Text(
-                'NEXT',
-                style: GameTheme.accentStyle.copyWith(
-                  fontSize: 11,
-                  letterSpacing: 1.5,
-                  color: cyberpunkPrimary,
-                ),
-              ),
-              const SizedBox(width: 6),
+          // NEXT 標題
+          Text(
+            'NEXT',
+            style: GameTheme.accentStyle.copyWith(
+              fontSize: 10,
+              letterSpacing: 1.2,
+              color: cyberpunkPrimary,
+            ),
+          ),
+          const SizedBox(width: 4),
 
-              // 主要 NEXT 方塊（第一個）
-              Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: GameTheme.gameBoardBg.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Column(
-                  children: preview
-                      .map((row) => Row(
-                            children: row
-                                .map(
-                                  (c) => Container(
-                                    width: cellSize * 0.8,
-                                    height: cellSize * 0.8,
-                                    margin: const EdgeInsets.all(0.4),
-                                    decoration: BoxDecoration(
-                                      color: c ??
-                                          GameTheme.gridLine.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(2),
-                                      border: c != null
-                                          ? null
-                                          : Border.all(
-                                              color: GameTheme.gridLine
-                                                  .withOpacity(0.2),
-                                              width: 0.3,
-                                            ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          ))
-                      .toList(),
-                ),
-              ),
-            ],
+          // 主要 NEXT 方塊
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: GameTheme.gameBoardBg.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Column(
+              children: preview
+                  .map((row) => Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: row
+                            .map(
+                              (c) => Container(
+                                width: cellSize * 0.7,
+                                height: cellSize * 0.7,
+                                margin: const EdgeInsets.all(0.3),
+                                decoration: BoxDecoration(
+                                  color:
+                                      c ?? GameTheme.gridLine.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(1),
+                                  border: c != null
+                                      ? null
+                                      : Border.all(
+                                          color: GameTheme.gridLine
+                                              .withOpacity(0.2),
+                                          width: 0.2,
+                                        ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ))
+                  .toList(),
+            ),
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(width: 3),
 
-          // 下三個方塊預覽（第二行）
+          // 三個小預覽方塊水平排列
           Row(
-            children: [
-              const SizedBox(width: 40), // 對齊NEXT文字下方
-              ...nextTetrominos.take(3).map((tetromino) => Container(
-                    margin: const EdgeInsets.only(right: 2),
-                    child: _buildSmallPreview(tetromino),
-                  )),
-            ],
+            mainAxisSize: MainAxisSize.min,
+            children: nextTetrominos
+                .take(3)
+                .map((tetromino) => Container(
+                      margin: const EdgeInsets.only(right: 1.5),
+                      child: _buildCompactPreview(tetromino),
+                    ))
+                .toList(),
           ),
         ],
       ),
@@ -440,6 +434,58 @@ class GameUIComponents {
                           decoration: BoxDecoration(
                             color: c ?? Colors.transparent,
                             borderRadius: BorderRadius.circular(1),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ))
+            .toList(),
+      ),
+    );
+  }
+
+  // 建立緊湊型方塊預覽（用於新的水平布局）
+  static Widget _buildCompactPreview(Tetromino tetromino) {
+    const compactPreviewSize = 3;
+    const offsetX = 0;
+    const offsetY = 0;
+
+    final preview = List.generate(
+      compactPreviewSize,
+      (_) => List.generate(compactPreviewSize, (_) => null as Color?),
+    );
+
+    for (final p in tetromino.shape) {
+      int px = p.dx.toInt() + offsetX;
+      int py = p.dy.toInt() + offsetY;
+      if (py >= 0 &&
+          py < compactPreviewSize &&
+          px >= 0 &&
+          px < compactPreviewSize) {
+        preview[py][px] = tetromino.color;
+      }
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(1),
+      decoration: BoxDecoration(
+        color: GameTheme.gameBoardBg.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(2),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: preview
+            .map((row) => Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: row
+                      .map(
+                        (c) => Container(
+                          width: cellSize * 0.5,
+                          height: cellSize * 0.5,
+                          margin: const EdgeInsets.all(0.2),
+                          decoration: BoxDecoration(
+                            color: c ?? Colors.transparent,
+                            borderRadius: BorderRadius.circular(0.5),
                           ),
                         ),
                       )

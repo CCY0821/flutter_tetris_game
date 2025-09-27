@@ -1,0 +1,128 @@
+頂部水平組件實現計劃
+========================
+
+## 實現目標
+創建兩個等高等寬的頂部組件：
+- 左側：Next Piece Preview (與遊戲棋盤左邊界對齊)
+- 右側：Score Display (與右側控制面板右邊界對齊)
+
+## 實現策略
+
+### Phase 1: 重構現有頂部區域
+**位置**: game_board.dart:530-555
+**現狀**: 已有完整 Row 結構，只需微調對齊
+**操作**:
+1. 保持 Expanded(flex:1) 結構
+2. 添加 Align 包裝器精確對齊
+3. 添加視覺邊界 Container
+
+### Phase 2: 動態邊界計算
+**新增方法**: 計算精確對齊偏移
+```dart
+// 計算左組件對齊偏移（相對於棋盤）
+double _calculateLeftAlignment(BoxConstraints constraints)
+
+// 計算右組件對齊偏移（相對於控制面板）
+double _calculateRightAlignment(BoxConstraints constraints)
+```
+
+### Phase 3: 高度統一控制
+**使用**: SizedBox.tightFor(height: componentHeight)
+**建議高度**: 60px (與控制按鈕區域協調)
+
+## 詳細實現步驟
+
+### Step 1: 添加對齊計算方法
+```dart
+// 在 _GameBoardState 類中添加
+double _calculateLeftComponentOffset(BoxConstraints constraints) {
+  final totalWidth = constraints.maxWidth;
+  final leftAreaWidth = (totalWidth - 32) * 0.6;
+  final gameAreaWidth = totalWidth * 0.6 - 32;
+  final cellSize = (gameAreaWidth / 10).clamp(14.0, 22.0);
+  final boardWidth = 10 * cellSize;
+  return (leftAreaWidth - boardWidth) / 2;
+}
+
+double _calculateRightComponentOffset(BoxConstraints constraints) {
+  final totalWidth = constraints.maxWidth;
+  final rightAreaWidth = (totalWidth - 32) * 0.4;
+  return (rightAreaWidth - 50) / 2; // 50px 是控制面板寬度
+}
+```
+
+### Step 2: 修改頂部 Row 結構
+```dart
+// 替換現有的 Row (line 533-554)
+LayoutBuilder(
+  builder: (context, constraints) {
+    final leftOffset = _calculateLeftComponentOffset(constraints);
+    final rightOffset = _calculateRightComponentOffset(constraints);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          // 左組件 - 精確對齊棋盤
+          Expanded(
+            flex: 3,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Transform.translate(
+                offset: Offset(leftOffset, 0),
+                child: Container(
+                  height: 60,
+                  decoration: BoxDecoration(/* 邊框裝飾 */),
+                  child: GameUIComponents.nextPiecePreview(...),
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 16),
+
+          // 右組件 - 精確對齊控制面板
+          Expanded(
+            flex: 2,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Transform.translate(
+                offset: Offset(-rightOffset, 0),
+                child: Container(
+                  height: 60,
+                  decoration: BoxDecoration(/* 邊框裝飾 */),
+                  child: GameUIComponents.scoreInfoPanel(...),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  },
+)
+```
+
+### Step 3: 視覺協調
+- **邊框**: 與遊戲棋盤風格一致的霓虹邊框
+- **背景**: 漸層背景呼應主題
+- **高度**: 60px 確保視覺平衡
+
+## 測試驗證點
+
+1. **對齊精度**:
+   - 左組件左邊界 = 棋盤左邊界
+   - 右組件右邊界 = 控制面板右邊界
+
+2. **響應性**:
+   - 不同螢幕尺寸下對齊保持準確
+   - cellSize 變化時對齊動態調整
+
+3. **視覺一致性**:
+   - 兩組件等高等寬
+   - 與整體 UI 風格協調
+
+## 風險評估
+- **低風險**: 基於現有結構微調
+- **可回滾**: 修改位置明確，易於回滾
+- **兼容性**: 不影響現有遊戲邏輯

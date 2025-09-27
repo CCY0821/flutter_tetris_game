@@ -1,0 +1,92 @@
+頂部組件精確對齊計算
+======================
+
+## 目標對齊點計算
+
+### 1. 左組件對齊點 (Next Piece Preview)
+**目標**: 與遊戲棋盤左邊界對齊
+
+**計算公式**:
+```
+棋盤實際左邊界 = 16px (padding) + 容器內偏移
+容器內偏移 = (左側區域寬度 - 棋盤實際寬度) / 2
+左側區域寬度 = (總寬度 - 32px) × 0.6
+棋盤實際寬度 = GameState.colCount × cellSize
+```
+
+**實際值**:
+- cellSize = (gameAreaWidth / GameState.colCount).clamp(14.0, 22.0)
+- gameAreaWidth = constraints.maxWidth × 0.6 - 32
+- GameState.colCount = 10
+
+### 2. 右組件對齊點 (Score Display)
+**目標**: 與右側控制面板右邊界對齊
+
+**計算公式**:
+```
+控制面板右邊界 = 總寬度 - 16px (padding.right)
+控制面板左邊界 = 控制面板右邊界 - 50px (統一寬度)
+控制面板中心 = (控制面板左邊界 + 控制面板右邊界) / 2
+```
+
+**在右側區域中的相對位置**:
+```
+右側區域起始點 = 16px + 左側區域寬度 + 16px (間距)
+右側區域寬度 = (總寬度 - 32px) × 0.4
+控制面板偏移 = (右側區域寬度 - 50px) / 2
+```
+
+## 等高等寬實現策略
+
+### Row 結構
+```dart
+Row(
+  children: [
+    // 左組件 - 與棋盤左邊界對齊
+    Expanded(flex: 3, child: Align(
+      alignment: Alignment.centerLeft,
+      child: Container(...)  // Next Piece Preview
+    )),
+    SizedBox(width: 16), // 中間間距
+    // 右組件 - 與控制面板右邊界對齊
+    Expanded(flex: 2, child: Align(
+      alignment: Alignment.centerRight,
+      child: Container(...)  // Score Display
+    )),
+  ]
+)
+```
+
+### 對齊微調計算
+
+#### 左組件微調
+```dart
+// 計算棋盤相對於左側區域的偏移
+double getBoardOffsetInLeftArea(BoxConstraints constraints) {
+  final totalWidth = constraints.maxWidth;
+  final leftAreaWidth = (totalWidth - 32) * 0.6;  // flex:3 區域
+  final gameAreaWidth = totalWidth * 0.6 - 32;    // 遊戲區域實際寬度
+  final cellSize = (gameAreaWidth / 10).clamp(14.0, 22.0);
+  final boardWidth = 10 * cellSize;
+  return (leftAreaWidth - boardWidth) / 2;
+}
+```
+
+#### 右組件微調
+```dart
+// 計算控制面板相對於右側區域的偏移
+double getControlPanelOffsetInRightArea(BoxConstraints constraints) {
+  final totalWidth = constraints.maxWidth;
+  final rightAreaWidth = (totalWidth - 32) * 0.4;  // flex:2 區域
+  final controlPanelWidth = 50.0;
+  return (rightAreaWidth - controlPanelWidth) / 2;
+}
+```
+
+## 實現步驟建議
+
+1. **保持現有 Row 結構** (line 533-554)
+2. **使用 Expanded + Align 精確定位**
+3. **動態計算偏移量確保對齊**
+4. **SizedBox.tightFor 控制組件高度**
+5. **Container 包裝提供視覺邊界**

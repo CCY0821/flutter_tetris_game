@@ -1,0 +1,71 @@
+遊戲界面邊界測量報告
+=============================
+
+## 當前佈局結構分析 (game_board.dart:523-867)
+
+### 主要容器結構
+```
+Column (父容器)
+├── 頂部資訊面板 (Row) - 目標區域
+│   ├── padding: horizontal=16, vertical=8
+│   ├── 左側 Expanded(flex:1) - 下個方塊預覽
+│   ├── SizedBox(width:16) - 中間間距
+│   └── 右側 Expanded(flex:1) - 分數資訊
+├── SizedBox(height:8) - 頂部間距
+├── 主遊戲區域 (Row)
+│   ├── 左側 Flexible(flex:3) - 遊戲棋盤
+│   ├── SizedBox(width:16) - 左右間距
+│   └── 右側 Flexible(flex:2) - 控制面板
+└── 觸控按鈕區域
+```
+
+## 關鍵邊界參數
+
+### 水平邊界計算
+- **全螢幕寬度**: constraints.maxWidth (動態)
+- **水平邊距**: 16px (padding horizontal)
+- **左右間距**: 16px (SizedBox between game and controls)
+
+### Flex 比例計算
+- **左側區域 (遊戲棋盤)**: flex: 3 (60%)
+- **右側區域 (控制面板)**: flex: 2 (40%)
+- **實際比例**: 3:2 = 60%:40%
+
+### 目標對齊邊界
+1. **左組件左邊界**:
+   - = padding.left = 16px
+
+2. **左組件右邊界**:
+   - = 左邊界 + 左側區域寬度
+   - = 16px + (螢幕寬度-32px) × 0.6
+
+3. **右組件左邊界**:
+   - = 左組件右邊界 + 16px (中間間距)
+
+4. **右組件右邊界**:
+   - = 螢幕寬度 - 16px (padding.right)
+
+### SafeArea 影響
+- **右側面板**: SafeArea(bottom: true) - 僅影響底部
+- **頂部區域**: 無 SafeArea 包覆
+- **實際影響**: 頂部組件不受 SafeArea 限制
+
+### 控制面板寬度約束
+- **實際寬度**: 50px (統一寬度, line 698,786,823)
+- **對齊方式**: Alignment.centerRight
+- **在右側區域內的位置**: 右對齊
+
+## 精確對齊策略
+
+### 左組件 (Next Piece Preview)
+- **左邊界對齊**: 棋盤容器左邊界
+- **計算**: 16px + 棋盤偏移
+
+### 右組件 (Score Display)
+- **右邊界對齊**: 控制面板右邊界
+- **計算**: 右側區域右邊界 - (右側區域寬度-50px)/2
+
+### 等高等寬設計
+- **高度**: 使用 SizedBox.tightFor(height: h)
+- **寬度**: 通過 Expanded(flex:1) 自動均分
+- **間距**: 16px (保持與主區域一致)
