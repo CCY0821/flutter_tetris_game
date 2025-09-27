@@ -530,26 +530,11 @@ class _GameBoardState extends State<GameBoard>
           // 頂部信息面板 - 預覽和分數左右並排
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                // 左側：下個方塊預覽
-                Expanded(
-                  flex: 1,
-                  child: GameUIComponents.nextPiecePreview(
-                    gameState.nextTetromino,
-                    gameState.nextTetrominos,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // 右側：分數資訊
-                Expanded(
-                  flex: 1,
-                  child: GameUIComponents.scoreInfoPanel(
-                    gameState.score,
-                    gameState.highScore,
-                  ),
-                ),
-              ],
+            child: GameUIComponents.nextAndScoreUnifiedPanel(
+              gameState.nextTetromino,
+              gameState.nextTetrominos,
+              gameState.score,
+              gameState.highScore,
             ),
           ),
 
@@ -697,26 +682,28 @@ class _GameBoardState extends State<GameBoard>
                               child: SizedBox(
                                 width: 50, // 統一寬度
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
                                     // 設置按鈕
                                     Container(
                                       margin: const EdgeInsets.only(bottom: 2),
                                       child: ElevatedButton(
                                         onPressed: () => _showSettingsPanel(),
-                                        style:
-                                            GameTheme.primaryButtonStyle.copyWith(
+                                        style: GameTheme.primaryButtonStyle
+                                            .copyWith(
                                           backgroundColor:
                                               WidgetStateProperty.all(
-                                            GameTheme.accentBlue.withOpacity(0.8),
+                                            GameTheme.accentBlue
+                                                .withOpacity(0.8),
                                           ),
                                           padding: WidgetStateProperty.all(
                                             const EdgeInsets.symmetric(
                                                 vertical: 2),
                                           ),
                                         ),
-                                        child:
-                                            const Icon(Icons.settings, size: 14),
+                                        child: const Icon(Icons.settings,
+                                            size: 14),
                                       ),
                                     ),
 
@@ -757,8 +744,8 @@ class _GameBoardState extends State<GameBoard>
                                     Container(
                                       child: ElevatedButton(
                                         onPressed: _startGame,
-                                        style:
-                                            GameTheme.primaryButtonStyle.copyWith(
+                                        style: GameTheme.primaryButtonStyle
+                                            .copyWith(
                                           backgroundColor:
                                               WidgetStateProperty.all(
                                             GameTheme.buttonDanger,
@@ -785,11 +772,13 @@ class _GameBoardState extends State<GameBoard>
                               child: SizedBox(
                                 width: 50, // 統一寬度，與控制按鈕保持一致
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
                                     // 消除行數
                                     GameUIComponents.linesStatComponent(
-                                      gameState.marathonSystem.totalLinesCleared,
+                                      gameState
+                                          .marathonSystem.totalLinesCleared,
                                     ),
                                     const SizedBox(height: 2),
 
@@ -832,8 +821,8 @@ class _GameBoardState extends State<GameBoard>
 
                             // 保留与触控按钮区的安全间距
                             SizedBox(
-                              height: snap(
-                                  12.0, MediaQuery.of(context).devicePixelRatio),
+                              height: snap(12.0,
+                                  MediaQuery.of(context).devicePixelRatio),
                             ),
                           ],
                         ),

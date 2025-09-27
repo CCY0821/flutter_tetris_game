@@ -35,7 +35,116 @@ class GameUIComponents {
     }
 
     return Container(
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 8),
+      decoration: BoxDecoration(
+        color: cyberpunkPanel,
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+        border: Border.all(
+          color: cyberpunkPrimary,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: cyberpunkPrimary.withOpacity(0.2),
+            blurRadius: cyberpunkGlowSoft,
+            offset: const Offset(0, 0),
+          ),
+        ],
+      ),
+      child: SizedBox(
+        width: 90,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 第一行：NEXT標題 + 主要方塊
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // NEXT 標題
+                Text(
+                  'NEXT',
+                  style: GameTheme.accentStyle.copyWith(
+                    fontSize: 14,
+                    letterSpacing: 1.8,
+                    color: cyberpunkPrimary,
+                  ),
+                ),
+                const SizedBox(width: 6),
+
+                // 主要 NEXT 方塊
+                Container(
+                  padding: const EdgeInsets.all(2.5),
+                  decoration: BoxDecoration(
+                    color: GameTheme.gameBoardBg.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(4.5),
+                  ),
+                  child: Column(
+                    children: preview
+                        .map((row) => Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: row
+                                  .map(
+                                    (c) => Container(
+                                      width: cellSize * 0.75,
+                                      height: cellSize * 0.75,
+                                      margin: const EdgeInsets.all(0.35),
+                                      decoration: BoxDecoration(
+                                        color: c ??
+                                            GameTheme.gridLine.withOpacity(0.1),
+                                        borderRadius:
+                                            BorderRadius.circular(1.5),
+                                        border: c != null
+                                            ? null
+                                            : Border.all(
+                                                color: GameTheme.gridLine
+                                                    .withOpacity(0.2),
+                                                width: 0.25,
+                                              ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 0),
+
+            // 第二行：3個小預覽方塊 (對齊主要方塊正下方)
+            Padding(
+              padding: const EdgeInsets.only(left: 41), // NEXT標題+間距對齊到主要方塊位置
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: nextTetrominos
+                    .take(3)
+                    .map((tetromino) => Container(
+                          margin: const EdgeInsets.only(right: 2),
+                          child: _buildCompactPreview(tetromino),
+                        ))
+                    .toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 四象限統一組件 - NEXT預覽 + 分數資訊
+  static Widget nextAndScoreUnifiedPanel(
+    Tetromino? nextTetromino,
+    List<Tetromino> nextTetrominos,
+    int score,
+    int highScore,
+  ) {
+    return Container(
+      height: 54, // 固定高度與原分數模組一致
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: cyberpunkPanel,
         borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
@@ -52,71 +161,215 @@ class GameUIComponents {
         ],
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // NEXT 標題
-          Text(
-            'NEXT',
-            style: GameTheme.accentStyle.copyWith(
-              fontSize: 10,
-              letterSpacing: 1.2,
-              color: cyberpunkPrimary,
+          // 左半部分：NEXT區域 (50%)
+          Expanded(
+            flex: 1,
+            child: _buildNextSection(nextTetromino, nextTetrominos),
+          ),
+
+          // 垂直虛線分隔線
+          Container(
+            width: 1,
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            child: CustomPaint(
+              painter: DashedLinePainter(
+                color: cyberpunkPrimary.withOpacity(0.4),
+                strokeWidth: 1,
+                dashLength: 3,
+                gapLength: 2,
+              ),
             ),
           ),
-          const SizedBox(width: 4),
 
-          // 主要 NEXT 方塊
-          Container(
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              color: GameTheme.gameBoardBg.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Column(
-              children: preview
-                  .map((row) => Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: row
-                            .map(
-                              (c) => Container(
-                                width: cellSize * 0.7,
-                                height: cellSize * 0.7,
-                                margin: const EdgeInsets.all(0.3),
-                                decoration: BoxDecoration(
-                                  color:
-                                      c ?? GameTheme.gridLine.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(1),
-                                  border: c != null
-                                      ? null
-                                      : Border.all(
-                                          color: GameTheme.gridLine
-                                              .withOpacity(0.2),
-                                          width: 0.2,
-                                        ),
-                                ),
-                              ),
-                            )
-                            .toList(),
+          // 右半部分：分數區域 (50%)
+          Expanded(
+            flex: 1,
+            child: _buildScoreSection(score, highScore),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 左半部分：NEXT區域建構函數
+  static Widget _buildNextSection(
+      Tetromino? nextTetromino, List<Tetromino> nextTetrominos) {
+    const previewSize = 4;
+    const offsetX = 1;
+    const offsetY = 1;
+
+    final preview = List.generate(
+      previewSize,
+      (_) => List.generate(previewSize, (_) => null as Color?),
+    );
+
+    if (nextTetromino != null) {
+      for (final p in nextTetromino.shape) {
+        int px = p.dx.toInt() + offsetX;
+        int py = p.dy.toInt() + offsetY;
+        if (py >= 0 && py < previewSize && px >= 0 && px < previewSize) {
+          preview[py][px] = nextTetromino.color;
+        }
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 上半：NEXT標題 + 主方塊
+        Expanded(
+          flex: 3, // 占左側70%高度
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // NEXT 標題
+              Text(
+                'NEXT',
+                style: GameTheme.accentStyle.copyWith(
+                  fontSize: 12,
+                  letterSpacing: 1.5,
+                  color: cyberpunkPrimary,
+                ),
+              ),
+              const SizedBox(width: 4),
+
+              // 主要 NEXT 方塊
+              Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: GameTheme.gameBoardBg.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Column(
+                  children: preview
+                      .map((row) => Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: row
+                                .map(
+                                  (c) => Container(
+                                    width: cellSize * 0.6,
+                                    height: cellSize * 0.6,
+                                    margin: const EdgeInsets.all(0.3),
+                                    decoration: BoxDecoration(
+                                      color: c ??
+                                          GameTheme.gridLine.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(1),
+                                      border: c != null
+                                          ? null
+                                          : Border.all(
+                                              color: GameTheme.gridLine
+                                                  .withOpacity(0.2),
+                                              width: 0.2,
+                                            ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ))
+                      .toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // 下半：小預覽方塊
+        Expanded(
+          flex: 2, // 占左側30%高度
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16), // 對齊主要方塊
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: nextTetrominos
+                  .take(3)
+                  .map((tetromino) => Container(
+                        margin: const EdgeInsets.only(right: 1.5),
+                        child: _buildCompactPreview(tetromino),
                       ))
                   .toList(),
             ),
           ),
+        ),
+      ],
+    );
+  }
 
-          const SizedBox(width: 3),
-
-          // 三個小預覽方塊水平排列
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: nextTetrominos
-                .take(3)
-                .map((tetromino) => Container(
-                      margin: const EdgeInsets.only(right: 1.5),
-                      child: _buildCompactPreview(tetromino),
-                    ))
-                .toList(),
+  // 右半部分：分數區域建構函數
+  static Widget _buildScoreSection(int score, int highScore) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // 上半：HIGH SCORE
+        Expanded(
+          flex: 1,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'HIGH',
+                style: GameTheme.accentStyle.copyWith(
+                  fontSize: 9,
+                  letterSpacing: 1.0,
+                  color: cyberpunkAccent,
+                ),
+              ),
+              Text(
+                '$highScore',
+                style: GameTheme.titleStyle.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.8,
+                  color: cyberpunkAccent,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
+
+        // 下半：SCORE
+        Expanded(
+          flex: 1,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'SCORE',
+                style: GameTheme.accentStyle.copyWith(
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                  color: cyberpunkPrimary,
+                ),
+              ),
+              Text(
+                '$score',
+                style: GameTheme.titleStyle.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                  color: cyberpunkCaution,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 垂直虛線繪製器
+  static Widget _buildDashedDivider() {
+    return Container(
+      width: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      child: CustomPaint(
+        painter: DashedLinePainter(
+          color: cyberpunkPrimary.withOpacity(0.4),
+          strokeWidth: 1,
+          dashLength: 3,
+          gapLength: 2,
+        ),
       ),
     );
   }
@@ -485,7 +738,7 @@ class GameUIComponents {
                           margin: const EdgeInsets.all(0.2),
                           decoration: BoxDecoration(
                             color: c ?? Colors.transparent,
-                            borderRadius: BorderRadius.circular(0.5),
+                            borderRadius: BorderRadius.circular(0.8),
                           ),
                         ),
                       )
@@ -1373,5 +1626,43 @@ class GameUIComponents {
             )),
       ],
     );
+  }
+}
+
+// 虛線繪製器類別
+class DashedLinePainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+  final double dashLength;
+  final double gapLength;
+
+  DashedLinePainter({
+    required this.color,
+    required this.strokeWidth,
+    required this.dashLength,
+    required this.gapLength,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    double currentY = 0;
+    while (currentY < size.height) {
+      canvas.drawLine(
+        Offset(size.width / 2, currentY),
+        Offset(size.width / 2, currentY + dashLength),
+        paint,
+      );
+      currentY += dashLength + gapLength;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return oldDelegate != this;
   }
 }
