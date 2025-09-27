@@ -215,82 +215,72 @@ class GameUIComponents {
     }
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // 上半：NEXT標題 + 主方塊
-        Expanded(
-          flex: 3, // 占左側70%高度
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // NEXT 標題
-              Text(
-                'NEXT',
-                style: GameTheme.accentStyle.copyWith(
-                  fontSize: 12,
-                  letterSpacing: 1.5,
-                  color: cyberpunkPrimary,
-                ),
-              ),
-              const SizedBox(width: 4),
-
-              // 主要 NEXT 方塊
-              Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: GameTheme.gameBoardBg.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Column(
-                  children: preview
-                      .map((row) => Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: row
-                                .map(
-                                  (c) => Container(
-                                    width: cellSize * 0.6,
-                                    height: cellSize * 0.6,
-                                    margin: const EdgeInsets.all(0.3),
-                                    decoration: BoxDecoration(
-                                      color: c ??
-                                          GameTheme.gridLine.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(1),
-                                      border: c != null
-                                          ? null
-                                          : Border.all(
-                                              color: GameTheme.gridLine
-                                                  .withOpacity(0.2),
-                                              width: 0.2,
-                                            ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          ))
-                      .toList(),
-                ),
-              ),
-            ],
+        // 頂部：NEXT標籤
+        Text(
+          'NEXT',
+          style: GameTheme.accentStyle.copyWith(
+            fontSize: 8,
+            letterSpacing: 0.8,
+            color: cyberpunkPrimary,
           ),
         ),
 
-        // 下半：小預覽方塊
-        Expanded(
-          flex: 2, // 占左側30%高度
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16), // 對齊主要方塊
-            child: Row(
+        // 中央：主要方塊
+        Flexible(
+          child: Container(
+            padding: const EdgeInsets.all(1.5),
+            decoration: BoxDecoration(
+              color: GameTheme.gameBoardBg.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(3),
+              border: Border.all(
+                color: cyberpunkPrimary.withOpacity(0.3),
+                width: 0.5,
+              ),
+            ),
+            child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: nextTetrominos
-                  .take(3)
-                  .map((tetromino) => Container(
-                        margin: const EdgeInsets.only(right: 1.5),
-                        child: _buildCompactPreview(tetromino),
+              children: preview
+                  .map((row) => Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: row
+                            .map(
+                              (c) => Container(
+                                width: cellSize * 0.5,
+                                height: cellSize * 0.5,
+                                margin: const EdgeInsets.all(0.2),
+                                decoration: BoxDecoration(
+                                  color: c ?? GameTheme.gridLine.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(1),
+                                  border: c != null
+                                      ? null
+                                      : Border.all(
+                                          color:
+                                              GameTheme.gridLine.withOpacity(0.2),
+                                          width: 0.2,
+                                        ),
+                                ),
+                              ),
+                            )
+                            .toList(),
                       ))
-                  .toList(),
+                      .toList(),
             ),
           ),
+        ),
+
+        // 底部：小預覽方塊組
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: nextTetrominos
+              .take(3)
+              .map((tetromino) => Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 0.5),
+                    child: _buildCompactPreview(tetromino),
+                  ))
+              .toList(),
         ),
       ],
     );
@@ -299,56 +289,79 @@ class GameUIComponents {
   // 右半部分：分數區域建構函數
   static Widget _buildScoreSection(int score, int highScore) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        // 上半：HIGH SCORE
-        Expanded(
-          flex: 1,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'HIGH',
-                style: GameTheme.accentStyle.copyWith(
-                  fontSize: 9,
-                  letterSpacing: 1.0,
-                  color: cyberpunkAccent,
-                ),
+        // 上半：標籤行 (HIGH | SCORE)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Text(
+              'HIGH',
+              style: GameTheme.accentStyle.copyWith(
+                fontSize: 8,
+                letterSpacing: 0.8,
+                color: cyberpunkAccent,
               ),
-              Text(
-                '$highScore',
-                style: GameTheme.titleStyle.copyWith(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.8,
-                  color: cyberpunkAccent,
-                ),
+            ),
+            Text(
+              'SCORE',
+              style: GameTheme.accentStyle.copyWith(
+                fontSize: 8,
+                letterSpacing: 0.8,
+                color: cyberpunkPrimary,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
 
-        // 下半：SCORE
-        Expanded(
-          flex: 1,
+        // 下半：數值行 (HIGH值 | SCORE值)
+        Flexible(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Text(
-                'SCORE',
-                style: GameTheme.accentStyle.copyWith(
-                  fontSize: 10,
-                  letterSpacing: 1.2,
-                  color: cyberpunkPrimary,
+              // HIGH SCORE數值
+              Expanded(
+                child: Text(
+                  '$highScore',
+                  textAlign: TextAlign.center,
+                  style: GameTheme.titleStyle.copyWith(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                    color: cyberpunkAccent,
+                  ),
                 ),
               ),
-              Text(
-                '$score',
-                style: GameTheme.titleStyle.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.0,
-                  color: cyberpunkCaution,
+
+              // 分隔線
+              Container(
+                width: 1,
+                height: 12,
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      cyberpunkPrimary.withOpacity(0.2),
+                      cyberpunkPrimary.withOpacity(0.6),
+                      cyberpunkPrimary.withOpacity(0.2),
+                    ],
+                  ),
+                ),
+              ),
+
+              // SCORE數值
+              Expanded(
+                child: Text(
+                  '$score',
+                  textAlign: TextAlign.center,
+                  style: GameTheme.titleStyle.copyWith(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.3,
+                    color: cyberpunkCaution,
+                  ),
                 ),
               ),
             ],
