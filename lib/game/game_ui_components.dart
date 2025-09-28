@@ -10,7 +10,7 @@ import '../game/marathon_system.dart';
 import '../services/audio_service.dart';
 
 class GameUIComponents {
-  static const double cellSize = 6;
+  static const double cellSize = 18;
 
   // 獨立的下個方塊預覽組件 - 水平緊湊布局
   static Widget nextPiecePreview(
@@ -87,8 +87,8 @@ class GameUIComponents {
                               children: row
                                   .map(
                                     (c) => Container(
-                                      width: cellSize * 0.75,
-                                      height: cellSize * 0.75,
+                                      width: cellSize * 0.9,
+                                      height: cellSize * 0.9,
                                       margin: const EdgeInsets.all(0.35),
                                       decoration: BoxDecoration(
                                         color: c ??
@@ -214,66 +214,67 @@ class GameUIComponents {
       }
     }
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // 頂部：NEXT標籤
+        // 左側：NEXT標籤 (垂直居中)
         Text(
           'NEXT',
           style: GameTheme.accentStyle.copyWith(
-            fontSize: 8,
-            letterSpacing: 0.8,
+            fontSize: 12,
+            letterSpacing: 1.0,
             color: cyberpunkPrimary,
           ),
         ),
 
-        // 中央：主要方塊
-        Flexible(
-          child: Container(
-            padding: const EdgeInsets.all(1.5),
-            decoration: BoxDecoration(
-              color: GameTheme.gameBoardBg.withOpacity(0.8),
-              borderRadius: BorderRadius.circular(3),
-              border: Border.all(
-                color: cyberpunkPrimary.withOpacity(0.3),
-                width: 0.5,
-              ),
+        const SizedBox(width: 6),
+
+        // 中間：主要方塊
+        Container(
+          padding: const EdgeInsets.all(1.5),
+          decoration: BoxDecoration(
+            color: GameTheme.gameBoardBg.withOpacity(0.8),
+            borderRadius: BorderRadius.circular(3),
+            border: Border.all(
+              color: cyberpunkPrimary.withOpacity(0.3),
+              width: 0.5,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: preview
-                  .map((row) => Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: row
-                            .map(
-                              (c) => Container(
-                                width: cellSize * 0.5,
-                                height: cellSize * 0.5,
-                                margin: const EdgeInsets.all(0.2),
-                                decoration: BoxDecoration(
-                                  color: c ?? GameTheme.gridLine.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(1),
-                                  border: c != null
-                                      ? null
-                                      : Border.all(
-                                          color:
-                                              GameTheme.gridLine.withOpacity(0.2),
-                                          width: 0.2,
-                                        ),
-                                ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: preview
+                .map((row) => Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: row
+                          .map(
+                            (c) => Container(
+                              width: cellSize * 0.55,
+                              height: cellSize * 0.55,
+                              margin: const EdgeInsets.all(0.2),
+                              decoration: BoxDecoration(
+                                color: c ?? GameTheme.gridLine.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(1),
+                                border: c != null
+                                    ? null
+                                    : Border.all(
+                                        color:
+                                            GameTheme.gridLine.withOpacity(0.2),
+                                        width: 0.2,
+                                      ),
                               ),
-                            )
-                            .toList(),
-                      ))
-                      .toList(),
-            ),
+                            ),
+                          )
+                          .toList(),
+                    ))
+                    .toList(),
           ),
         ),
 
-        // 底部：小預覽方塊組
+        const SizedBox(width: 4),
+
+        // 右側：小預覽方塊組 (水平排列)
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: nextTetrominos
               .take(3)
               .map((tetromino) => Container(
@@ -614,8 +615,8 @@ class GameUIComponents {
                                 children: row
                                     .map(
                                       (c) => Container(
-                                        width: cellSize * 0.8,
-                                        height: cellSize * 0.8,
+                                        width: cellSize * 0.95,
+                                        height: cellSize * 0.95,
                                         margin: const EdgeInsets.all(0.4),
                                         decoration: BoxDecoration(
                                           color: c ??
@@ -694,8 +695,8 @@ class GameUIComponents {
                   children: row
                       .map(
                         (c) => Container(
-                          width: cellSize * 0.6,
-                          height: cellSize * 0.6,
+                          width: cellSize * 0.35,
+                          height: cellSize * 0.35,
                           margin: const EdgeInsets.all(0.25),
                           decoration: BoxDecoration(
                             color: c ?? Colors.transparent,
@@ -746,8 +747,8 @@ class GameUIComponents {
                   children: row
                       .map(
                         (c) => Container(
-                          width: cellSize * 0.5,
-                          height: cellSize * 0.5,
+                          width: cellSize * 0.25,
+                          height: cellSize * 0.25,
                           margin: const EdgeInsets.all(0.2),
                           decoration: BoxDecoration(
                             color: c ?? Colors.transparent,
@@ -971,8 +972,8 @@ class GameUIComponents {
                         children: row
                             .map(
                               (c) => Container(
-                                width: cellSize * 0.8,
-                                height: cellSize * 0.8,
+                                width: cellSize * 0.95,
+                                height: cellSize * 0.95,
                                 margin: const EdgeInsets.all(0.5),
                                 decoration: BoxDecoration(
                                   color:
