@@ -10,7 +10,7 @@ import '../game/marathon_system.dart';
 import '../services/audio_service.dart';
 
 class GameUIComponents {
-  static const double cellSize = 18;
+  static const double cellSize = 12;
 
   // 獨立的下個方塊預覽組件 - 水平緊湊布局
   static Widget nextPiecePreview(
@@ -51,17 +51,18 @@ class GameUIComponents {
           ),
         ],
       ),
-      child: SizedBox(
-        width: 90,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 110),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 第一行：NEXT標題 + 主要方塊
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+            Flexible(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
                 // NEXT 標題
                 Text(
                   'NEXT',
@@ -111,6 +112,7 @@ class GameUIComponents {
                   ),
                 ),
               ],
+              ),
             ),
 
             const SizedBox(height: 0),
@@ -216,6 +218,7 @@ class GameUIComponents {
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
         // 左側：NEXT標籤 (垂直居中)
         Text(
@@ -747,8 +750,8 @@ class GameUIComponents {
                   children: row
                       .map(
                         (c) => Container(
-                          width: cellSize * 0.25,
-                          height: cellSize * 0.25,
+                          width: cellSize * 0.2,
+                          height: cellSize * 0.2,
                           margin: const EdgeInsets.all(0.2),
                           decoration: BoxDecoration(
                             color: c ?? Colors.transparent,
