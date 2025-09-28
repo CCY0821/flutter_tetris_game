@@ -698,8 +698,8 @@ class GameUIComponents {
                   children: row
                       .map(
                         (c) => Container(
-                          width: cellSize * 0.35,
-                          height: cellSize * 0.35,
+                          width: cellSize * 0.45,
+                          height: cellSize * 0.45,
                           margin: const EdgeInsets.all(0.25),
                           decoration: BoxDecoration(
                             color: c ?? Colors.transparent,
@@ -750,8 +750,8 @@ class GameUIComponents {
                   children: row
                       .map(
                         (c) => Container(
-                          width: cellSize * 0.2,
-                          height: cellSize * 0.2,
+                          width: cellSize * 0.35,
+                          height: cellSize * 0.35,
                           margin: const EdgeInsets.all(0.2),
                           decoration: BoxDecoration(
                             color: c ?? Colors.transparent,
