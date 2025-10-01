@@ -552,12 +552,10 @@ class _GameBoardState extends State<GameBoard>
             ),
           ),
 
-          // NEXT預覽 + 分數面板 - 保持在頂部原位置
+          // 分數面板 - 保持在頂部原位置
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: GameUIComponents.nextAndScoreUnifiedPanel(
-              gameState.nextTetromino,
-              gameState.nextTetrominos,
+            child: GameUIComponents.scoreInfoPanel(
               gameState.score,
               gameState.highScore,
             ),
@@ -691,7 +689,6 @@ class _GameBoardState extends State<GameBoard>
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-
                             // 遊戲狀態指示器
                             GameUIComponents.gameStatusIndicators(
                               combo: gameState.scoringService.currentCombo,
@@ -714,26 +711,33 @@ class _GameBoardState extends State<GameBoard>
                                 ),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
                                   // 設置按鈕
                                   Expanded(
                                     child: Container(
-                                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 2),
                                       child: ElevatedButton(
                                         onPressed: () => _showSettingsPanel(),
-                                        style: GameTheme.primaryButtonStyle.copyWith(
-                                          backgroundColor: WidgetStateProperty.all(
-                                            GameTheme.accentBlue.withOpacity(0.8),
+                                        style: GameTheme.primaryButtonStyle
+                                            .copyWith(
+                                          backgroundColor:
+                                              WidgetStateProperty.all(
+                                            GameTheme.accentBlue
+                                                .withOpacity(0.8),
                                           ),
                                           padding: WidgetStateProperty.all(
-                                            const EdgeInsets.symmetric(vertical: 8),
+                                            const EdgeInsets.symmetric(
+                                                vertical: 8),
                                           ),
                                           minimumSize: WidgetStateProperty.all(
                                             const Size(0, 36),
                                           ),
                                         ),
-                                        child: const Icon(Icons.settings, size: 16),
+                                        child: const Icon(Icons.settings,
+                                            size: 16),
                                       ),
                                     ),
                                   ),
@@ -741,14 +745,18 @@ class _GameBoardState extends State<GameBoard>
                                   // 暫停/繼續按鈕
                                   Expanded(
                                     child: Container(
-                                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 2),
                                       child: ElevatedButton(
                                         onPressed: () => setState(() {
-                                          gameState.isPaused = !gameState.isPaused;
+                                          gameState.isPaused =
+                                              !gameState.isPaused;
                                           if (gameState.isPaused) {
-                                            gameState.audioService.pauseBackgroundMusic();
+                                            gameState.audioService
+                                                .pauseBackgroundMusic();
                                           } else {
-                                            gameState.audioService.resumeBackgroundMusic();
+                                            gameState.audioService
+                                                .resumeBackgroundMusic();
                                           }
                                         }),
                                         style: (gameState.isPaused
@@ -756,7 +764,8 @@ class _GameBoardState extends State<GameBoard>
                                                 : GameTheme.primaryButtonStyle)
                                             .copyWith(
                                           padding: WidgetStateProperty.all(
-                                            const EdgeInsets.symmetric(vertical: 8),
+                                            const EdgeInsets.symmetric(
+                                                vertical: 8),
                                           ),
                                           minimumSize: WidgetStateProperty.all(
                                             const Size(0, 36),
@@ -775,21 +784,26 @@ class _GameBoardState extends State<GameBoard>
                                   // 重新開始按鈕
                                   Expanded(
                                     child: Container(
-                                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 2),
                                       child: ElevatedButton(
                                         onPressed: _startGame,
-                                        style: GameTheme.primaryButtonStyle.copyWith(
-                                          backgroundColor: WidgetStateProperty.all(
+                                        style: GameTheme.primaryButtonStyle
+                                            .copyWith(
+                                          backgroundColor:
+                                              WidgetStateProperty.all(
                                             GameTheme.buttonDanger,
                                           ),
                                           padding: WidgetStateProperty.all(
-                                            const EdgeInsets.symmetric(vertical: 8),
+                                            const EdgeInsets.symmetric(
+                                                vertical: 8),
                                           ),
                                           minimumSize: WidgetStateProperty.all(
                                             const Size(0, 36),
                                           ),
                                         ),
-                                        child: const Icon(Icons.refresh, size: 16),
+                                        child:
+                                            const Icon(Icons.refresh, size: 16),
                                       ),
                                     ),
                                   ),
@@ -816,13 +830,16 @@ class _GameBoardState extends State<GameBoard>
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: GameUIComponents.linesStatComponent(
-                                          gameState.marathonSystem.totalLinesCleared,
+                                        child:
+                                            GameUIComponents.linesStatComponent(
+                                          gameState
+                                              .marathonSystem.totalLinesCleared,
                                         ),
                                       ),
                                       const SizedBox(width: 4),
                                       Expanded(
-                                        child: GameUIComponents.levelStatComponent(
+                                        child:
+                                            GameUIComponents.levelStatComponent(
                                           gameState.marathonSystem.currentLevel,
                                         ),
                                       ),
@@ -834,20 +851,31 @@ class _GameBoardState extends State<GameBoard>
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: GameUIComponents.comboStatComponent(
+                                        child:
+                                            GameUIComponents.comboStatComponent(
                                           gameState.scoringService.currentCombo,
                                         ),
                                       ),
                                       const SizedBox(width: 4),
                                       Expanded(
-                                        child: GameUIComponents.lastScoreStatComponent(
-                                          gameState.lastScoringResult?.description,
+                                        child: GameUIComponents
+                                            .lastScoreStatComponent(
+                                          gameState
+                                              .lastScoringResult?.description,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
+                            ),
+
+                            const SizedBox(height: HudSpacing.kHudGap),
+
+                            // NEXT 預覽模組
+                            GameUIComponents.nextPiecePreview(
+                              gameState.nextTetromino,
+                              gameState.nextTetrominos,
                             ),
 
                             const SizedBox(height: HudSpacing.kHudGap),
@@ -864,8 +892,10 @@ class _GameBoardState extends State<GameBoard>
                                 ),
                               ),
                               child: RuneEnergyHUD(
-                                energyStatus: gameState.runeEnergyManager.getStatus(),
-                                gap: snap(4.0, MediaQuery.of(context).devicePixelRatio),
+                                energyStatus:
+                                    gameState.runeEnergyManager.getStatus(),
+                                gap: snap(4.0,
+                                    MediaQuery.of(context).devicePixelRatio),
                               ),
                             ),
 
