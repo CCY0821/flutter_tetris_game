@@ -392,98 +392,121 @@ class GameUIComponents {
     );
   }
 
-  // 獨立的分數資訊組件（3:7比例，放大即時分數）
+  // 獨立的分數資訊組件（方案B：半透明卡片分層設計）
   static Widget scoreInfoPanel(int score, int highScore) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: cyberpunkPanel,
         borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
         border: Border.all(
-          color: cyberpunkPrimary,
+          color: cyberpunkPrimary.withOpacity(0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: cyberpunkPrimary.withOpacity(0.2),
+            color: cyberpunkPrimary.withOpacity(0.15),
             blurRadius: cyberpunkGlowSoft,
             offset: const Offset(0, 0),
-          ),
-          BoxShadow(
-            color: cyberpunkSecondary.withOpacity(0.1),
-            blurRadius: cyberpunkGlowSoft / 2,
-            offset: const Offset(1, 1),
           ),
         ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // High Score 區域 (次要資訊)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'HIGH SCORE',
-                style: GameTheme.accentStyle.copyWith(
-                  fontSize: 9,
-                  letterSpacing: 1.0,
-                  color: cyberpunkAccent.withOpacity(0.8),
-                ),
-              ),
-              Text(
-                '$highScore',
-                style: GameTheme.titleStyle.copyWith(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.5,
-                  color: cyberpunkAccent.withOpacity(0.8),
-                ),
-              ),
-            ],
-          ),
-
-          // 霓虹分隔線
+          // HIGH SCORE 半透明深色卡片
           Container(
-            height: 1,
-            margin: const EdgeInsets.symmetric(vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  cyberpunkPrimary.withOpacity(0.5),
-                  cyberpunkSecondary.withOpacity(0.3),
-                  Colors.transparent,
-                ],
+              color: cyberpunkBgDeep.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: const Color(0xFFE0E0E0).withOpacity(0.2),
+                width: 0.5,
               ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'HIGH SCORE',
+                  style: GameTheme.accentStyle.copyWith(
+                    fontSize: 9,
+                    letterSpacing: 1.0,
+                    color: const Color(0xFFE0E0E0).withOpacity(0.7),
+                  ),
+                ),
+                Text(
+                  '$highScore',
+                  style: GameTheme.titleStyle.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.5,
+                    color: const Color(0xFFE0E0E0).withOpacity(0.9),
+                  ),
+                ),
+              ],
             ),
           ),
 
-          // Score 區域 (主要資訊，放大顯示)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                'SCORE',
-                style: GameTheme.accentStyle.copyWith(
-                  fontSize: 12,
-                  letterSpacing: 2.0,
-                  color: cyberpunkPrimary,
-                ),
+          const SizedBox(height: 8),
+
+          // SCORE 半透明亮色卡片 + 發光效果
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: cyberpunkPrimary.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: cyberpunkPrimary.withOpacity(0.5),
+                width: 1,
               ),
-              Text(
-                '$score',
-                style: GameTheme.titleStyle.copyWith(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                  color: cyberpunkCaution,
-                  height: 1.0,
+              boxShadow: [
+                BoxShadow(
+                  color: cyberpunkPrimary.withOpacity(0.2),
+                  blurRadius: cyberpunkGlowMed,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 0),
                 ),
-              ),
-            ],
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  'SCORE',
+                  style: GameTheme.accentStyle.copyWith(
+                    fontSize: 12,
+                    letterSpacing: 2.0,
+                    color: cyberpunkPrimary,
+                    shadows: [
+                      Shadow(
+                        color: cyberpunkPrimary.withOpacity(0.5),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '$score',
+                  style: GameTheme.titleStyle.copyWith(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                    color: cyberpunkCaution,
+                    height: 1.0,
+                    shadows: [
+                      Shadow(
+                        color: cyberpunkCaution.withOpacity(0.6),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
