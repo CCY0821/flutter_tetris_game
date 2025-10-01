@@ -553,11 +553,14 @@ class _GameBoardState extends State<GameBoard>
           ),
 
           // 分數面板 - 保持在頂部原位置
+          // RepaintBoundary: 隔離分數模組，只在得分時更新
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: GameUIComponents.scoreInfoPanel(
-              gameState.score,
-              gameState.highScore,
+            child: RepaintBoundary(
+              child: GameUIComponents.scoreInfoPanel(
+                gameState.score,
+                gameState.highScore,
+              ),
             ),
           ),
 
@@ -700,182 +703,200 @@ class _GameBoardState extends State<GameBoard>
                             const SizedBox(height: HudSpacing.kHudGap),
 
                             // 控制按鈕 (水平排列，提升視覺層次)
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: GameTheme.primaryDark.withOpacity(0.4),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: GameTheme.accentBlue.withOpacity(0.3),
-                                  width: 1,
+                            // RepaintBoundary: 隔離控制按鈕，幾乎不變
+                            RepaintBoundary(
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: GameTheme.primaryDark.withOpacity(0.4),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color:
+                                        GameTheme.accentBlue.withOpacity(0.3),
+                                    width: 1,
+                                  ),
                                 ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  // 設置按鈕
-                                  Expanded(
-                                    child: Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 2),
-                                      child: ElevatedButton(
-                                        onPressed: () => _showSettingsPanel(),
-                                        style: GameTheme.primaryButtonStyle
-                                            .copyWith(
-                                          backgroundColor:
-                                              WidgetStateProperty.all(
-                                            GameTheme.accentBlue
-                                                .withOpacity(0.8),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    // 設置按鈕
+                                    Expanded(
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 2),
+                                        child: ElevatedButton(
+                                          onPressed: () => _showSettingsPanel(),
+                                          style: GameTheme.primaryButtonStyle
+                                              .copyWith(
+                                            backgroundColor:
+                                                WidgetStateProperty.all(
+                                              GameTheme.accentBlue
+                                                  .withOpacity(0.8),
+                                            ),
+                                            padding: WidgetStateProperty.all(
+                                              const EdgeInsets.symmetric(
+                                                  vertical: 8),
+                                            ),
+                                            minimumSize:
+                                                WidgetStateProperty.all(
+                                              const Size(0, 36),
+                                            ),
                                           ),
-                                          padding: WidgetStateProperty.all(
-                                            const EdgeInsets.symmetric(
-                                                vertical: 8),
-                                          ),
-                                          minimumSize: WidgetStateProperty.all(
-                                            const Size(0, 36),
-                                          ),
+                                          child: const Icon(Icons.settings,
+                                              size: 16),
                                         ),
-                                        child: const Icon(Icons.settings,
-                                            size: 16),
                                       ),
                                     ),
-                                  ),
 
-                                  // 暫停/繼續按鈕
-                                  Expanded(
-                                    child: Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 2),
-                                      child: ElevatedButton(
-                                        onPressed: () => setState(() {
-                                          gameState.isPaused =
-                                              !gameState.isPaused;
-                                          if (gameState.isPaused) {
-                                            gameState.audioService
-                                                .pauseBackgroundMusic();
-                                          } else {
-                                            gameState.audioService
-                                                .resumeBackgroundMusic();
-                                          }
-                                        }),
-                                        style: (gameState.isPaused
-                                                ? GameTheme.secondaryButtonStyle
-                                                : GameTheme.primaryButtonStyle)
-                                            .copyWith(
-                                          padding: WidgetStateProperty.all(
-                                            const EdgeInsets.symmetric(
-                                                vertical: 8),
+                                    // 暫停/繼續按鈕
+                                    Expanded(
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 2),
+                                        child: ElevatedButton(
+                                          onPressed: () => setState(() {
+                                            gameState.isPaused =
+                                                !gameState.isPaused;
+                                            if (gameState.isPaused) {
+                                              gameState.audioService
+                                                  .pauseBackgroundMusic();
+                                            } else {
+                                              gameState.audioService
+                                                  .resumeBackgroundMusic();
+                                            }
+                                          }),
+                                          style: (gameState.isPaused
+                                                  ? GameTheme
+                                                      .secondaryButtonStyle
+                                                  : GameTheme
+                                                      .primaryButtonStyle)
+                                              .copyWith(
+                                            padding: WidgetStateProperty.all(
+                                              const EdgeInsets.symmetric(
+                                                  vertical: 8),
+                                            ),
+                                            minimumSize:
+                                                WidgetStateProperty.all(
+                                              const Size(0, 36),
+                                            ),
                                           ),
-                                          minimumSize: WidgetStateProperty.all(
-                                            const Size(0, 36),
+                                          child: Icon(
+                                            gameState.isPaused
+                                                ? Icons.play_arrow
+                                                : Icons.pause,
+                                            size: 16,
                                           ),
-                                        ),
-                                        child: Icon(
-                                          gameState.isPaused
-                                              ? Icons.play_arrow
-                                              : Icons.pause,
-                                          size: 16,
                                         ),
                                       ),
                                     ),
-                                  ),
 
-                                  // 重新開始按鈕
-                                  Expanded(
-                                    child: Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 2),
-                                      child: ElevatedButton(
-                                        onPressed: _startGame,
-                                        style: GameTheme.primaryButtonStyle
-                                            .copyWith(
-                                          backgroundColor:
-                                              WidgetStateProperty.all(
-                                            GameTheme.buttonDanger,
+                                    // 重新開始按鈕
+                                    Expanded(
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 2),
+                                        child: ElevatedButton(
+                                          onPressed: _startGame,
+                                          style: GameTheme.primaryButtonStyle
+                                              .copyWith(
+                                            backgroundColor:
+                                                WidgetStateProperty.all(
+                                              GameTheme.buttonDanger,
+                                            ),
+                                            padding: WidgetStateProperty.all(
+                                              const EdgeInsets.symmetric(
+                                                  vertical: 8),
+                                            ),
+                                            minimumSize:
+                                                WidgetStateProperty.all(
+                                              const Size(0, 36),
+                                            ),
                                           ),
-                                          padding: WidgetStateProperty.all(
-                                            const EdgeInsets.symmetric(
-                                                vertical: 8),
-                                          ),
-                                          minimumSize: WidgetStateProperty.all(
-                                            const Size(0, 36),
-                                          ),
+                                          child: const Icon(Icons.refresh,
+                                              size: 16),
                                         ),
-                                        child:
-                                            const Icon(Icons.refresh, size: 16),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
 
                             const SizedBox(height: HudSpacing.kHudGap),
 
                             // 統計數據區域 (2×2網格布局，提升空間利用率)
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: GameTheme.secondaryDark.withOpacity(0.4),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: GameTheme.gridLine.withOpacity(0.3),
-                                  width: 1,
+                            // RepaintBoundary: 隔離統計數據，低頻更新
+                            RepaintBoundary(
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color:
+                                      GameTheme.secondaryDark.withOpacity(0.4),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: GameTheme.gridLine.withOpacity(0.3),
+                                    width: 1,
+                                  ),
                                 ),
-                              ),
-                              child: Column(
-                                children: [
-                                  // 第一行：行數 + 關卡
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child:
-                                            GameUIComponents.linesStatComponent(
-                                          gameState
-                                              .marathonSystem.totalLinesCleared,
+                                child: Column(
+                                  children: [
+                                    // 第一行：行數 + 關卡
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: GameUIComponents
+                                              .linesStatComponent(
+                                            gameState.marathonSystem
+                                                .totalLinesCleared,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child:
-                                            GameUIComponents.levelStatComponent(
-                                          gameState.marathonSystem.currentLevel,
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: GameUIComponents
+                                              .levelStatComponent(
+                                            gameState
+                                                .marathonSystem.currentLevel,
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
 
-                                  // 第二行：Combo + 最後得分
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child:
-                                            GameUIComponents.comboStatComponent(
-                                          gameState.scoringService.currentCombo,
+                                    // 第二行：Combo + 最後得分
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: GameUIComponents
+                                              .comboStatComponent(
+                                            gameState
+                                                .scoringService.currentCombo,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: GameUIComponents
-                                            .lastScoreStatComponent(
-                                          gameState
-                                              .lastScoringResult?.description,
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: GameUIComponents
+                                              .lastScoreStatComponent(
+                                            gameState
+                                                .lastScoringResult?.description,
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
 
                             const SizedBox(height: HudSpacing.kHudGap),
 
                             // NEXT 預覽模組
-                            GameUIComponents.nextPiecePreview(
-                              gameState.nextTetromino,
-                              gameState.nextTetrominos,
+                            // RepaintBoundary: 隔離 NEXT 預覽，只在換方塊時更新
+                            RepaintBoundary(
+                              child: GameUIComponents.nextPiecePreview(
+                                gameState.nextTetromino,
+                                gameState.nextTetrominos,
+                              ),
                             ),
 
                             const SizedBox(height: HudSpacing.kHudGap),
