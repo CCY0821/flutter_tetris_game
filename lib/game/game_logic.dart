@@ -35,11 +35,18 @@ class GameLogic {
     // 創建遊戲上下文對象供符文使用
     final gameContext = _GameContext(this);
 
-    return gameState.runeSystem.castRune(
+    final result = gameState.runeSystem.castRune(
       slotIndex,
       board: gameState.board,
       gameContext: gameContext,
     );
+
+    // 📊 統計：法術成功施放計數（只在成功時統計，不影響邏輯）
+    if (result.isSuccess) {
+      gameState.totalSpellsCast++;
+    }
+
+    return result;
   }
 
   bool canMove(Tetromino tetro,
@@ -77,6 +84,10 @@ class GameLogic {
         gameState.board[y][x] = gameState.currentTetromino!.color;
       }
     }
+
+    // 📊 統計：方塊鎖定計數（只添加統計，不影響邏輯）
+    gameState.totalPiecesPlaced++;
+
     clearFullRows();
   }
 

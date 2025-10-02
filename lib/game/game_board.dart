@@ -51,6 +51,9 @@ class _GameBoardState extends State<GameBoard>
   // RuneEventBus 訂閱
   StreamSubscription<RuneEvent>? _runeEventSubscription;
 
+  // Game Over Dialog 狀態（防止重複彈出）
+  bool _gameOverDialogShown = false;
+
   @override
   void initState() {
     super.initState();
@@ -336,9 +339,238 @@ class _GameBoardState extends State<GameBoard>
     await gameState.clearSavedState();
     await gameState.startGame();
     _currentSpeed = gameState.dropSpeed;
+    _gameOverDialogShown = false; // 重置 Dialog 標誌
     _startGameTimer();
     setState(() {});
     debugPrint('Game: New game started, saved state cleared');
+  }
+
+  // 📊 顯示遊戲結算畫面
+  void _showGameOverDialog() {
+    // 計算遊戲時長
+    final playTime = gameState.gameStartTime != null
+        ? DateTime.now().difference(gameState.gameStartTime!)
+        : Duration.zero;
+    final minutes = playTime.inMinutes;
+    final seconds = playTime.inSeconds % 60;
+
+    // TODO: 預留音效接口
+    // gameState.audioService.playSoundEffect('game_over_summary');
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 400),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: cyberpunkBgDeep.withOpacity(0.95),
+            border: Border.all(color: cyberpunkPrimary, width: 2),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: cyberpunkPrimary.withOpacity(0.3),
+                blurRadius: 20,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 標題
+              Text(
+                'GAME OVER',
+                style: GameTheme.accentStyle.copyWith(
+                  fontSize: 28,
+                  letterSpacing: 3,
+                  color: cyberpunkPrimary,
+                  shadows: [
+                    Shadow(
+                      color: cyberpunkPrimary.withOpacity(0.5),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // 最終分數卡片
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: cyberpunkPanel,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: cyberpunkPrimary, width: 1),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'FINAL SCORE',
+                      style: GameTheme.accentStyle.copyWith(
+                        fontSize: 14,
+                        color: cyberpunkSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${gameState.score}',
+                      style: GameTheme.titleStyle.copyWith(
+                        fontSize: 36,
+                        color: cyberpunkPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // 統計數據卡片
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: cyberpunkPanel.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                      color: cyberpunkGridLine.withOpacity(0.3), width: 1),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'STATISTICS',
+                      style: GameTheme.accentStyle.copyWith(
+                        fontSize: 14,
+                        color: cyberpunkSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildStatRow('Lines Cleared',
+                                  '${gameState.marathonSystem.totalLinesCleared}'),
+                              _buildStatRow('Max Combo',
+                                  '${gameState.scoringService.maxCombo}x'),
+                              _buildStatRow('Spells Cast',
+                                  '${gameState.totalSpellsCast}'),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildStatRow('Time Played',
+                                  '$minutes:${seconds.toString().padLeft(2, '0')}'),
+                              _buildStatRow('Level Reached',
+                                  '${gameState.marathonSystem.currentLevel}'),
+                              _buildStatRow('Pieces Placed',
+                                  '${gameState.totalPiecesPlaced}'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // 最高分卡片
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: cyberpunkPanel.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                      color: cyberpunkAccent.withOpacity(0.3), width: 1),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'HIGH SCORE: ',
+                      style: GameTheme.accentStyle.copyWith(
+                        fontSize: 12,
+                        color: cyberpunkAccent,
+                      ),
+                    ),
+                    Text(
+                      '${gameState.highScore}',
+                      style: GameTheme.titleStyle.copyWith(
+                        fontSize: 16,
+                        color: cyberpunkAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // 開始新遊戲按鈕
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _startGame();
+                  },
+                  style: GameTheme.primaryButtonStyle,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      'START NEW GAME',
+                      style: GameTheme.accentStyle.copyWith(
+                        fontSize: 16,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 統計數據行組件
+  Widget _buildStatRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF8899AA), // 次要文字顏色
+              fontSize: 11,
+              fontFamily: 'RobotoMono',
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              color: cyberpunkPrimary,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'RobotoMono',
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _startGameTimer() {
@@ -361,11 +593,22 @@ class _GameBoardState extends State<GameBoard>
             _currentSpeed = newSpeed;
             _startGameTimer(); // 重新啟動計時器使用新速度
           }
-
-          if (gameState.isGameOver) {
-            _dropTimer?.cancel();
-          }
         });
+      }
+
+      // 📊 Game Over 檢測（放在 if 外面，確保能執行）
+      if (gameState.isGameOver) {
+        _dropTimer?.cancel();
+        // 顯示結算畫面（只顯示一次）
+        if (!_gameOverDialogShown) {
+          _gameOverDialogShown = true;
+          // 延遲顯示確保 UI 已更新
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted) {
+              _showGameOverDialog();
+            }
+          });
+        }
       }
     });
   }

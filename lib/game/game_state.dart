@@ -68,6 +68,11 @@ class GameState {
   bool isGameOver = false;
   bool isPaused = false;
 
+  // 📊 遊戲統計數據（用於結算畫面）
+  int totalPiecesPlaced = 0; // 總放置方塊數
+  int totalSpellsCast = 0; // 總施放法術次數
+  DateTime? gameStartTime; // 遊戲開始時間
+
   // Ghost piece 設定
   bool isGhostPieceEnabled = true;
 
@@ -208,6 +213,11 @@ class GameState {
     score = 0;
     isGameOver = false;
     isPaused = false;
+
+    // 📊 重置統計數據
+    totalPiecesPlaced = 0;
+    totalSpellsCast = 0;
+    gameStartTime = DateTime.now();
 
     // 重置方塊供應器系統（清除所有攔截器）
     pieceProviderStack.clear();
