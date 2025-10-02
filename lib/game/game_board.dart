@@ -440,11 +440,13 @@ class _GameBoardState extends State<GameBoard>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'STATISTICS',
-                      style: GameTheme.accentStyle.copyWith(
-                        fontSize: 14,
-                        color: cyberpunkSecondary,
+                    Center(
+                      child: Text(
+                        'STATISTICS',
+                        style: GameTheme.accentStyle.copyWith(
+                          fontSize: 14,
+                          color: cyberpunkSecondary,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -491,7 +493,8 @@ class _GameBoardState extends State<GameBoard>
                   color: cyberpunkPanel.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                      color: cyberpunkAccent.withOpacity(0.3), width: 1),
+                      color: const Color(0xFFE0E0E0).withOpacity(0.2),
+                      width: 1),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -500,14 +503,14 @@ class _GameBoardState extends State<GameBoard>
                       'HIGH SCORE: ',
                       style: GameTheme.accentStyle.copyWith(
                         fontSize: 12,
-                        color: cyberpunkAccent,
+                        color: const Color(0xFFE0E0E0).withOpacity(0.7),
                       ),
                     ),
                     Text(
                       '${gameState.highScore}',
                       style: GameTheme.titleStyle.copyWith(
                         fontSize: 16,
-                        color: cyberpunkAccent,
+                        color: const Color(0xFFE0E0E0).withOpacity(0.9),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -602,8 +605,8 @@ class _GameBoardState extends State<GameBoard>
         // 顯示結算畫面（只顯示一次）
         if (!_gameOverDialogShown) {
           _gameOverDialogShown = true;
-          // 延遲顯示確保 UI 已更新
-          Future.delayed(const Duration(milliseconds: 500), () {
+          // 等待當前幀渲染完成後立即顯示
+          WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               _showGameOverDialog();
             }
