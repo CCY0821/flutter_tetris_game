@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'game_logic.dart';
 import 'game_state.dart';
 import 'rune_system.dart';
@@ -13,6 +12,19 @@ import '../core/dual_logger.dart';
 /// 關鍵事件同步日誌，避免被節流沖掉
 void logCritical(String msg) {
   logCrit(msg);
+}
+
+/// 浮動提示配置類
+class _ToastConfig {
+  final String message;
+  final Color color;
+  final IconData icon;
+
+  const _ToastConfig({
+    required this.message,
+    required this.color,
+    required this.icon,
+  });
 }
 
 class TouchControls extends StatefulWidget {
@@ -36,6 +48,46 @@ class _TouchControlsState extends State<TouchControls> {
   Timer? _cooldownUpdateTimer;
   String? _activeButton;
 
+  // Overlay 管理變數
+  OverlayEntry? _currentToast;
+  Timer? _toastTimer;
+
+  // GlobalKey 追蹤符文槽位置
+  final List<GlobalKey> _slotKeys = [
+    GlobalKey(),
+    GlobalKey(),
+    GlobalKey(),
+  ];
+
+  // 錯誤類型配置映射
+  static const Map<RuneCastError, _ToastConfig> _toastConfigs = {
+    RuneCastError.energyInsufficient: _ToastConfig(
+      message: 'ENERGY LOW',
+      color: Colors.red,
+      icon: Icons.flash_off,
+    ),
+    RuneCastError.cooldownActive: _ToastConfig(
+      message: 'COOLING DOWN',
+      color: cyberpunkAccent,
+      icon: Icons.timer,
+    ),
+    RuneCastError.temporalMutualExclusive: _ToastConfig(
+      message: 'EFFECT CONFLICT',
+      color: Colors.amber,
+      icon: Icons.warning_amber_rounded,
+    ),
+    RuneCastError.slotEmpty: _ToastConfig(
+      message: 'EMPTY SLOT',
+      color: Colors.grey,
+      icon: Icons.add_circle_outline,
+    ),
+    RuneCastError.ghostInvalid: _ToastConfig(
+      message: 'INVALID POS',
+      color: Colors.orange,
+      icon: Icons.error_outline,
+    ),
+  };
+
   void _attach() {
     logCritical('TouchControls: Attaching listeners');
     // 設置UI更新回調，當能量變化時觸發rebuild
@@ -56,6 +108,71 @@ class _TouchControlsState extends State<TouchControls> {
     logCritical('TouchControls: Detaching listeners');
     _repeatTimer?.cancel();
     _cooldownUpdateTimer?.cancel();
+    _removeToast();
+  }
+
+  /// 移除當前浮動提示
+  void _removeToast() {
+    _currentToast?.remove();
+    _currentToast = null;
+    _toastTimer?.cancel();
+    _toastTimer = null;
+  }
+
+  /// 獲取符文槽的螢幕位置
+  Offset? _getSlotPosition(int index) {
+    if (index < 0 || index >= _slotKeys.length) return null;
+
+    final RenderBox? renderBox =
+        _slotKeys[index].currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.hasSize) return null;
+
+    return renderBox.localToGlobal(Offset.zero);
+  }
+
+  /// 建立浮動提示 Overlay
+  OverlayEntry _buildToastOverlay(
+    Offset position,
+    String message,
+    Color color,
+    IconData icon,
+  ) {
+    const slotSize = 48.0;
+    const toastHeight = 32.0;
+    const toastOffset = 8.0; // 槽位上方間距
+
+    return OverlayEntry(
+      builder: (context) => _AnimatedToast(
+        position: Offset(
+          position.dx + slotSize / 2, // 置中對齊
+          position.dy - toastHeight - toastOffset, // 槽位上方
+        ),
+        message: message,
+        color: color,
+        icon: icon,
+      ),
+    );
+  }
+
+  /// 顯示浮動提示
+  void _showFloatingToast(
+      int slotIndex, String message, Color color, IconData icon) {
+    if (!mounted) return;
+
+    final position = _getSlotPosition(slotIndex);
+    if (position == null) return;
+
+    _removeToast(); // 先移除舊的
+
+    _currentToast = _buildToastOverlay(position, message, color, icon);
+    Overlay.of(context).insert(_currentToast!);
+
+    // 1.3秒後自動移除
+    _toastTimer = Timer(const Duration(milliseconds: 1300), () {
+      if (mounted) {
+        _removeToast();
+      }
+    });
   }
 
   @override
@@ -123,13 +240,6 @@ class _TouchControlsState extends State<TouchControls> {
     _repeatTimer?.cancel();
   }
 
-  void _executeAction(String action, VoidCallback callback) {
-    if (widget.gameState.isPaused || widget.gameState.isGameOver) return;
-
-    callback();
-    widget.onStateChange();
-  }
-
   void _startSinglePress(String action, VoidCallback callback) {
     if (widget.gameState.isPaused || widget.gameState.isGameOver) return;
 
@@ -184,7 +294,7 @@ class _TouchControlsState extends State<TouchControls> {
 
     // 🔥 檢查能量檢測是否有問題
     debugPrint(
-        'ENERGY DEBUG: currentBars=$currentEnergyBars, needCost=${definition.energyCost}, canConsume=$hasEnoughEnergy');
+        'ENERGY DEBUG: currentBars=$currentEnergyBars, needCost=$definition.energyCost, canConsume=$hasEnoughEnergy');
 
     // 檢查 UI 與核心狀態是否同步
     final coreEnergyBars = widget.gameState.runeEnergyManager.currentBars;
@@ -196,11 +306,12 @@ class _TouchControlsState extends State<TouchControls> {
     // 🔥 詳細除錯：追蹤所有影響 canCast 的因子
     debugPrint('RuneSlot $index (${definition.name}): '
         'runeSlot.canCast=${runeSlot.canCast}, runeSlot.state=${runeSlot.state}, '
-        'disabled=$isDisabled, hasEnoughEnergy=$hasEnoughEnergy (need ${definition.energyCost}), '
+        'disabled=$isDisabled, hasEnoughEnergy=$hasEnoughEnergy (need $definition.energyCost), '
         'final canCast=$canCast, cooldownRemaining=${runeSlot.cooldownRemaining}ms, '
         'cooldownEndTime=${runeSlot.cooldownEndTime}, now=${MonotonicTimer.now}');
 
     return GestureDetector(
+      key: _slotKeys[index], // 綁定 GlobalKey
       onTap: () {
         // 🔥 ChatGPT建議：強制重新計算最新狀態，確保UI狀態同步
         widget.gameState.runeSystem.slots[index].update(); // 強制更新狀態
@@ -219,7 +330,7 @@ class _TouchControlsState extends State<TouchControls> {
         logCritical('=== CLICK DEBUG (ChatGPT修復) ===');
         logCritical('RuneSlot $index clicked!');
         logCritical(
-            'UI build canCast=$canCast, currentBars=${currentEnergyBars}, hasEnoughEnergy=$hasEnoughEnergy');
+            'UI build canCast=$canCast, currentBars=$currentEnergyBars, hasEnoughEnergy=$hasEnoughEnergy');
         logCritical(
             'Click time (強制更新後) canCast=$clickTimeCanCast, currentBars=$clickTimeCurrentBars, hasEnoughEnergy=$clickTimeHasEnoughEnergy');
         logCritical(
@@ -479,7 +590,8 @@ class _TouchControlsState extends State<TouchControls> {
         HapticFeedback.mediumImpact();
 
         if (result.energyRefunded) {
-          _showRuneMessage('Energy Refunded', Colors.yellow);
+          _showFloatingToast(
+              index, 'ENERGY REFUNDED', Colors.yellow, Icons.refresh);
         }
       }
     } catch (e) {
@@ -513,66 +625,34 @@ class _TouchControlsState extends State<TouchControls> {
   }
 
   void _showRuneErrorFeedback(RuneCastError error, int index) {
+    // 獲取配置
+    final config = _toastConfigs[error];
+    if (config == null) {
+      // 未定義的錯誤類型，使用默認配置
+      HapticFeedback.lightImpact();
+      _showFloatingToast(index, 'CAST FAILED', Colors.red, Icons.error);
+      return;
+    }
+
+    // 根據錯誤類型決定是否震動
     switch (error) {
       case RuneCastError.energyInsufficient:
-        // 紅色短閃 + 輕震
-        HapticFeedback.lightImpact();
-        _flashRuneSlot(index, Colors.red, 200);
-        _showRuneMessage('Energy Insufficient', Colors.red);
-        break;
-
-      case RuneCastError.cooldownActive:
-        // 藍紫色節奏閃 + 無震
-        _flashRuneSlot(index, cyberpunkAccent, 500);
-        _showRuneMessage('Cooling Down', cyberpunkAccent);
-        break;
-
       case RuneCastError.temporalMutualExclusive:
-        // 琥珀色閃 + 輕震 + 固定提示
-        HapticFeedback.lightImpact();
-        _flashRuneSlot(index, Colors.amber, 300);
-        _showRuneMessage('時間系效果互斥', Colors.amber);
-        break;
-
-      case RuneCastError.slotEmpty:
-        _showRuneMessage('Empty Slot', Colors.grey);
-        break;
-
       case RuneCastError.ghostInvalid:
-        HapticFeedback.lightImpact();
-        _flashRuneSlot(index, Colors.orange, 250);
-        _showRuneMessage('Invalid Ghost Position', Colors.orange);
+        HapticFeedback.lightImpact(); // 保留輕震動
         break;
-
-      default:
-        _showRuneMessage('Cast Failed', Colors.red);
+      case RuneCastError.cooldownActive:
+      case RuneCastError.slotEmpty:
+      case RuneCastError.success:
+      case RuneCastError.frameThrottled:
+      case RuneCastError.noValidTargets:
+      case RuneCastError.systemError:
+        // 無震動
         break;
     }
-  }
 
-  void _flashRuneSlot(int index, Color color, int durationMs) {
-    // 槽位閃爍效果的實現
-    // 這裡可以通過setState觸發重繪，或使用Animation
-    // 簡化版本：只觸發重繪
-    setState(() {});
-
-    Timer(Duration(milliseconds: durationMs), () {
-      setState(() {});
-    });
-  }
-
-  void _showRuneMessage(String message, Color color) {
-    // 顯示符文操作消息
-    // 可以用 SnackBar 或自定義浮動提示
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color.withOpacity(0.8),
-        duration: const Duration(milliseconds: 1500),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(bottom: 100, left: 20, right: 20),
-      ),
-    );
+    // 顯示浮動提示
+    _showFloatingToast(index, config.message, config.color, config.icon);
   }
 
   Widget _buildControlButton({
@@ -942,6 +1022,130 @@ class _TouchControlsState extends State<TouchControls> {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 動畫浮動提示 Widget
+class _AnimatedToast extends StatefulWidget {
+  final Offset position;
+  final String message;
+  final Color color;
+  final IconData icon;
+
+  const _AnimatedToast({
+    required this.position,
+    required this.message,
+    required this.color,
+    required this.icon,
+  });
+
+  @override
+  State<_AnimatedToast> createState() => _AnimatedToastState();
+}
+
+class _AnimatedToastState extends State<_AnimatedToast> {
+  bool _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // 延遲一幀後觸發動畫
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _visible = true;
+        });
+      }
+    });
+
+    // 1秒後開始淡出
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      if (mounted) {
+        setState(() {
+          _visible = false;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: widget.position.dx,
+      top: widget.position.dy,
+      child: Transform.translate(
+        offset: const Offset(-60, 0), // 置中偏移（假設寬度約120）
+        child: AnimatedOpacity(
+          opacity: _visible ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          child: AnimatedSlide(
+            offset: _visible ? Offset.zero : const Offset(0, 0.5),
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutCubic,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    widget.color.withOpacity(0.95),
+                    widget.color.withOpacity(0.85),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: cyberpunkAccent.withOpacity(0.8),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: widget.color.withOpacity(0.6),
+                    blurRadius: 12,
+                    offset: const Offset(0, 0),
+                  ),
+                  const BoxShadow(
+                    color: Colors.black54,
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    widget.icon,
+                    color: Colors.white,
+                    size: 16,
+                    shadows: const [
+                      Shadow(
+                        color: Colors.black87,
+                        blurRadius: 2,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    widget.message,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black87,
+                          blurRadius: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
