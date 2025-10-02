@@ -527,31 +527,6 @@ class _GameBoardState extends State<GameBoard>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 預留頂部空間 - 未來功能區域
-          Container(
-            height: 60,
-            width: double.infinity,
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: GameTheme.primaryDark.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: GameTheme.gridLine.withOpacity(0.2),
-                width: 1,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                'RESERVED SPACE',
-                style: TextStyle(
-                  color: GameTheme.textSecondary.withOpacity(0.5),
-                  fontSize: 12,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ),
-          ),
-
           // 分數面板 - 保持在頂部原位置
           // RepaintBoundary: 隔離分數模組，只在得分時更新
           Padding(
