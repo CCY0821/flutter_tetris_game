@@ -13,6 +13,12 @@ void main() async {
   // 初始化雙路徑日誌系統
   await DualLogger.instance.init();
 
+  // 鎖定直式方向
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   // 設置系統UI樣式
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
