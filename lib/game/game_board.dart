@@ -17,6 +17,7 @@ import '../theme/hud_spacing.dart';
 import '../core/pixel_snap.dart';
 import '../core/constants.dart';
 import 'rune_events.dart';
+import 'spell_animation_controller.dart';
 
 class GameBoard extends StatefulWidget {
   const GameBoard({super.key});
@@ -53,6 +54,11 @@ class _GameBoardState extends State<GameBoard>
 
   // Game Over Dialog 狀態（防止重複彈出）
   bool _gameOverDialogShown = false;
+
+  // 法術動畫控制器
+  final SpellAnimationController _spellAnimationController =
+      SpellAnimationController();
+  SpriteSheetAnimation? _angelsGraceAnimation;
 
   @override
   void initState() {
@@ -91,6 +97,26 @@ class _GameBoardState extends State<GameBoard>
     _initializeGame();
   }
 
+  /// 預載入法術動畫資源（在 _initializeGame 之後調用）
+  Future<void> _loadSpellAnimations() async {
+    try {
+      debugPrint('[GameBoard] Loading Angel\'s Grace animation...');
+      _angelsGraceAnimation = SpriteSheetAnimation(
+        assetPath: "assets/animations/angels_grace.png",
+        rows: 4,
+        columns: 4,
+        totalFrames: 16,
+        frameDuration: const Duration(milliseconds: 60),
+      );
+      await _angelsGraceAnimation!.load();
+      debugPrint(
+          '[GameBoard] ✅ Angel\'s Grace animation loaded successfully (${_angelsGraceAnimation!.isLoaded})');
+    } catch (e, stackTrace) {
+      debugPrint('[GameBoard] ❌ Failed to load Angel\'s Grace animation: $e');
+      debugPrint('[GameBoard] Stack trace: $stackTrace');
+    }
+  }
+
   void _initializeGame() async {
     // 設置震動回調
     gameState.setShakeCallback(() {
@@ -101,6 +127,9 @@ class _GameBoardState extends State<GameBoard>
 
     // 設置符文事件監聽
     _setupRuneEventListeners();
+
+    // 預載入法術動畫（在音頻和事件系統初始化之後）
+    await _loadSpellAnimations();
 
     // 嘗試從本地存儲載入遊戲狀態
     bool stateLoaded = false;
@@ -169,9 +198,22 @@ class _GameBoardState extends State<GameBoard>
 
   /// 設置符文事件監聽器
   void _setupRuneEventListeners() {
+    debugPrint('[GameBoard] Setting up rune event listeners');
+
     // 監聽所有符文事件並過濾 Time Change
     _runeEventSubscription = RuneEventBus.events.listen((event) {
+      debugPrint(
+          '[GameBoard] Received rune event: ${event.runeType} - ${event.type}');
+
       if (!mounted) return;
+
+      // 監聽 Angel's Grace 施法事件，觸發動畫
+      if (event.runeType == RuneType.angelsGrace &&
+          event.type == RuneEventType.cast) {
+        debugPrint(
+            '[GameBoard] Angel\'s Grace cast detected, triggering animation');
+        _playAngelsGraceAnimation();
+      }
 
       if (event.runeType == RuneType.timeChange &&
           event.type == RuneEventType.effectStart) {
@@ -241,6 +283,17 @@ class _GameBoardState extends State<GameBoard>
     });
   }
 
+  /// 播放 Angel's Grace 爆炸動畫
+  void _playAngelsGraceAnimation() {
+    if (_angelsGraceAnimation == null || !_angelsGraceAnimation!.isLoaded) {
+      debugPrint('[GameBoard] Angel\'s Grace animation not ready');
+      return;
+    }
+
+    debugPrint('[GameBoard] Playing Angel\'s Grace animation');
+    _spellAnimationController.play(_angelsGraceAnimation!);
+  }
+
   /// 以當前速度重啟計時器
   void _restartTimerWithCurrentSpeed() {
     _currentSpeed = gameState.dropSpeed;
@@ -259,6 +312,9 @@ class _GameBoardState extends State<GameBoard>
 
     // 清理符文事件監聽器
     _runeEventSubscription?.cancel();
+
+    // 清理動畫控制器
+    _spellAnimationController.dispose();
 
     controllerHandler.dispose();
     gameState.dispose();
@@ -882,6 +938,14 @@ class _GameBoardState extends State<GameBoard>
                                         ),
                                       ),
                                     ),
+                                  ),
+
+                                  // 法術動畫疊加層（覆蓋整個可視區域：20行）
+                                  SpellAnimationOverlay(
+                                    controller: _spellAnimationController,
+                                    visibleAreaTop: 0,
+                                    visibleAreaHeight:
+                                        GameState.rowCount * cellSize,
                                   ),
 
                                   // 暫停或 Game Over 蓋板
