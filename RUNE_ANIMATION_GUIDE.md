@@ -2,7 +2,9 @@
 
 ## 📋 概述
 
-本指南詳細說明如何為符文添加全螢幕動畫效果，以 **Angel's Grace** 符文為範例。
+本指南詳細說明如何為符文添加全螢幕動畫效果，以 **Angel's Grace** 和 **Flame Burst** 符文為範例。
+
+**⚠️ 重要**: 所有符文動畫統一使用 **fadeInOut** 模式（淡入淡出），資源為單張完整圖片，不使用 sprite sheet 分格動畫。
 
 ---
 
@@ -13,23 +15,11 @@
 **檔案位置**: `assets/animations/angels_grace.png`
 
 **格式要求**:
-- **Sprite Sheet**: 4x4 網格（16 幀動畫）
+- **圖片類型**: 單張完整圖片（非 Sprite Sheet）
 - **尺寸**: 建議 960x1088 或類似比例
 - **背景**: 必須是透明背景（PNG Alpha 通道）
 - **顏色**: 藍紫色爆炸效果
-
-**範例**:
-```
-┌────┬────┬────┬────┐
-│ 1  │ 2  │ 3  │ 4  │  第一排：動畫開始
-├────┼────┼────┼────┤
-│ 5  │ 6  │ 7  │ 8  │  第二排：動畫中段
-├────┼────┼────┼────┤
-│ 9  │ 10 │ 11 │ 12 │  第三排：動畫高潮
-├────┼────┼────┼────┤
-│ 13 │ 14 │ 15 │ 16 │  第四排：動畫結束
-└────┴────┴────┴────┘
-```
+- **動畫方式**: 透過淡入淡出控制顯示
 
 ---
 
@@ -50,9 +40,12 @@ class _GameBoardState extends State<GameBoard>
   // 👇 定義 Angel's Grace 動畫變數
   SpriteSheetAnimation? _angelsGraceAnimation;
 
+  // ✅ 已實現的符文動畫
+  SpriteSheetAnimation? _flameBurstAnimation;
+
   // 其他符文動畫變數可以在這裡添加
-  // SpriteSheetAnimation? _flameBurstAnimation;
   // SpriteSheetAnimation? _thunderStrikeAnimation;
+  // SpriteSheetAnimation? _dragonRoarAnimation;
 ```
 
 ---
@@ -92,8 +85,8 @@ Future<void> _loadSpellAnimations() async {
 ```
 
 **動畫類型說明**:
-- `AnimationType.spriteSheet`: 逐幀播放 4x4 網格（適合連續動畫）
-- `AnimationType.fadeInOut`: 淡入淡出效果（適合單張爆炸圖）
+- `AnimationType.fadeInOut`: 淡入淡出效果（**所有符文統一使用**）
+- ~~`AnimationType.spriteSheet`: 逐幀播放 4x4 網格~~（已棄用）
 
 ---
 
@@ -180,7 +173,7 @@ RuneEventBus.emitCast(slot.runeType!);  // 👈 這會觸發動畫
 
 #### 1. 準備圖片
 ```
-assets/animations/flame_burst.png  (4x4 sprite sheet)
+assets/animations/flame_burst.png  (單張完整圖片，透明背景)
 ```
 
 #### 2. 在 game_board.dart 定義變數
@@ -192,10 +185,10 @@ SpriteSheetAnimation? _flameBurstAnimation;
 ```dart
 _flameBurstAnimation = SpriteSheetAnimation(
   assetPath: "assets/animations/flame_burst.png",
-  animationType: AnimationType.spriteSheet,  // 使用逐幀動畫
-  rows: 4,
-  columns: 4,
-  frameDuration: const Duration(milliseconds: 60),  // 每幀 60ms
+  animationType: AnimationType.fadeInOut,  // 使用淡入淡出模式
+  fadeInDuration: const Duration(milliseconds: 200),  // 淡入 0.2s
+  holdDuration: const Duration(milliseconds: 500),     // 停留 0.5s
+  fadeOutDuration: const Duration(milliseconds: 200),  // 淡出 0.2s
 );
 await _flameBurstAnimation!.load();
 ```
@@ -223,30 +216,28 @@ if (event.runeType == RuneType.flameBurst &&
 
 ## 📊 動畫參數對照表
 
-### AnimationType.fadeInOut（淡入淡出）
+### ✅ AnimationType.fadeInOut（淡入淡出）- 所有符文統一使用
 
-| 參數 | 說明 | 推薦值 |
-|------|------|--------|
-| `fadeInDuration` | 淡入時長 | 200ms |
-| `holdDuration` | 停留時長 | 500ms |
-| `fadeOutDuration` | 淡出時長 | 200ms |
+| 參數 | 說明 | 推薦值 | 可調範圍 |
+|------|------|--------|---------|
+| `fadeInDuration` | 淡入時長 | 200ms | 100-300ms |
+| `holdDuration` | 停留時長 | 500ms | 300-800ms |
+| `fadeOutDuration` | 淡出時長 | 200ms | 100-300ms |
 
-**總時長**: fadeIn + hold + fadeOut = 900ms
+**總時長**: fadeIn + hold + fadeOut = 900ms（推薦）
 
-**適用場景**: 單張圖片爆炸效果、閃光效果
+**適用場景**: 所有符文爆炸效果、閃光效果
 
-### AnimationType.spriteSheet（逐幀動畫）
+**視覺效果時間軸**:
+```
+0ms ────── 200ms ────── 700ms ────── 900ms
+  │           │            │            │
+淡入開始    完全顯示    開始淡出     完全消失
+```
 
-| 參數 | 說明 | 推薦值 |
-|------|------|--------|
-| `rows` | 網格行數 | 4 |
-| `columns` | 網格列數 | 4 |
-| `totalFrames` | 總幀數 | 16 (預設 rows*columns) |
-| `frameDuration` | 每幀時長 | 60ms |
+### ❌ AnimationType.spriteSheet（已棄用）
 
-**總時長**: frameDuration × totalFrames = 960ms
-
-**適用場景**: 連續動畫、複雜特效
+~~此模式不再使用於符文動畫系統~~
 
 ---
 
@@ -254,20 +245,23 @@ if (event.runeType == RuneType.flameBurst &&
 
 ### 圖片規格
 - **格式**: PNG 32-bit (含 Alpha 通道)
-- **背景**: 完全透明
-- **尺寸**: 960x1088 或 1920x1080
-- **網格**: 4x4 均勻分割
+- **背景**: 完全透明（Alpha = 0）
+- **尺寸**: 960x1088 或 1920x1080（建議保持一致）
+- **圖片類型**: 單張完整爆炸/特效圖
 
 ### 視覺效果
-- **起始幀**: 從小或淡開始
-- **中段幀**: 逐漸放大/變亮
-- **結束幀**: 淡出或縮小
-- **顏色**: 避免使用綠色（以免誤判為綠幕）
+- **構圖**: 完整的爆炸或特效靜態圖
+- **透明度**: 完全依賴 PNG Alpha 通道（不要用半透明灰色背景）
+- **顏色**: 避免使用純綠色 #00FF00（Chroma Key 可能會誤判）
+- **細節**: 可包含粒子、光芒、衝擊波等靜態元素
 
 ### 製作工具
-- Adobe After Effects → 導出序列幀 → 合併成 4x4 Sprite Sheet
-- Spine / DragonBones → 導出 PNG 序列
-- 線上工具: https://www.codeandweb.com/texturepacker
+- **Adobe Photoshop**: 創建爆炸/特效圖，確保背景透明
+- **Adobe After Effects**: 渲染單幀特效（選擇最佳視覺瞬間）
+- **Blender**: 3D 爆炸效果渲染（導出 PNG 序列選最佳幀）
+- **線上資源**:
+  - https://opengameart.org/ （免費遊戲素材）
+  - https://kenney.nl/ （免費 2D/3D 素材）
 
 ---
 
@@ -293,22 +287,26 @@ if (event.runeType == RuneType.flameBurst &&
 
 ### 2. 動畫有綠色殘留
 
-**原因**: 圖片背景不是完全透明
+**原因**: 圖片背景不是完全透明，或包含綠色像素
 
 **解決方案**:
 - 使用圖片編輯器（Photoshop/GIMP）確保背景 Alpha = 0
-- 或使用 `tools/chroma_key_processor_v2.dart` 去背（但已還原原始圖片，不需要）
+- 檢查圖片是否包含 #00FF00 純綠色（Chroma Key 會去除）
+- 確認 PNG 格式為 32-bit RGBA
 
 ### 3. 動畫播放太快/太慢
 
 **調整參數**:
 ```dart
-// 淡入淡出模式
+// 播放較慢（更戲劇化）
 fadeInDuration: const Duration(milliseconds: 300),  // 增加淡入時間
 holdDuration: const Duration(milliseconds: 800),    // 增加停留時間
+fadeOutDuration: const Duration(milliseconds: 300), // 增加淡出時間
 
-// 逐幀模式
-frameDuration: const Duration(milliseconds: 80),    // 增加每幀時間
+// 播放較快（更爽快）
+fadeInDuration: const Duration(milliseconds: 100),
+holdDuration: const Duration(milliseconds: 300),
+fadeOutDuration: const Duration(milliseconds: 100),
 ```
 
 ---
@@ -339,12 +337,44 @@ frameDuration: const Duration(milliseconds: 80),    // 增加每幀時間
 
 為新符文添加動畫的步驟：
 
-- [ ] **1. 準備圖片**: 放到 `assets/animations/your_rune.png`
-- [ ] **2. 定義變數**: `SpriteSheetAnimation? _yourRuneAnimation;`
-- [ ] **3. 載入動畫**: 在 `_loadSpellAnimations()` 中添加載入邏輯
+- [ ] **1. 準備圖片**: 單張完整 PNG 圖片，放到 `assets/animations/your_rune.png`
+- [ ] **2. 定義變數**: 在 `game_board.dart` 添加 `SpriteSheetAnimation? _yourRuneAnimation;`
+- [ ] **3. 載入動畫**: 在 `_loadSpellAnimations()` 中使用 `fadeInOut` 模式載入
 - [ ] **4. 創建播放方法**: `void _playYourRuneAnimation() { ... }`
-- [ ] **5. 監聽事件**: 在 `_setupRuneEventListeners()` 中添加監聽
-- [ ] **6. 測試**: 運行遊戲，觸發符文，確認動畫顯示
+- [ ] **5. 監聽事件**: 在 `_setupRuneEventListeners()` 中監聽施法事件
+- [ ] **6. 測試**: 運行遊戲，觸發符文，確認動畫正確淡入淡出
+
+**標準模板代碼**（複製貼上後修改符文名稱）:
+```dart
+// 步驟 2: 定義變數
+SpriteSheetAnimation? _yourRuneAnimation;
+
+// 步驟 3: 載入動畫
+_yourRuneAnimation = SpriteSheetAnimation(
+  assetPath: "assets/animations/your_rune.png",
+  animationType: AnimationType.fadeInOut,
+  fadeInDuration: const Duration(milliseconds: 200),
+  holdDuration: const Duration(milliseconds: 500),
+  fadeOutDuration: const Duration(milliseconds: 200),
+);
+await _yourRuneAnimation!.load();
+
+// 步驟 4: 播放方法
+void _playYourRuneAnimation() {
+  if (_yourRuneAnimation == null || !_yourRuneAnimation!.isLoaded) {
+    debugPrint('[GameBoard] Your Rune animation not ready');
+    return;
+  }
+  debugPrint('[GameBoard] Playing Your Rune animation');
+  _spellAnimationController.play(_yourRuneAnimation!);
+}
+
+// 步驟 5: 監聽事件
+if (event.runeType == RuneType.yourRune &&
+    event.type == RuneEventType.cast) {
+  _playYourRuneAnimation();
+}
+```
 
 ---
 
@@ -356,6 +386,25 @@ frameDuration: const Duration(milliseconds: 80),    // 增加每幀時間
 
 ---
 
-**最後更新**: 2025-01-18
-**範例符文**: Angel's Grace
+---
+
+## 📝 已實現的符文動畫清單
+
+| 符文名稱 | 動畫文件 | 實現狀態 | 動畫模式 | 備註 |
+|---------|---------|---------|---------|------|
+| Angel's Grace | `angels_grace.png` | ✅ 已完成 | fadeInOut | 藍紫色爆炸 |
+| Flame Burst | `flame_burst.png` | ✅ 已完成 | fadeInOut | 火焰爆炸 |
+| Thunder Strike | `thunder_strike_left.png`<br>`thunder_strike_right.png` | ⏳ 待實現 | fadeInOut | 左右雷擊 |
+| Dragon Roar | `dragon_roar.png` | ⏳ 待實現 | fadeInOut | 龍吼效果 |
+| Blessed Combo | `blessed_combo.png` | ⏳ 待實現 | fadeInOut | 祝福光芒 |
+| Gravity Reset | `gravity_reset.png` | ⏳ 待實現 | fadeInOut | 重力波動 |
+| Element Morph | `element_morph.png` | ⏳ 待實現 | fadeInOut | 元素變化 |
+| Time Change | `time_change.png` | ⏳ 待實現 | fadeInOut | 時間扭曲 |
+| Titan Gravity | `titan_gravity.png` | ⏳ 待實現 | fadeInOut | 泰坦重力 |
+
+---
+
+**最後更新**: 2025-10-19
+**已實現符文**: Angel's Grace, Flame Burst
+**動畫模式**: 統一使用 fadeInOut（淡入淡出）
 **適用版本**: v1.2.0+

@@ -18,6 +18,7 @@ import '../core/pixel_snap.dart';
 import '../core/constants.dart';
 import 'rune_events.dart';
 import 'spell_animation_controller.dart';
+import 'shaders/chroma_key.dart';
 
 class GameBoard extends StatefulWidget {
   const GameBoard({super.key});
@@ -28,6 +29,9 @@ class GameBoard extends StatefulWidget {
 
 class _GameBoardState extends State<GameBoard>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  // 👇 Debug: 一鍵關閉所有可疑覆蓋（臨時排查用）
+  static const bool _DBG_ONLY_BOARD_AND_SPELL = false;
+
   double _calculateCellSize(BoxConstraints constraints) {
     // 響應式計算格子大小 - 左側區域約佔60%寬度
     final gameAreaWidth = constraints.maxWidth * 0.6 - 32; // 60%減去padding
@@ -59,6 +63,7 @@ class _GameBoardState extends State<GameBoard>
   final SpellAnimationController _spellAnimationController =
       SpellAnimationController();
   SpriteSheetAnimation? _angelsGraceAnimation;
+  SpriteSheetAnimation? _flameBurstAnimation;
 
   @override
   void initState() {
@@ -100,19 +105,43 @@ class _GameBoardState extends State<GameBoard>
   /// 預載入法術動畫資源（在 _initializeGame 之後調用）
   Future<void> _loadSpellAnimations() async {
     try {
+      // 載入 Chroma Key Shader
+      debugPrint('[GameBoard] Loading Chroma Key Shader...');
+      await ChromaKey.I.ensureLoaded();
+      if (ChromaKey.I.isReady) {
+        debugPrint('[GameBoard] ✅ Chroma Key Shader loaded successfully');
+      } else {
+        debugPrint(
+            '[GameBoard] ⚠️ Chroma Key Shader not loaded, using fallback rendering');
+      }
+
+      // 載入 Angel's Grace 動畫
       debugPrint('[GameBoard] Loading Angel\'s Grace animation...');
       _angelsGraceAnimation = SpriteSheetAnimation(
         assetPath: "assets/animations/angels_grace.png",
-        rows: 4,
-        columns: 4,
-        totalFrames: 16,
-        frameDuration: const Duration(milliseconds: 60),
+        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
+        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
+        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
       );
       await _angelsGraceAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Angel\'s Grace animation loaded successfully (${_angelsGraceAnimation!.isLoaded})');
+
+      // 載入 Flame Burst 動畫
+      debugPrint('[GameBoard] Loading Flame Burst animation...');
+      _flameBurstAnimation = SpriteSheetAnimation(
+        assetPath: "assets/animations/flame_burst.png",
+        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
+        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
+        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
+      );
+      await _flameBurstAnimation!.load();
+      debugPrint(
+          '[GameBoard] ✅ Flame Burst animation loaded successfully (${_flameBurstAnimation!.isLoaded})');
     } catch (e, stackTrace) {
-      debugPrint('[GameBoard] ❌ Failed to load Angel\'s Grace animation: $e');
+      debugPrint('[GameBoard] ❌ Failed to load spell animations: $e');
       debugPrint('[GameBoard] Stack trace: $stackTrace');
     }
   }
@@ -215,6 +244,14 @@ class _GameBoardState extends State<GameBoard>
         _playAngelsGraceAnimation();
       }
 
+      // 監聽 Flame Burst 施法事件，觸發動畫
+      if (event.runeType == RuneType.flameBurst &&
+          event.type == RuneEventType.cast) {
+        debugPrint(
+            '[GameBoard] Flame Burst cast detected, triggering animation');
+        _playFlameBurstAnimation();
+      }
+
       if (event.runeType == RuneType.timeChange &&
           event.type == RuneEventType.effectStart) {
         // 🎯 時間類符文互斥：結束任何其他正在進行的時間效果
@@ -292,6 +329,17 @@ class _GameBoardState extends State<GameBoard>
 
     debugPrint('[GameBoard] Playing Angel\'s Grace animation');
     _spellAnimationController.play(_angelsGraceAnimation!);
+  }
+
+  /// 播放 Flame Burst 爆炸動畫
+  void _playFlameBurstAnimation() {
+    if (_flameBurstAnimation == null || !_flameBurstAnimation!.isLoaded) {
+      debugPrint('[GameBoard] Flame Burst animation not ready');
+      return;
+    }
+
+    debugPrint('[GameBoard] Playing Flame Burst animation');
+    _spellAnimationController.play(_flameBurstAnimation!);
   }
 
   /// 以當前速度重啟計時器
@@ -877,17 +925,7 @@ class _GameBoardState extends State<GameBoard>
                           },
                           child: Container(
                             decoration: BoxDecoration(
-                              // 🌃 Neon Gradient - 深色到藍紫的線性漸層背景
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  cyberpunkBgDeep, // 深層背景
-                                  cyberpunkAccent.withOpacity(0.05), // 電光紫極淡
-                                  cyberpunkPrimary.withOpacity(0.03), // 霓虹青極淡
-                                ],
-                                stops: const [0.0, 0.7, 1.0],
-                              ),
+                              // 只保留 border 和 boxShadow（外框效果）
                               borderRadius: BorderRadius.circular(16),
                               // 🔮 HUD Border - 霓虹描邊與輕微外發光
                               border: Border.all(
@@ -922,6 +960,27 @@ class _GameBoardState extends State<GameBoard>
                               borderRadius: BorderRadius.circular(12),
                               child: Stack(
                                 children: [
+                                  // 🌃 背景漸層（移到 Stack 最底層）
+                                  Positioned.fill(
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            cyberpunkBgDeep, // 深層背景
+                                            cyberpunkAccent
+                                                .withOpacity(0.05), // 電光紫極淡
+                                            cyberpunkPrimary
+                                                .withOpacity(0.03), // 霓虹青極淡
+                                          ],
+                                          stops: const [0.0, 0.7, 1.0],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
+                                  // 棋盤層
                                   RepaintBoundary(
                                     child: SizedBox(
                                       width: GameState.colCount * cellSize,
@@ -949,13 +1008,15 @@ class _GameBoardState extends State<GameBoard>
                                   ),
 
                                   // 暫停或 Game Over 蓋板
-                                  if (gameState.isPaused &&
-                                      !gameState.isGameOver)
-                                    GameUIComponents.overlayText(
-                                        'PAUSED', GameTheme.highlight),
-                                  if (gameState.isGameOver)
-                                    GameUIComponents.overlayText(
-                                        'GAME OVER', GameTheme.highlight),
+                                  if (!_DBG_ONLY_BOARD_AND_SPELL)
+                                    if (gameState.isPaused &&
+                                        !gameState.isGameOver)
+                                      GameUIComponents.overlayText(
+                                          'PAUSED', GameTheme.highlight),
+                                  if (!_DBG_ONLY_BOARD_AND_SPELL)
+                                    if (gameState.isGameOver)
+                                      GameUIComponents.overlayText(
+                                          'GAME OVER', GameTheme.highlight),
                                 ],
                               ),
                             ),
