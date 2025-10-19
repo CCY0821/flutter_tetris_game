@@ -2,9 +2,45 @@
 
 ## 📋 概述
 
-本指南詳細說明如何為符文添加全螢幕動畫效果，以 **Angel's Grace** 和 **Flame Burst** 符文為範例。
+本指南詳細說明如何為符文添加**全 APP 覆蓋**動畫效果，以 **Angel's Grace** 和 **Flame Burst** 符文為範例。
 
-**⚠️ 重要**: 所有符文動畫統一使用 **fadeInOut** 模式（淡入淡出），資源為單張完整圖片，不使用 sprite sheet 分格動畫。
+**⚠️ 重要標準**:
+1. 所有符文動畫統一使用 **fadeInOut** 模式（淡入淡出）
+2. 資源為單張完整圖片，不使用 sprite sheet 分格動畫
+3. **動畫覆蓋整個 APP 螢幕**（包含遊戲場和所有 UI 元素）
+4. 動畫控制器在 `main.dart` 管理，傳遞給 `GameBoard`
+
+---
+
+## 🏗️ 架構總覽
+
+### Widget 層級結構
+```
+main.dart
+└── Stack
+    ├── BackgroundPattern (背景裝飾)
+    ├── SafeArea
+    │   └── GameBoard (遊戲內容)
+    │       └── 接收 spellAnimationController
+    ├── ScanlineOverlay (掃描線效果)
+    └── Positioned.fill (最上層)
+        └── SpellAnimationOverlay ✨ (符文動畫 - 覆蓋整個 APP)
+```
+
+### 動畫觸發流程
+```
+玩家點擊符文槽
+  ↓
+rune_system.dart: RuneEventBus.emitCast()
+  ↓
+game_board.dart: 監聽到事件
+  ↓
+game_board.dart: widget.spellAnimationController.play()
+  ↓
+main.dart: SpellAnimationOverlay 顯示動畫
+  ↓
+全螢幕爆炸效果（覆蓋所有 UI）
+```
 
 ---
 
@@ -29,18 +65,21 @@
 
 **位置**: 在 `_GameBoardState` 類別中，約第 65 行
 
+**⚠️ 重要**: 動畫控制器現在由 `main.dart` 管理，`GameBoard` 只負責存儲動畫資源
+
 ```dart
-class _GameBoardState extends State<GameBoard>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+class GameBoard extends StatefulWidget {
+  final SpellAnimationController spellAnimationController; // 接收外部控制器
 
-  // 法術動畫控制器
-  final SpellAnimationController _spellAnimationController =
-      SpellAnimationController();
+  const GameBoard({
+    super.key,
+    required this.spellAnimationController,
+  });
+}
 
-  // 👇 定義 Angel's Grace 動畫變數
+class _GameBoardState extends State<GameBoard> {
+  // 👇 只定義動畫資源變數（控制器由 main.dart 管理）
   SpriteSheetAnimation? _angelsGraceAnimation;
-
-  // ✅ 已實現的符文動畫
   SpriteSheetAnimation? _flameBurstAnimation;
 
   // 其他符文動畫變數可以在這裡添加
@@ -107,8 +146,8 @@ void _playAngelsGraceAnimation() {
 
   debugPrint('[GameBoard] Playing Angel\'s Grace animation');
 
-  // 👇 使用動畫控制器播放動畫
-  _spellAnimationController.play(_angelsGraceAnimation!);
+  // 👇 使用外部傳入的控制器播放動畫
+  widget.spellAnimationController.play(_angelsGraceAnimation!);
 }
 ```
 
@@ -162,14 +201,99 @@ RuneEventBus.emitCast(slot.runeType!);  // 👈 這會觸發動畫
   → RuneEventBus.emitCast(RuneType.angelsGrace)
   → game_board.dart: 監聽到事件
   → _playAngelsGraceAnimation()
-  → 動畫顯示在螢幕上
+  → widget.spellAnimationController.play()
+  → main.dart: SpellAnimationOverlay 顯示動畫
+  → 全螢幕爆炸效果（覆蓋整個 APP）
 ```
+
+---
+
+### 7️⃣ 在 main.dart 設置全局動畫控制器和顯示層
+
+**檔案**: `lib/main.dart`
+
+**這是關鍵步驟！** 動畫顯示在整個 APP 層級，而非 GameBoard 內部。
+
+#### A. 創建全局控制器
+
+```dart
+import 'game/spell_animation_controller.dart'; // 導入
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  // 👇 創建全局動畫控制器
+  final SpellAnimationController _spellAnimationController =
+      SpellAnimationController();
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _spellAnimationController.dispose(); // 清理控制器
+    super.dispose();
+  }
+}
+```
+
+#### B. 傳遞控制器給 GameBoard
+
+```dart
+SafeArea(
+  child: Center(
+    child: SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // 👇 傳遞控制器給 GameBoard
+            GameBoard(
+              spellAnimationController: _spellAnimationController,
+            ),
+          ],
+        ),
+      ),
+    ),
+  ),
+),
+```
+
+#### C. 添加全螢幕動畫疊加層（最上層）
+
+```dart
+home: Scaffold(
+  body: Container(
+    child: Stack(
+      children: [
+        BackgroundPattern(...),
+        SafeArea(child: GameBoard(...)),
+        ScanlineOverlay(),
+
+        // 👇 全螢幕法術動畫疊加層（最上層，覆蓋所有 UI）
+        Positioned.fill(
+          child: SpellAnimationOverlay(
+            controller: _spellAnimationController,
+            visibleAreaTop: 0,
+            visibleAreaHeight: MediaQuery.of(context).size.height,
+            fit: BoxFit.cover, // 填滿螢幕
+          ),
+        ),
+      ],
+    ),
+  ),
+),
+```
+
+**重點說明**:
+- ✅ `Positioned.fill`: 填滿整個 Stack（覆蓋所有內容）
+- ✅ `visibleAreaHeight: MediaQuery.of(context).size.height`: 使用整個螢幕高度
+- ✅ `fit: BoxFit.cover`: 填滿螢幕（可能裁切邊緣）
+- ✅ 位於 Stack 最上層（在 ScanlineOverlay 之後）
 
 ---
 
 ## 🔧 為其他符文添加動畫
 
 ### 範例：Flame Burst 符文
+
+**⚠️ 重要**: 添加新符文動畫時，**只需修改 `game_board.dart`**，`main.dart` 的全局動畫層已經配置好，無需再修改！
 
 #### 1. 準備圖片
 ```
@@ -200,7 +324,8 @@ void _playFlameBurstAnimation() {
     debugPrint('[GameBoard] Flame Burst animation not ready');
     return;
   }
-  _spellAnimationController.play(_flameBurstAnimation!);
+  // 👇 使用外部控制器（會自動顯示在全螢幕）
+  widget.spellAnimationController.play(_flameBurstAnimation!);
 }
 ```
 
@@ -211,6 +336,8 @@ if (event.runeType == RuneType.flameBurst &&
   _playFlameBurstAnimation();
 }
 ```
+
+**就這麼簡單！** 動畫會自動在整個 APP 螢幕上顯示，覆蓋所有 UI 元素。
 
 ---
 
@@ -335,21 +462,29 @@ fadeOutDuration: const Duration(milliseconds: 100),
 
 ## 🚀 快速套用清單
 
-為新符文添加動畫的步驟：
+為新符文添加**全 APP 覆蓋**動畫的步驟（僅需修改 `game_board.dart`）：
 
+### 一次性設置（已完成，不需重複）✅
+- [x] **main.dart**: 創建全局 `SpellAnimationController`
+- [x] **main.dart**: 傳遞 controller 給 `GameBoard`
+- [x] **main.dart**: 添加 `Positioned.fill` + `SpellAnimationOverlay`
+
+### 每個新符文需要做的事
 - [ ] **1. 準備圖片**: 單張完整 PNG 圖片，放到 `assets/animations/your_rune.png`
 - [ ] **2. 定義變數**: 在 `game_board.dart` 添加 `SpriteSheetAnimation? _yourRuneAnimation;`
 - [ ] **3. 載入動畫**: 在 `_loadSpellAnimations()` 中使用 `fadeInOut` 模式載入
 - [ ] **4. 創建播放方法**: `void _playYourRuneAnimation() { ... }`
 - [ ] **5. 監聽事件**: 在 `_setupRuneEventListeners()` 中監聽施法事件
-- [ ] **6. 測試**: 運行遊戲，觸發符文，確認動畫正確淡入淡出
+- [ ] **6. 測試**: 運行遊戲，觸發符文，確認動畫覆蓋整個 APP 螢幕
 
 **標準模板代碼**（複製貼上後修改符文名稱）:
 ```dart
+// ==================== game_board.dart ====================
+
 // 步驟 2: 定義變數
 SpriteSheetAnimation? _yourRuneAnimation;
 
-// 步驟 3: 載入動畫
+// 步驟 3: 載入動畫（在 _loadSpellAnimations() 中）
 _yourRuneAnimation = SpriteSheetAnimation(
   assetPath: "assets/animations/your_rune.png",
   animationType: AnimationType.fadeInOut,
@@ -366,15 +501,20 @@ void _playYourRuneAnimation() {
     return;
   }
   debugPrint('[GameBoard] Playing Your Rune animation');
-  _spellAnimationController.play(_yourRuneAnimation!);
+  widget.spellAnimationController.play(_yourRuneAnimation!); // 使用外部控制器
 }
 
-// 步驟 5: 監聽事件
+// 步驟 5: 監聽事件（在 _setupRuneEventListeners() 中）
 if (event.runeType == RuneType.yourRune &&
     event.type == RuneEventType.cast) {
   _playYourRuneAnimation();
 }
 ```
+
+**重點**:
+- ✅ 使用 `widget.spellAnimationController`（外部控制器）
+- ✅ 動畫會自動在 `main.dart` 的全螢幕層顯示
+- ✅ 無需修改 `main.dart`
 
 ---
 
@@ -407,4 +547,6 @@ if (event.runeType == RuneType.yourRune &&
 **最後更新**: 2025-10-19
 **已實現符文**: Angel's Grace, Flame Burst
 **動畫模式**: 統一使用 fadeInOut（淡入淡出）
+**動畫覆蓋範圍**: 整個 APP 螢幕（全局疊加層）
+**架構模式**: Controller 在 `main.dart`，動畫資源在 `game_board.dart`
 **適用版本**: v1.2.0+

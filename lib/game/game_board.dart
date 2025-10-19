@@ -21,7 +21,12 @@ import 'spell_animation_controller.dart';
 import 'shaders/chroma_key.dart';
 
 class GameBoard extends StatefulWidget {
-  const GameBoard({super.key});
+  final SpellAnimationController spellAnimationController;
+
+  const GameBoard({
+    super.key,
+    required this.spellAnimationController,
+  });
 
   @override
   State<GameBoard> createState() => _GameBoardState();
@@ -59,9 +64,7 @@ class _GameBoardState extends State<GameBoard>
   // Game Over Dialog 狀態（防止重複彈出）
   bool _gameOverDialogShown = false;
 
-  // 法術動畫控制器
-  final SpellAnimationController _spellAnimationController =
-      SpellAnimationController();
+  // 法術動畫資源
   SpriteSheetAnimation? _angelsGraceAnimation;
   SpriteSheetAnimation? _flameBurstAnimation;
 
@@ -328,7 +331,7 @@ class _GameBoardState extends State<GameBoard>
     }
 
     debugPrint('[GameBoard] Playing Angel\'s Grace animation');
-    _spellAnimationController.play(_angelsGraceAnimation!);
+    widget.spellAnimationController.play(_angelsGraceAnimation!);
   }
 
   /// 播放 Flame Burst 爆炸動畫
@@ -339,7 +342,7 @@ class _GameBoardState extends State<GameBoard>
     }
 
     debugPrint('[GameBoard] Playing Flame Burst animation');
-    _spellAnimationController.play(_flameBurstAnimation!);
+    widget.spellAnimationController.play(_flameBurstAnimation!);
   }
 
   /// 以當前速度重啟計時器
@@ -361,8 +364,7 @@ class _GameBoardState extends State<GameBoard>
     // 清理符文事件監聽器
     _runeEventSubscription?.cancel();
 
-    // 清理動畫控制器
-    _spellAnimationController.dispose();
+    // 注意：動畫控制器由 main.dart 管理，這裡不需要 dispose
 
     controllerHandler.dispose();
     gameState.dispose();
@@ -999,13 +1001,7 @@ class _GameBoardState extends State<GameBoard>
                                     ),
                                   ),
 
-                                  // 法術動畫疊加層（覆蓋整個可視區域：20行）
-                                  SpellAnimationOverlay(
-                                    controller: _spellAnimationController,
-                                    visibleAreaTop: 0,
-                                    visibleAreaHeight:
-                                        GameState.rowCount * cellSize,
-                                  ),
+                                  // 注意：法術動畫已移至 main.dart 全螢幕層級
 
                                   // 暫停或 Game Over 蓋板
                                   if (!_DBG_ONLY_BOARD_AND_SPELL)

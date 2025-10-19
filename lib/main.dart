@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'game/game_board.dart';
 import 'game/monotonic_timer.dart';
+import 'game/spell_animation_controller.dart';
 import 'theme/game_theme.dart';
 import 'core/constants.dart';
 import 'core/dual_logger.dart';
@@ -38,6 +39,10 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  // 全局法術動畫控制器
+  final SpellAnimationController _spellAnimationController =
+      SpellAnimationController();
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +52,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _spellAnimationController.dispose(); // 清理動畫控制器
     super.dispose();
   }
 
@@ -90,19 +96,22 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
             foregroundColor: cyberpunkPrimary,
-            side: BorderSide(
+            side: const BorderSide(
               color: cyberpunkPrimary,
               width: cyberpunkBorderWidth,
             ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+            shape: const RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.all(Radius.circular(cyberpunkBorderRadius)),
             ),
           ).copyWith(
             overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
-              if (states.contains(WidgetState.hovered))
+              if (states.contains(WidgetState.hovered)) {
                 return cyberpunkPrimary.withOpacity(0.1);
-              if (states.contains(WidgetState.pressed))
+              }
+              if (states.contains(WidgetState.pressed)) {
                 return cyberpunkPrimary.withOpacity(0.2);
+              }
               return null;
             }),
           ),
@@ -111,7 +120,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       home: Scaffold(
         backgroundColor: cyberpunkBgDeep, // Scaffold 背景設為深層背景
         body: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: GameTheme.backgroundGradient,
           ),
           child: Stack(
@@ -133,7 +142,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // 遊戲板
-                          const GameBoard(),
+                          GameBoard(
+                            spellAnimationController: _spellAnimationController,
+                          ),
                         ],
                       ),
                     ),
@@ -141,8 +152,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 ),
               ),
 
-              // 🖥️ 全畫面掃描線疊層 (最上層，不影響事件)
+              // 🖥️ 全畫面掃描線疊層
               const ScanlineOverlay(),
+
+              // ✨ 全螢幕法術動畫疊加層（最上層）
+              Positioned.fill(
+                child: SpellAnimationOverlay(
+                  controller: _spellAnimationController,
+                  visibleAreaTop: 0,
+                  visibleAreaHeight: MediaQuery.of(context).size.height,
+                  fit: BoxFit.cover, // 填滿螢幕
+                ),
+              ),
             ],
           ),
         ),
