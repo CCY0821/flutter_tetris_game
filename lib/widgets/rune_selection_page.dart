@@ -69,7 +69,7 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
           ],
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           children: [
             // 標題欄
             _buildHeader(),
