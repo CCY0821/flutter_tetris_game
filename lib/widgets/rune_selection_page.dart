@@ -44,7 +44,7 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
           minHeight: 400,
         ),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
@@ -52,7 +52,7 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
               cyberpunkPanel,
               cyberpunkBgDeep,
             ],
-            stops: const [0.0, 0.5, 1.0],
+            stops: [0.0, 0.5, 1.0],
           ),
           borderRadius: BorderRadius.circular(cyberpunkBorderRadiusLarge),
           border: Border.all(
@@ -93,7 +93,7 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
             ),
 
             // 符文選擇區
-            Flexible(
+            Expanded(
               child: _buildRuneGrid(),
             ),
 
@@ -122,7 +122,7 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.auto_awesome,
             color: cyberpunkPrimary,
             size: 24,
@@ -140,7 +140,7 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
           ),
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: Icon(
+            icon: const Icon(
               Icons.close,
               color: cyberpunkPrimary,
               size: 24,
