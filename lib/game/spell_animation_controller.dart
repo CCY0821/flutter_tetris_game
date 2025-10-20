@@ -382,8 +382,8 @@ class _SpellAnimationPainter extends CustomPainter {
         final double scaleY = targetSize.height / sourceSize.height;
         final double scale = scaleX < scaleY ? scaleX : scaleY;
 
-        final scaledWidth = sourceSize.width * scale * 0.6;
-        final scaledHeight = sourceSize.height * scale * 0.6;
+        final scaledWidth = sourceSize.width * scale * 0.5;
+        final scaledHeight = sourceSize.height * scale * 0.5;
 
         final offsetX = (targetSize.width - scaledWidth) / 2;
         final offsetY = (targetSize.height - scaledHeight) / 2;
@@ -397,8 +397,8 @@ class _SpellAnimationPainter extends CustomPainter {
         final double scaleY = targetSize.height / sourceSize.height;
         final double scale = scaleX > scaleY ? scaleX : scaleY;
 
-        final scaledWidth = sourceSize.width * scale * 0.6;
-        final scaledHeight = sourceSize.height * scale * 0.6;
+        final scaledWidth = sourceSize.width * scale * 0.5;
+        final scaledHeight = sourceSize.height * scale * 0.5;
 
         final offsetX = (targetSize.width - scaledWidth) / 2;
         final offsetY = (targetSize.height - scaledHeight) / 2;
@@ -408,8 +408,8 @@ class _SpellAnimationPainter extends CustomPainter {
 
       case BoxFit.fill:
         // 拉伸填滿，不保持比例
-        final fillWidth = targetSize.width * 0.6;
-        final fillHeight = targetSize.height * 0.6;
+        final fillWidth = targetSize.width * 0.5;
+        final fillHeight = targetSize.height * 0.5;
         final fillOffsetX = (targetSize.width - fillWidth) / 2;
         final fillOffsetY = (targetSize.height - fillHeight) / 2;
         destRect =

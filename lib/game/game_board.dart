@@ -67,6 +67,8 @@ class _GameBoardState extends State<GameBoard>
   // 法術動畫資源
   SpriteSheetAnimation? _angelsGraceAnimation;
   SpriteSheetAnimation? _flameBurstAnimation;
+  SpriteSheetAnimation? _thunderStrikeLeftAnimation;
+  SpriteSheetAnimation? _thunderStrikeRightAnimation;
 
   @override
   void initState() {
@@ -143,6 +145,32 @@ class _GameBoardState extends State<GameBoard>
       await _flameBurstAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Flame Burst animation loaded successfully (${_flameBurstAnimation!.isLoaded})');
+
+      // 載入 Thunder Strike Left 動畫
+      debugPrint('[GameBoard] Loading Thunder Strike Left animation...');
+      _thunderStrikeLeftAnimation = SpriteSheetAnimation(
+        assetPath: "assets/animations/thunder_ strike_left.png",
+        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
+        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
+        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
+      );
+      await _thunderStrikeLeftAnimation!.load();
+      debugPrint(
+          '[GameBoard] ✅ Thunder Strike Left animation loaded successfully (${_thunderStrikeLeftAnimation!.isLoaded})');
+
+      // 載入 Thunder Strike Right 動畫
+      debugPrint('[GameBoard] Loading Thunder Strike Right animation...');
+      _thunderStrikeRightAnimation = SpriteSheetAnimation(
+        assetPath: "assets/animations/thunder_ strike_right.png",
+        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
+        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
+        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
+      );
+      await _thunderStrikeRightAnimation!.load();
+      debugPrint(
+          '[GameBoard] ✅ Thunder Strike Right animation loaded successfully (${_thunderStrikeRightAnimation!.isLoaded})');
     } catch (e, stackTrace) {
       debugPrint('[GameBoard] ❌ Failed to load spell animations: $e');
       debugPrint('[GameBoard] Stack trace: $stackTrace');
@@ -255,6 +283,22 @@ class _GameBoardState extends State<GameBoard>
         _playFlameBurstAnimation();
       }
 
+      // 監聽 Thunder Strike Right 施法事件，觸發動畫
+      if (event.runeType == RuneType.thunderStrike &&
+          event.type == RuneEventType.cast) {
+        debugPrint(
+            '[GameBoard] Thunder Strike Right cast detected, triggering animation');
+        _playThunderStrikeRightAnimation();
+      }
+
+      // 監聽 Thunder Strike Left 施法事件，觸發動畫
+      if (event.runeType == RuneType.thunderStrikeLeft &&
+          event.type == RuneEventType.cast) {
+        debugPrint(
+            '[GameBoard] Thunder Strike Left cast detected, triggering animation');
+        _playThunderStrikeLeftAnimation();
+      }
+
       if (event.runeType == RuneType.timeChange &&
           event.type == RuneEventType.effectStart) {
         // 🎯 時間類符文互斥：結束任何其他正在進行的時間效果
@@ -343,6 +387,30 @@ class _GameBoardState extends State<GameBoard>
 
     debugPrint('[GameBoard] Playing Flame Burst animation');
     widget.spellAnimationController.play(_flameBurstAnimation!);
+  }
+
+  /// 播放 Thunder Strike Right 雷擊動畫
+  void _playThunderStrikeRightAnimation() {
+    if (_thunderStrikeRightAnimation == null ||
+        !_thunderStrikeRightAnimation!.isLoaded) {
+      debugPrint('[GameBoard] Thunder Strike Right animation not ready');
+      return;
+    }
+
+    debugPrint('[GameBoard] Playing Thunder Strike Right animation');
+    widget.spellAnimationController.play(_thunderStrikeRightAnimation!);
+  }
+
+  /// 播放 Thunder Strike Left 雷擊動畫
+  void _playThunderStrikeLeftAnimation() {
+    if (_thunderStrikeLeftAnimation == null ||
+        !_thunderStrikeLeftAnimation!.isLoaded) {
+      debugPrint('[GameBoard] Thunder Strike Left animation not ready');
+      return;
+    }
+
+    debugPrint('[GameBoard] Playing Thunder Strike Left animation');
+    widget.spellAnimationController.play(_thunderStrikeLeftAnimation!);
   }
 
   /// 以當前速度重啟計時器

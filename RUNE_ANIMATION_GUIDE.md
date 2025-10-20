@@ -534,7 +534,7 @@ if (event.runeType == RuneType.yourRune &&
 |---------|---------|---------|---------|------|
 | Angel's Grace | `angels_grace.png` | ✅ 已完成 | fadeInOut | 藍紫色爆炸 |
 | Flame Burst | `flame_burst.png` | ✅ 已完成 | fadeInOut | 火焰爆炸 |
-| Thunder Strike | `thunder_strike_left.png`<br>`thunder_strike_right.png` | ⏳ 待實現 | fadeInOut | 左右雷擊 |
+| Thunder Strike | `thunder_strike_left.png`<br>`thunder_strike_right.png` | ✅ 已完成 | fadeInOut | 左右雷擊 |
 | Dragon Roar | `dragon_roar.png` | ⏳ 待實現 | fadeInOut | 龍吼效果 |
 | Blessed Combo | `blessed_combo.png` | ⏳ 待實現 | fadeInOut | 祝福光芒 |
 | Gravity Reset | `gravity_reset.png` | ⏳ 待實現 | fadeInOut | 重力波動 |
@@ -544,8 +544,8 @@ if (event.runeType == RuneType.yourRune &&
 
 ---
 
-**最後更新**: 2025-10-19
-**已實現符文**: Angel's Grace, Flame Burst
+**最後更新**: 2025-10-20
+**已實現符文**: Angel's Grace, Flame Burst, Thunder Strike (Left & Right)
 **動畫模式**: 統一使用 fadeInOut（淡入淡出）
 **動畫覆蓋範圍**: 整個 APP 螢幕（全局疊加層）
 **架構模式**: Controller 在 `main.dart`，動畫資源在 `game_board.dart`
