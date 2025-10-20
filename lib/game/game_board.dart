@@ -73,6 +73,8 @@ class _GameBoardState extends State<GameBoard>
   SpriteSheetAnimation? _dragonRoarAnimation;
   SpriteSheetAnimation? _elementMorphAnimation;
   SpriteSheetAnimation? _gravityResetAnimation;
+  SpriteSheetAnimation? _timeChangeAnimation;
+  SpriteSheetAnimation? _titanGravityAnimation;
 
   @override
   void initState() {
@@ -227,6 +229,32 @@ class _GameBoardState extends State<GameBoard>
       await _gravityResetAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Gravity Reset animation loaded successfully (${_gravityResetAnimation!.isLoaded})');
+
+      // 載入 Time Change 動畫
+      debugPrint('[GameBoard] Loading Time Change animation...');
+      _timeChangeAnimation = SpriteSheetAnimation(
+        assetPath: "assets/animations/time_change.png",
+        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
+        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
+        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
+      );
+      await _timeChangeAnimation!.load();
+      debugPrint(
+          '[GameBoard] ✅ Time Change animation loaded successfully (${_timeChangeAnimation!.isLoaded})');
+
+      // 載入 Titan Gravity 動畫
+      debugPrint('[GameBoard] Loading Titan Gravity animation...');
+      _titanGravityAnimation = SpriteSheetAnimation(
+        assetPath: "assets/animations/titan_gravity.png",
+        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
+        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
+        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
+      );
+      await _titanGravityAnimation!.load();
+      debugPrint(
+          '[GameBoard] ✅ Titan Gravity animation loaded successfully (${_titanGravityAnimation!.isLoaded})');
     } catch (e, stackTrace) {
       debugPrint('[GameBoard] ❌ Failed to load spell animations: $e');
       debugPrint('[GameBoard] Stack trace: $stackTrace');
@@ -387,6 +415,22 @@ class _GameBoardState extends State<GameBoard>
         _playGravityResetAnimation();
       }
 
+      // 監聽 Time Change 施法事件，觸發動畫
+      if (event.runeType == RuneType.timeChange &&
+          event.type == RuneEventType.cast) {
+        debugPrint(
+            '[GameBoard] Time Change cast detected, triggering animation');
+        _playTimeChangeAnimation();
+      }
+
+      // 監聽 Titan Gravity 施法事件，觸發動畫
+      if (event.runeType == RuneType.titanGravity &&
+          event.type == RuneEventType.cast) {
+        debugPrint(
+            '[GameBoard] Titan Gravity cast detected, triggering animation');
+        _playTitanGravityAnimation();
+      }
+
       if (event.runeType == RuneType.timeChange &&
           event.type == RuneEventType.effectStart) {
         // 🎯 時間類符文互斥：結束任何其他正在進行的時間效果
@@ -543,6 +587,28 @@ class _GameBoardState extends State<GameBoard>
 
     debugPrint('[GameBoard] Playing Gravity Reset animation');
     widget.spellAnimationController.play(_gravityResetAnimation!);
+  }
+
+  /// 播放 Time Change 時間扭曲動畫
+  void _playTimeChangeAnimation() {
+    if (_timeChangeAnimation == null || !_timeChangeAnimation!.isLoaded) {
+      debugPrint('[GameBoard] Time Change animation not ready');
+      return;
+    }
+
+    debugPrint('[GameBoard] Playing Time Change animation');
+    widget.spellAnimationController.play(_timeChangeAnimation!);
+  }
+
+  /// 播放 Titan Gravity 泰坦重力動畫
+  void _playTitanGravityAnimation() {
+    if (_titanGravityAnimation == null || !_titanGravityAnimation!.isLoaded) {
+      debugPrint('[GameBoard] Titan Gravity animation not ready');
+      return;
+    }
+
+    debugPrint('[GameBoard] Playing Titan Gravity animation');
+    widget.spellAnimationController.play(_titanGravityAnimation!);
   }
 
   /// 以當前速度重啟計時器
