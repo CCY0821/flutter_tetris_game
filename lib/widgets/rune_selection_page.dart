@@ -308,6 +308,8 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
                   fontSize: 12,
                   color: validation.isValid ? cyberpunkAccent : Colors.red,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
