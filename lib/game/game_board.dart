@@ -70,6 +70,7 @@ class _GameBoardState extends State<GameBoard>
   SpriteSheetAnimation? _thunderStrikeLeftAnimation;
   SpriteSheetAnimation? _thunderStrikeRightAnimation;
   SpriteSheetAnimation? _blessedComboAnimation;
+  SpriteSheetAnimation? _dragonRoarAnimation;
 
   @override
   void initState() {
@@ -185,6 +186,19 @@ class _GameBoardState extends State<GameBoard>
       await _blessedComboAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Blessed Combo animation loaded successfully (${_blessedComboAnimation!.isLoaded})');
+
+      // 載入 Dragon Roar 動畫
+      debugPrint('[GameBoard] Loading Dragon Roar animation...');
+      _dragonRoarAnimation = SpriteSheetAnimation(
+        assetPath: "assets/animations/dragon_roar.png",
+        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
+        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
+        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
+      );
+      await _dragonRoarAnimation!.load();
+      debugPrint(
+          '[GameBoard] ✅ Dragon Roar animation loaded successfully (${_dragonRoarAnimation!.isLoaded})');
     } catch (e, stackTrace) {
       debugPrint('[GameBoard] ❌ Failed to load spell animations: $e');
       debugPrint('[GameBoard] Stack trace: $stackTrace');
@@ -321,6 +335,14 @@ class _GameBoardState extends State<GameBoard>
         _playBlessedComboAnimation();
       }
 
+      // 監聽 Dragon Roar 施法事件，觸發動畫
+      if (event.runeType == RuneType.dragonRoar &&
+          event.type == RuneEventType.cast) {
+        debugPrint(
+            '[GameBoard] Dragon Roar cast detected, triggering animation');
+        _playDragonRoarAnimation();
+      }
+
       if (event.runeType == RuneType.timeChange &&
           event.type == RuneEventType.effectStart) {
         // 🎯 時間類符文互斥：結束任何其他正在進行的時間效果
@@ -444,6 +466,17 @@ class _GameBoardState extends State<GameBoard>
 
     debugPrint('[GameBoard] Playing Blessed Combo animation');
     widget.spellAnimationController.play(_blessedComboAnimation!);
+  }
+
+  /// 播放 Dragon Roar 龍吼動畫
+  void _playDragonRoarAnimation() {
+    if (_dragonRoarAnimation == null || !_dragonRoarAnimation!.isLoaded) {
+      debugPrint('[GameBoard] Dragon Roar animation not ready');
+      return;
+    }
+
+    debugPrint('[GameBoard] Playing Dragon Roar animation');
+    widget.spellAnimationController.play(_dragonRoarAnimation!);
   }
 
   /// 以當前速度重啟計時器
