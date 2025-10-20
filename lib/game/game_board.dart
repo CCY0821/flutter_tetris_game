@@ -72,6 +72,7 @@ class _GameBoardState extends State<GameBoard>
   SpriteSheetAnimation? _blessedComboAnimation;
   SpriteSheetAnimation? _dragonRoarAnimation;
   SpriteSheetAnimation? _elementMorphAnimation;
+  SpriteSheetAnimation? _gravityResetAnimation;
 
   @override
   void initState() {
@@ -213,6 +214,19 @@ class _GameBoardState extends State<GameBoard>
       await _elementMorphAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Element Morph animation loaded successfully (${_elementMorphAnimation!.isLoaded})');
+
+      // 載入 Gravity Reset 動畫
+      debugPrint('[GameBoard] Loading Gravity Reset animation...');
+      _gravityResetAnimation = SpriteSheetAnimation(
+        assetPath: "assets/animations/gravity_reset.png",
+        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
+        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
+        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
+      );
+      await _gravityResetAnimation!.load();
+      debugPrint(
+          '[GameBoard] ✅ Gravity Reset animation loaded successfully (${_gravityResetAnimation!.isLoaded})');
     } catch (e, stackTrace) {
       debugPrint('[GameBoard] ❌ Failed to load spell animations: $e');
       debugPrint('[GameBoard] Stack trace: $stackTrace');
@@ -365,6 +379,14 @@ class _GameBoardState extends State<GameBoard>
         _playElementMorphAnimation();
       }
 
+      // 監聽 Gravity Reset 施法事件，觸發動畫
+      if (event.runeType == RuneType.gravityReset &&
+          event.type == RuneEventType.cast) {
+        debugPrint(
+            '[GameBoard] Gravity Reset cast detected, triggering animation');
+        _playGravityResetAnimation();
+      }
+
       if (event.runeType == RuneType.timeChange &&
           event.type == RuneEventType.effectStart) {
         // 🎯 時間類符文互斥：結束任何其他正在進行的時間效果
@@ -510,6 +532,17 @@ class _GameBoardState extends State<GameBoard>
 
     debugPrint('[GameBoard] Playing Element Morph animation');
     widget.spellAnimationController.play(_elementMorphAnimation!);
+  }
+
+  /// 播放 Gravity Reset 重力波動動畫
+  void _playGravityResetAnimation() {
+    if (_gravityResetAnimation == null || !_gravityResetAnimation!.isLoaded) {
+      debugPrint('[GameBoard] Gravity Reset animation not ready');
+      return;
+    }
+
+    debugPrint('[GameBoard] Playing Gravity Reset animation');
+    widget.spellAnimationController.play(_gravityResetAnimation!);
   }
 
   /// 以當前速度重啟計時器
