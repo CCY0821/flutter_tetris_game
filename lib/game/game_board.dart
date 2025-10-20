@@ -71,6 +71,7 @@ class _GameBoardState extends State<GameBoard>
   SpriteSheetAnimation? _thunderStrikeRightAnimation;
   SpriteSheetAnimation? _blessedComboAnimation;
   SpriteSheetAnimation? _dragonRoarAnimation;
+  SpriteSheetAnimation? _elementMorphAnimation;
 
   @override
   void initState() {
@@ -199,6 +200,19 @@ class _GameBoardState extends State<GameBoard>
       await _dragonRoarAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Dragon Roar animation loaded successfully (${_dragonRoarAnimation!.isLoaded})');
+
+      // 載入 Element Morph 動畫
+      debugPrint('[GameBoard] Loading Element Morph animation...');
+      _elementMorphAnimation = SpriteSheetAnimation(
+        assetPath: "assets/animations/element_morph.png",
+        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
+        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
+        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
+      );
+      await _elementMorphAnimation!.load();
+      debugPrint(
+          '[GameBoard] ✅ Element Morph animation loaded successfully (${_elementMorphAnimation!.isLoaded})');
     } catch (e, stackTrace) {
       debugPrint('[GameBoard] ❌ Failed to load spell animations: $e');
       debugPrint('[GameBoard] Stack trace: $stackTrace');
@@ -343,6 +357,14 @@ class _GameBoardState extends State<GameBoard>
         _playDragonRoarAnimation();
       }
 
+      // 監聽 Element Morph 施法事件，觸發動畫
+      if (event.runeType == RuneType.elementMorph &&
+          event.type == RuneEventType.cast) {
+        debugPrint(
+            '[GameBoard] Element Morph cast detected, triggering animation');
+        _playElementMorphAnimation();
+      }
+
       if (event.runeType == RuneType.timeChange &&
           event.type == RuneEventType.effectStart) {
         // 🎯 時間類符文互斥：結束任何其他正在進行的時間效果
@@ -477,6 +499,17 @@ class _GameBoardState extends State<GameBoard>
 
     debugPrint('[GameBoard] Playing Dragon Roar animation');
     widget.spellAnimationController.play(_dragonRoarAnimation!);
+  }
+
+  /// 播放 Element Morph 元素變化動畫
+  void _playElementMorphAnimation() {
+    if (_elementMorphAnimation == null || !_elementMorphAnimation!.isLoaded) {
+      debugPrint('[GameBoard] Element Morph animation not ready');
+      return;
+    }
+
+    debugPrint('[GameBoard] Playing Element Morph animation');
+    widget.spellAnimationController.play(_elementMorphAnimation!);
   }
 
   /// 以當前速度重啟計時器

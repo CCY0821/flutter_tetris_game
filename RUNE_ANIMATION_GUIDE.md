@@ -538,14 +538,14 @@ if (event.runeType == RuneType.yourRune &&
 | Dragon Roar | `dragon_roar.png` | ✅ 已完成 | fadeInOut | 龍吼效果 |
 | Blessed Combo | `blessed_combo.png` | ✅ 已完成 | fadeInOut | 祝福光芒 |
 | Gravity Reset | `gravity_reset.png` | ⏳ 待實現 | fadeInOut | 重力波動 |
-| Element Morph | `element_morph.png` | ⏳ 待實現 | fadeInOut | 元素變化 |
+| Element Morph | `element_morph.png` | ✅ 已完成 | fadeInOut | 元素變化 |
 | Time Change | `time_change.png` | ⏳ 待實現 | fadeInOut | 時間扭曲 |
 | Titan Gravity | `titan_gravity.png` | ⏳ 待實現 | fadeInOut | 泰坦重力 |
 
 ---
 
 **最後更新**: 2025-10-20
-**已實現符文**: Angel's Grace, Flame Burst, Thunder Strike (Left & Right), Blessed Combo, Dragon Roar
+**已實現符文**: Angel's Grace, Flame Burst, Thunder Strike (Left & Right), Blessed Combo, Dragon Roar, Element Morph
 **動畫模式**: 統一使用 fadeInOut（淡入淡出）
 **動畫覆蓋範圍**: 整個 APP 螢幕（全局疊加層）
 **架構模式**: Controller 在 `main.dart`，動畫資源在 `game_board.dart`
