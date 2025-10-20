@@ -69,6 +69,7 @@ class _GameBoardState extends State<GameBoard>
   SpriteSheetAnimation? _flameBurstAnimation;
   SpriteSheetAnimation? _thunderStrikeLeftAnimation;
   SpriteSheetAnimation? _thunderStrikeRightAnimation;
+  SpriteSheetAnimation? _blessedComboAnimation;
 
   @override
   void initState() {
@@ -171,6 +172,19 @@ class _GameBoardState extends State<GameBoard>
       await _thunderStrikeRightAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Thunder Strike Right animation loaded successfully (${_thunderStrikeRightAnimation!.isLoaded})');
+
+      // 載入 Blessed Combo 動畫
+      debugPrint('[GameBoard] Loading Blessed Combo animation...');
+      _blessedComboAnimation = SpriteSheetAnimation(
+        assetPath: "assets/animations/blessed_combo.png",
+        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
+        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
+        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
+      );
+      await _blessedComboAnimation!.load();
+      debugPrint(
+          '[GameBoard] ✅ Blessed Combo animation loaded successfully (${_blessedComboAnimation!.isLoaded})');
     } catch (e, stackTrace) {
       debugPrint('[GameBoard] ❌ Failed to load spell animations: $e');
       debugPrint('[GameBoard] Stack trace: $stackTrace');
@@ -299,6 +313,14 @@ class _GameBoardState extends State<GameBoard>
         _playThunderStrikeLeftAnimation();
       }
 
+      // 監聽 Blessed Combo 施法事件，觸發動畫
+      if (event.runeType == RuneType.blessedCombo &&
+          event.type == RuneEventType.cast) {
+        debugPrint(
+            '[GameBoard] Blessed Combo cast detected, triggering animation');
+        _playBlessedComboAnimation();
+      }
+
       if (event.runeType == RuneType.timeChange &&
           event.type == RuneEventType.effectStart) {
         // 🎯 時間類符文互斥：結束任何其他正在進行的時間效果
@@ -411,6 +433,17 @@ class _GameBoardState extends State<GameBoard>
 
     debugPrint('[GameBoard] Playing Thunder Strike Left animation');
     widget.spellAnimationController.play(_thunderStrikeLeftAnimation!);
+  }
+
+  /// 播放 Blessed Combo 祝福動畫
+  void _playBlessedComboAnimation() {
+    if (_blessedComboAnimation == null || !_blessedComboAnimation!.isLoaded) {
+      debugPrint('[GameBoard] Blessed Combo animation not ready');
+      return;
+    }
+
+    debugPrint('[GameBoard] Playing Blessed Combo animation');
+    widget.spellAnimationController.play(_blessedComboAnimation!);
   }
 
   /// 以當前速度重啟計時器
