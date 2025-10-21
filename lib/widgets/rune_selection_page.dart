@@ -68,38 +68,53 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
             ),
           ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            // 標題欄
-            _buildHeader(),
+        child: ClipRect(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: 0,
+                    maxHeight: constraints.maxHeight,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 標題欄
+                      _buildHeader(),
 
-            // 符文槽配置區
-            _buildLoadoutSection(),
+                      // 符文槽配置區
+                      _buildLoadoutSection(),
 
-            // 分隔線
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              height: 1,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.transparent,
-                    cyberpunkPrimary.withOpacity(0.5),
-                    Colors.transparent,
-                  ],
+                      // 分隔線
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        height: 1,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.transparent,
+                              cyberpunkPrimary.withOpacity(0.5),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // 符文選擇區
+                      Flexible(
+                        child: _buildRuneGrid(),
+                      ),
+
+                      // 底部按鈕區
+                      _buildBottomActions(),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-
-            // 符文選擇區
-            Expanded(
-              child: _buildRuneGrid(),
-            ),
-
-            // 底部按鈕區
-            _buildBottomActions(),
-          ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -436,10 +451,12 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 6),
-                    Row(
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         _buildEnergyIndicator(definition.energyCost),
-                        const SizedBox(width: 12),
                         Text(
                           '${definition.cooldownSeconds}s CD',
                           style: GameTheme.bodyStyle.copyWith(
@@ -448,8 +465,7 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        if (definition.durationSeconds > 0) ...[
-                          const SizedBox(width: 12),
+                        if (definition.durationSeconds > 0)
                           Text(
                             '${definition.durationSeconds}s Duration',
                             style: GameTheme.bodyStyle.copyWith(
@@ -458,7 +474,6 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                        ],
                       ],
                     ),
                   ],
