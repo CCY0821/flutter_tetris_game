@@ -49,17 +49,26 @@ class GameState {
     debugPrint('[GameState] Input frozen for ${duration.inMilliseconds}ms');
   }
 
-  // 可見遊戲區域：10寬 x 20高
+  /// Tetris 標準可視區域高度（GUIDELINE 規範）
+  /// 玩家可見的遊戲區域為 20 行
   static const int visibleRowCount = 20;
+
+  /// Tetris 標準寬度（GUIDELINE 規範）
+  /// 遊戲區域寬度固定為 10 列
   static const int colCount = 10;
 
-  // 緩衝區：在可見區域上方20行
+  /// SRS 系統所需的緩衝區高度
+  /// 用於方塊生成、旋轉檢測和 T-Spin 判定
+  /// 緩衝區位於可視區域上方，不顯示給玩家
   static const int bufferRowCount = 20;
 
-  // 總矩陣大小：10寬 x 40高 (20緩衝 + 20可見)
+  /// 總矩陣大小（包含緩衝區和可視區域）
+  /// 40 行 = 20 行緩衝區 + 20 行可視區域
+  /// 10 列（無水平緩衝區）
   static const int totalRowCount = bufferRowCount + visibleRowCount;
 
-  // 為了向後兼容，保留原rowCount但標註為可見區域
+  /// 向後兼容的行數常數（等同於 visibleRowCount）
+  /// @deprecated 使用 visibleRowCount 替代以保持語義清晰
   static const int rowCount = visibleRowCount;
 
   List<List<Color?>> board = [];

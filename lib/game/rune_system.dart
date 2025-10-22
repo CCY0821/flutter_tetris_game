@@ -111,7 +111,10 @@ class RuneSlot {
   int _getCooldownRemaining(int nowMs) {
     if (cooldownEndTime <= 0) return 0;
     final raw = cooldownEndTime - nowMs;
-    const kCooldownEpsilonMs = 16; // 一幀誤差容忍
+
+    /// 冷卻計算的容錯值（對應 60fps 下的單幀時間：16.67ms）
+    /// 避免因幀同步誤差導致冷卻顯示不穩定（閃爍）
+    const kCooldownEpsilonMs = 16;
     return (raw <= kCooldownEpsilonMs) ? 0 : raw;
   }
 
@@ -340,8 +343,10 @@ class RuneSystem {
   RuneType? _activeTemporalRune;
   Timer? _temporalEffectTimer;
 
-  /// 基於時間的節流（毫秒）
-  static const int _castThrottleMs = 250; // 250ms節流間隔
+  /// 防止重複施法的節流間隔（毫秒）
+  /// 250ms = 0.25秒，避免觸控/按鍵事件導致的意外多次施法
+  /// 這個值足夠短以保持響應性，同時防止意外觸發
+  static const int _castThrottleMs = 250;
   int _lastCastTime = 0;
 
   /// 事件訂閱
@@ -791,6 +796,7 @@ class RuneSystem {
   }
 
   /// 執行 Earthquake
+  // ignore: unused_element
   RuneCastResult _executeEarthquake(List<List<Color?>> board) {
     batchProcessor.addOperation(ShiftBoardDownOperation(isSpellRemoval: true));
     return RuneCastResult.success;
@@ -833,6 +839,7 @@ class RuneSystem {
   }
 
   /// 執行 Column Breaker
+  // ignore: unused_element
   RuneCastResult _executeColumnBreaker(
       List<List<Color?>> board, dynamic gameContext) {
     final ghostPiece = gameContext.calculateGhostPiece();
@@ -973,6 +980,7 @@ class RuneSystem {
   }
 
   /// 執行 Time Slow
+  // ignore: unused_element
   RuneCastResult _executeTimeSlow() {
     // 時間系效果的具體實現由外部處理
     RuneEventBus.emitEffectStart(RuneType.timeChange);
@@ -980,6 +988,7 @@ class RuneSystem {
   }
 
   /// 執行 Time Stop
+  // ignore: unused_element
   RuneCastResult _executeTimeStop() {
     // 時間系效果的具體實現由外部處理
     RuneEventBus.emitEffectStart(RuneType.timeChange);
@@ -1061,6 +1070,7 @@ class RuneSystem {
   }
 
   /// 選擇高密度行（Thunder Strike 用）
+  // ignore: unused_element
   int _selectHighDensityRow(List<List<Color?>> board) {
     int bestRow = 0;
     int maxDensity = 0;
@@ -1147,6 +1157,7 @@ class RuneSystem {
   // =============================================================================
 
   /// 計算方塊中心行
+  // ignore: unused_element
   int _calculateSmartCenterRow(Tetromino tetromino, List<List<Color?>> board) {
     final positions = tetromino.getAbsolutePositions();
     if (positions.isEmpty) return board.length ~/ 2;
@@ -1158,6 +1169,7 @@ class RuneSystem {
   }
 
   /// 選擇目標行：中心±1行
+  // ignore: unused_element
   List<int> _selectOptimalTargetRows(int centerRow, List<List<Color?>> board) {
     final targets = <int>[];
 

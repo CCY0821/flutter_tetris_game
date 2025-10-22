@@ -35,7 +35,7 @@ class GameBoard extends StatefulWidget {
 class _GameBoardState extends State<GameBoard>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   // 👇 Debug: 一鍵關閉所有可疑覆蓋（臨時排查用）
-  static const bool _DBG_ONLY_BOARD_AND_SPELL = false;
+  static const bool _dbgOnlyBoardAndSpell = false;
 
   double _calculateCellSize(BoxConstraints constraints) {
     // 響應式計算格子大小 - 左側區域約佔60%寬度
@@ -1270,12 +1270,12 @@ class _GameBoardState extends State<GameBoard>
                                   // 注意：法術動畫已移至 main.dart 全螢幕層級
 
                                   // 暫停或 Game Over 蓋板
-                                  if (!_DBG_ONLY_BOARD_AND_SPELL)
+                                  if (!_dbgOnlyBoardAndSpell)
                                     if (gameState.isPaused &&
                                         !gameState.isGameOver)
                                       GameUIComponents.overlayText(
                                           'PAUSED', GameTheme.highlight),
-                                  if (!_DBG_ONLY_BOARD_AND_SPELL)
+                                  if (!_dbgOnlyBoardAndSpell)
                                     if (gameState.isGameOver)
                                       GameUIComponents.overlayText(
                                           'GAME OVER', GameTheme.highlight),

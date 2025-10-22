@@ -3,6 +3,7 @@ import '../game/marathon_system.dart';
 import '../services/scoring_service.dart';
 import '../theme/game_theme.dart';
 import '../core/constants.dart';
+import '../utils/game_colors.dart';
 
 /// 整合的統計面板：Marathon 模式資訊 + COMBO 統計
 class IntegratedStatsPanel extends StatelessWidget {
@@ -17,48 +18,50 @@ class IntegratedStatsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cyberpunkPanel, // 面板底色
-        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
-        border: Border.all(
-          color: cyberpunkPrimary, // 1px primary 外框
-          width: 1,
-        ),
-        boxShadow: [
-          // 輕微外光
-          BoxShadow(
-            color: cyberpunkPrimary.withOpacity(0.2),
-            blurRadius: cyberpunkGlowSoft,
-            offset: const Offset(0, 0),
+    return RepaintBoundary(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: cyberpunkPanel, // 面板底色
+          borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+          border: Border.all(
+            color: cyberpunkPrimary, // 1px primary 外框
+            width: 1,
           ),
-          // 角落裝飾線效果
-          BoxShadow(
-            color: cyberpunkAccent.withOpacity(0.1),
-            blurRadius: cyberpunkGlowSoft / 2,
-            offset: const Offset(1, 1),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 標題區域
-          _buildHeader(),
-          const SizedBox(height: 12),
-
-          // Marathon 模式資訊
-          if (marathonSystem != null) ...[
-            _buildMarathonSection(),
-            const SizedBox(height: 12),
-            _buildDivider(),
-            const SizedBox(height: 12),
+          boxShadow: [
+            // 輕微外光
+            BoxShadow(
+              color: cyberpunkPrimary.withOpacity(0.2),
+              blurRadius: cyberpunkGlowSoft,
+              offset: const Offset(0, 0),
+            ),
+            // 角落裝飾線效果
+            BoxShadow(
+              color: cyberpunkAccent.withOpacity(0.1),
+              blurRadius: cyberpunkGlowSoft / 2,
+              offset: const Offset(1, 1),
+            ),
           ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 標題區域
+            _buildHeader(),
+            const SizedBox(height: 12),
 
-          // COMBO 統計區域
-          _buildComboSection(),
-        ],
+            // Marathon 模式資訊
+            if (marathonSystem != null) ...[
+              _buildMarathonSection(),
+              const SizedBox(height: 12),
+              _buildDivider(),
+              const SizedBox(height: 12),
+            ],
+
+            // COMBO 統計區域
+            _buildComboSection(),
+          ],
+        ),
       ),
     );
   }
@@ -67,7 +70,7 @@ class IntegratedStatsPanel extends StatelessWidget {
   Widget _buildHeader() {
     return Row(
       children: [
-        Icon(
+        const Icon(
           Icons.speed,
           color: cyberpunkPrimary,
           size: 16,
@@ -98,7 +101,7 @@ class IntegratedStatsPanel extends StatelessWidget {
             ),
             child: Text(
               'Lv ${marathonSystem!.getLevelDisplayName()}',
-              style: TextStyle(
+              style: const TextStyle(
                 color: cyberpunkAccent,
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
@@ -150,7 +153,7 @@ class IntegratedStatsPanel extends StatelessWidget {
                   ),
                   Text(
                     '${stats.totalLines}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.cyan,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -282,7 +285,7 @@ class IntegratedStatsPanel extends StatelessWidget {
                 Row(
                   children: [
                     if (maxCombo > 0)
-                      Icon(
+                      const Icon(
                         Icons.emoji_events,
                         color: GameTheme.highlight,
                         size: 10,
@@ -344,25 +347,11 @@ class IntegratedStatsPanel extends StatelessWidget {
 
   /// 根據連擊數獲取顏色
   Color _getComboColor(int combo) {
-    if (combo >= 21) return const Color(0xFFFF1744); // 紅色 - LEGENDARY
-    if (combo >= 16) return const Color(0xFFFF5722); // 橙紅色 - INCREDIBLE
-    if (combo >= 11) return const Color(0xFFFF9800); // 橙色 - AMAZING
-    if (combo >= 7) return const Color(0xFFFFC107); // 黃色 - EXCELLENT
-    if (combo >= 4) return const Color(0xFF4CAF50); // 綠色 - GREAT
-    if (combo >= 1) return const Color(0xFF2196F3); // 藍色 - NICE
-    return GameTheme.accentBlue;
+    return GameColors.getComboColor(combo);
   }
 
   /// 根據速度獲取顏色
   Color _getSpeedColor(double gravity) {
-    if (gravity < 1.0) {
-      return Colors.green;
-    } else if (gravity < 5.0) {
-      return Colors.yellow;
-    } else if (gravity < 15.0) {
-      return Colors.orange;
-    } else {
-      return Colors.red;
-    }
+    return GameColors.getSpeedColor(gravity);
   }
 }

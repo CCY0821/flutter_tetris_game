@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/scoring_service.dart';
 import '../theme/game_theme.dart';
+import '../utils/game_colors.dart';
 
 /// 連擊統計資訊面板
 class ComboStatsPanel extends StatelessWidget {
@@ -34,7 +35,7 @@ class ComboStatsPanel extends StatelessWidget {
           // 標題
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.flash_on,
                 color: GameTheme.accentBlue,
                 size: 18,
@@ -111,7 +112,7 @@ class ComboStatsPanel extends StatelessWidget {
         Row(
           children: [
             if (isRecord && int.parse(value) > 0)
-              Icon(
+              const Icon(
                 Icons.emoji_events,
                 color: GameTheme.highlight,
                 size: 12,
@@ -203,13 +204,7 @@ class ComboStatsPanel extends StatelessWidget {
 
   /// 根據連擊數獲取顏色
   Color _getComboColor(int combo) {
-    if (combo >= 21) return const Color(0xFFFF1744); // 紅色 - LEGENDARY
-    if (combo >= 16) return const Color(0xFFFF5722); // 橙紅色 - INCREDIBLE
-    if (combo >= 11) return const Color(0xFFFF9800); // 橙色 - AMAZING
-    if (combo >= 7) return const Color(0xFFFFC107); // 黃色 - EXCELLENT
-    if (combo >= 4) return const Color(0xFF4CAF50); // 綠色 - GREAT
-    if (combo >= 1) return const Color(0xFF2196F3); // 藍色 - NICE
-    return GameTheme.accentBlue;
+    return GameColors.getComboColor(combo);
   }
 }
 

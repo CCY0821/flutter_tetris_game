@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../game/marathon_system.dart';
+import '../utils/game_colors.dart';
 
 /// Marathon 模式資訊面板
 class MarathonInfoPanel extends StatelessWidget {
@@ -30,7 +31,7 @@ class MarathonInfoPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 標題
-          Text(
+          const Text(
             'MARATHON MODE',
             style: TextStyle(
               color: Colors.cyan,
@@ -63,7 +64,7 @@ class MarathonInfoPanel extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'LEVEL',
               style: TextStyle(
                 color: Colors.white70,
@@ -73,7 +74,7 @@ class MarathonInfoPanel extends StatelessWidget {
             ),
             Text(
               marathonSystem.getLevelDisplayName(),
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -84,7 +85,7 @@ class MarathonInfoPanel extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(
+            const Text(
               'LINES',
               style: TextStyle(
                 color: Colors.white70,
@@ -94,7 +95,7 @@ class MarathonInfoPanel extends StatelessWidget {
             ),
             Text(
               '${stats.totalLines}',
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -113,7 +114,7 @@ class MarathonInfoPanel extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
+            const Text(
               'PROGRESS',
               style: TextStyle(
                 color: Colors.white70,
@@ -123,7 +124,7 @@ class MarathonInfoPanel extends StatelessWidget {
             ),
             Text(
               '${stats.linesInLevel}/${MarathonSystem.linesPerLevel}',
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -145,7 +146,7 @@ class MarathonInfoPanel extends StatelessWidget {
             widthFactor: stats.progress,
             child: Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
+                gradient: const LinearGradient(
                   colors: [Colors.cyan, Colors.blue],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
@@ -161,13 +162,13 @@ class MarathonInfoPanel extends StatelessWidget {
         if (!marathonSystem.isMaxLevel)
           Text(
             'Next: ${marathonSystem.linesToNextLevel} lines',
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white60,
               fontSize: 10,
             ),
           )
         else
-          Text(
+          const Text(
             'MAX LEVEL',
             style: TextStyle(
               color: Colors.red,
@@ -183,7 +184,7 @@ class MarathonInfoPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'SPEED',
           style: TextStyle(
             color: Colors.white70,
@@ -208,7 +209,7 @@ class MarathonInfoPanel extends StatelessWidget {
                 ),
                 Text(
                   marathonSystem.getSpeedDescription(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white60,
                     fontSize: 10,
                   ),
@@ -220,13 +221,13 @@ class MarathonInfoPanel extends StatelessWidget {
               children: [
                 Text(
                   '${stats.dropInterval}ms',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Text(
+                const Text(
                   'interval',
                   style: TextStyle(
                     color: Colors.white60,
@@ -242,15 +243,7 @@ class MarathonInfoPanel extends StatelessWidget {
   }
 
   Color _getSpeedColor(double gravity) {
-    if (gravity < 1.0) {
-      return Colors.green;
-    } else if (gravity < 5.0) {
-      return Colors.yellow;
-    } else if (gravity < 15.0) {
-      return Colors.orange;
-    } else {
-      return Colors.red;
-    }
+    return GameColors.getSpeedColor(gravity);
   }
 }
 
@@ -277,7 +270,7 @@ class MarathonMiniInfo extends StatelessWidget {
         children: [
           Text(
             'Lv ${marathonSystem.getLevelDisplayName()}',
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.cyan,
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -286,7 +279,7 @@ class MarathonMiniInfo extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             '${marathonSystem.linesInCurrentLevel}/${MarathonSystem.linesPerLevel}',
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 10,
             ),
