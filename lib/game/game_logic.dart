@@ -74,6 +74,9 @@ class GameLogic {
   }
 
   void lockTetromino() {
+    // ✅ Epoch 守門：拒絕過期世代的操作
+    final currentEpoch = gameState.gameEpoch;
+
     for (final point in gameState.currentTetromino!.shape) {
       final x = gameState.currentTetromino!.x + point.dx.toInt();
       final y = gameState.currentTetromino!.y + point.dy.toInt();
@@ -81,6 +84,12 @@ class GameLogic {
           x < GameState.colCount &&
           y >= 0 &&
           y < GameState.totalRowCount) {
+        // ✅ 再次檢查 epoch（防止非同步延遲）
+        if (currentEpoch != gameState.gameEpoch) {
+          debugPrint(
+              '[GameLogic] lockTetromino aborted: epoch mismatch ($currentEpoch != ${gameState.gameEpoch})');
+          return;
+        }
         gameState.board[y][x] = gameState.currentTetromino!.color;
       }
     }
@@ -197,6 +206,11 @@ class GameLogic {
       gameState.audioService.playSoundEffect('game_over');
       // 停止背景音樂
       gameState.audioService.stopBackgroundMusic();
+
+      // ✅ 新增：Game Over 時立即清除存檔，避免保存損壞狀態
+      gameState.clearSavedState();
+      debugPrint(
+          '[GameLogic] Game Over - cleared saved state to prevent corruption');
     }
   }
 

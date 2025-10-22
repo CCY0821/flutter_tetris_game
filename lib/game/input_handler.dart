@@ -20,6 +20,12 @@ class InputHandler {
 
   void handleKey(KeyEvent event) {
     if (event is KeyDownEvent) {
+      // ✅ 輸入凍結檢查
+      if (gameState.isInputFrozen) {
+        debugPrint('[Input] Ignored: input frozen');
+        return;
+      }
+
       final key = event.logicalKey.keyLabel.toLowerCase();
 
       if (key == 'p' && !gameState.isGameOver) {
@@ -47,9 +53,9 @@ class InputHandler {
                 '🎮 遊戲控制說明',
                 style: TextStyle(color: Colors.white),
               ),
-              content: SizedBox(
+              content: const SizedBox(
                 width: 400,
-                child: const SingleChildScrollView(
+                child: SingleChildScrollView(
                   child: Text(
                     '''⌨️ 標準鍵盤控制：
 ← →  移動方塊

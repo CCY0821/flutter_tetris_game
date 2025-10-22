@@ -68,7 +68,16 @@ class GamePersistence {
       }
 
       final gameDataMap = stateMap['gameData'] as Map<String, dynamic>;
-      return _gameDataFromMap(gameDataMap);
+      final gameData = _gameDataFromMap(gameDataMap);
+
+      // ✅ 新增：結構一致性驗證
+      if (!gameData.validateStructure()) {
+        debugPrint('[Load] State validation failed, clearing corrupted save');
+        await clearGameState();
+        return null;
+      }
+
+      return gameData;
     } catch (e) {
       debugPrint('Failed to load game state: $e');
       return null;
@@ -347,6 +356,118 @@ class GameStateData {
     for (final row in board) {
       for (final cell in row) {
         if (cell != null) return false;
+      }
+    }
+    return true;
+  }
+
+  /// 🛡️ 結構一致性驗證（8 條硬性規則）
+  /// 任何一條不符 → 拒絕載入
+  bool validateStructure() {
+    // 規則 1：尺寸驗證（40 行 x 10 列）
+    if (board.length != 40) {
+      debugPrint('[Validation] FAIL: board.length != 40 (got ${board.length})');
+      return false;
+    }
+    for (int i = 0; i < board.length; i++) {
+      if (board[i].length != 10) {
+        debugPrint(
+            '[Validation] FAIL: board[$i].length != 10 (got ${board[i].length})');
+        return false;
+      }
+    }
+
+    // 規則 2：合法顏色檢查（只允許 7 種 Tetromino 顏色 + null）
+    final validColors = GamePersistence._colorToInt.keys.toSet();
+    for (int row = 0; row < board.length; row++) {
+      for (int col = 0; col < board[row].length; col++) {
+        final cell = board[row][col];
+        if (cell != null && !validColors.contains(cell)) {
+          debugPrint('[Validation] FAIL: Invalid color at [$row][$col]');
+          return false;
+        }
+      }
+    }
+
+    // 規則 3：Tetromino 座標合法性
+    if (currentTetromino != null) {
+      if (currentTetromino!.x < 0 ||
+          currentTetromino!.x >= 10 ||
+          currentTetromino!.y < 0 ||
+          currentTetromino!.y >= 40) {
+        debugPrint(
+            '[Validation] FAIL: currentTetromino out of bounds (${currentTetromino!.x}, ${currentTetromino!.y})');
+        return false;
+      }
+    }
+    if (nextTetromino != null) {
+      if (nextTetromino!.x < 0 ||
+          nextTetromino!.x >= 10 ||
+          nextTetromino!.y < 0 ||
+          nextTetromino!.y >= 40) {
+        debugPrint('[Validation] FAIL: nextTetromino out of bounds');
+        return false;
+      }
+    }
+
+    // 規則 4：狀態機一致性
+    if (isGameOver && currentTetromino != null) {
+      debugPrint('[Validation] FAIL: Game Over 但還有 currentTetromino');
+      return false;
+    }
+
+    // 規則 5：分數合理性（非負數）
+    if (score < 0 || marathonTotalLinesCleared < 0 || scoringMaxCombo < 0) {
+      debugPrint('[Validation] FAIL: Negative values detected');
+      return false;
+    }
+
+    // 規則 6：等級與消行一致性
+    if (marathonCurrentLevel > marathonTotalLinesCleared + 1) {
+      debugPrint(
+          '[Validation] FAIL: Level ($marathonCurrentLevel) > lines cleared ($marathonTotalLinesCleared)');
+      return false;
+    }
+
+    // 規則 7：進行中遊戲必須有方塊
+    if (!isGameOver && (currentTetromino == null || nextTetromino == null)) {
+      debugPrint('[Validation] FAIL: Game in progress but missing pieces');
+      return false;
+    }
+
+    // 規則 8：棋盤孤立方塊檢查（底部第 1 行例外）
+    if (!_validateBoardConnectivity()) {
+      debugPrint('[Validation] FAIL: Detected isolated blocks in board');
+      return false;
+    }
+
+    debugPrint('[Validation] PASS: All 8 rules passed');
+    return true;
+  }
+
+  /// 檢查棋盤連通性（檢測孤立方塊）
+  bool _validateBoardConnectivity() {
+    // 檢查是否有孤立方塊（周圍 4 個方向都沒有方塊且不在底部）
+    for (int row = 0; row < board.length - 1; row++) {
+      // 不檢查最後一行（底部）
+      for (int col = 0; col < board[row].length; col++) {
+        if (board[row][col] != null) {
+          bool hasNeighbor = false;
+
+          // 檢查上下左右 4 個方向
+          if (row > 0 && board[row - 1][col] != null) hasNeighbor = true;
+          if (row < board.length - 1 && board[row + 1][col] != null)
+            hasNeighbor = true;
+          if (col > 0 && board[row][col - 1] != null) hasNeighbor = true;
+          if (col < board[row].length - 1 && board[row][col + 1] != null)
+            hasNeighbor = true;
+
+          // 孤立方塊且不在底部 → 視為損壞
+          if (!hasNeighbor && row < board.length - 1) {
+            debugPrint('[Validation] Isolated block detected at [$row][$col]');
+            return false;
+          }
+        }
       }
     }
     return true;

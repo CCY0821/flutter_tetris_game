@@ -30,6 +30,25 @@ class GameState {
   // 工廠構造函數
   factory GameState() => instance;
 
+  // 🛡️ 遊戲世代計數器（防止異步殘留事件）
+  int _gameEpoch = 0;
+  int get gameEpoch => _gameEpoch;
+
+  // 🛡️ 輸入凍結機制（防止重複按鍵事件）
+  DateTime? _inputFrozenUntil;
+
+  bool get isInputFrozen {
+    if (_inputFrozenUntil == null) return false;
+    if (DateTime.now().isBefore(_inputFrozenUntil!)) return true;
+    _inputFrozenUntil = null;
+    return false;
+  }
+
+  void freezeInput(Duration duration) {
+    _inputFrozenUntil = DateTime.now().add(duration);
+    debugPrint('[GameState] Input frozen for ${duration.inMilliseconds}ms');
+  }
+
   // 可見遊戲區域：10寬 x 20高
   static const int visibleRowCount = 20;
   static const int colCount = 10;
@@ -209,6 +228,13 @@ class GameState {
   }
 
   Future<void> startGame() async {
+    // ✅ 遞增遊戲世代，使所有舊的異步事件失效
+    _gameEpoch++;
+    debugPrint('[GameState] Starting new game, epoch = $_gameEpoch');
+
+    // ✅ 凍結輸入 150ms，防止重複事件
+    freezeInput(const Duration(milliseconds: 150));
+
     initBoard();
     score = 0;
     isGameOver = false;
