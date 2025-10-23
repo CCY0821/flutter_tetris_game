@@ -64,13 +64,13 @@ class ClearRowOperation extends BoardOperation {
   @override
   void execute(List<List<Color?>> board) {
     if (isValid(board)) {
-      debugPrint('BatchProcessor: Executing ClearRowOperation for row $row');
+      debugPrint('[BatchProcessor] Executing ClearRowOperation for row $row');
       for (int col = 0; col < board[row].length; col++) {
         board[row][col] = null;
       }
-      debugPrint('BatchProcessor: Row $row cleared successfully');
+      debugPrint('[BatchProcessor] Row $row cleared successfully');
     } else {
-      debugPrint('BatchProcessor: ClearRowOperation invalid for row $row');
+      debugPrint('[BatchProcessor] ClearRowOperation invalid for row $row');
     }
   }
 }
@@ -245,7 +245,7 @@ class RuneBatchProcessor {
   /// 手動觸發棋盤變化通知
   void notifyBoardChanged() {
     _onBoardChanged?.call();
-    debugPrint('RuneBatchProcessor: Manual board change notification sent');
+    debugPrint('[RuneBatchProcessor] Manual board change notification sent');
   }
 
   /// 添加操作到批處理隊列
@@ -308,10 +308,10 @@ class RuneBatchProcessor {
       // 單次重繪通知
       if (_operations.isNotEmpty) {
         _onBoardChanged?.call();
-        debugPrint('RuneBatchProcessor: Board changed notification sent');
+        debugPrint('[RuneBatchProcessor] Board changed notification sent');
       }
     } catch (e) {
-      debugPrint('RuneBatchProcessor: Error during execution - $e');
+      debugPrint('[RuneBatchProcessor] Error during execution - $e');
     } finally {
       // 清理操作隊列
       _operations.clear();
@@ -343,7 +343,7 @@ class RuneBatchProcessor {
 
     final count = _operations.length;
     _operations.clear();
-    debugPrint('RuneBatchProcessor: Cleared $count pending operations');
+    debugPrint('[RuneBatchProcessor] Cleared $count pending operations');
   }
 
   /// 檢查是否正在處理中

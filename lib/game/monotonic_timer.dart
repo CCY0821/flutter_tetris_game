@@ -22,14 +22,14 @@ class MonotonicTimer {
       }
     });
 
-    debugPrint('MonotonicTimer: Started');
+    debugPrint('[MonotonicTimer] Started');
   }
 
   /// 停止時鐘
   static void stop() {
     _ticker?.cancel();
     _ticker = null;
-    debugPrint('MonotonicTimer: Stopped');
+    debugPrint('[MonotonicTimer] Stopped');
   }
 
   /// 暫停時鐘
@@ -39,7 +39,7 @@ class MonotonicTimer {
       for (final listener in _pauseListeners) {
         listener();
       }
-      debugPrint('MonotonicTimer: Paused at ${_gameTime}ms');
+      debugPrint('[MonotonicTimer] Paused at ${_gameTime}ms');
     }
   }
 
@@ -50,7 +50,7 @@ class MonotonicTimer {
       for (final listener in _resumeListeners) {
         listener();
       }
-      debugPrint('MonotonicTimer: Resumed at ${_gameTime}ms');
+      debugPrint('[MonotonicTimer] Resumed at ${_gameTime}ms');
     }
   }
 
@@ -109,7 +109,7 @@ class MonotonicTimer {
   static void reset() {
     _gameTime = 0;
     _isPaused = false;
-    debugPrint('MonotonicTimer: Reset');
+    debugPrint('[MonotonicTimer] Reset');
   }
 
   /// 檢查時間點是否已過期

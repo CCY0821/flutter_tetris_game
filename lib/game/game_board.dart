@@ -280,7 +280,7 @@ class _GameBoardState extends State<GameBoard>
     try {
       stateLoaded = await gameState.loadState();
       if (stateLoaded) {
-        debugPrint('Game: Successfully loaded saved game state');
+        debugPrint('[Game] Successfully loaded saved game state');
         // 載入成功，保持暫停狀態並啟動定時器
         _currentSpeed = gameState.dropSpeed;
         if (!gameState.isGameOver) {
@@ -290,7 +290,7 @@ class _GameBoardState extends State<GameBoard>
         return;
       }
     } catch (e) {
-      debugPrint('Game: Error loading saved state: $e');
+      debugPrint('[Game] Error loading saved state: $e');
       stateLoaded = false;
     }
 
@@ -309,11 +309,11 @@ class _GameBoardState extends State<GameBoard>
     }
 
     if (needsNewGame) {
-      debugPrint('Game: Starting new game (no valid saved state)');
+      debugPrint('[Game] Starting new game (no valid saved state)');
       await _startGame();
     } else {
       // 保持當前狀態，只確保定時器正常
-      debugPrint('Game: Maintaining current game state');
+      debugPrint('[Game] Maintaining current game state');
       if (!gameState.isGameOver) {
         _startGameTimer();
       }
@@ -466,7 +466,7 @@ class _GameBoardState extends State<GameBoard>
         if (!gameState.isPaused && !gameState.isGameOver) {
           _restartTimerWithCurrentSpeed();
         }
-        debugPrint('GameBoard: Time Change effect deactivated');
+        debugPrint('[GameBoard] Time Change effect deactivated');
       } else if (event.runeType == RuneType.blessedCombo &&
           event.type == RuneEventType.effectStart) {
         // 🎯 時間類符文互斥：結束任何其他正在進行的時間效果
@@ -494,7 +494,7 @@ class _GameBoardState extends State<GameBoard>
         _blessedComboTimer = null;
 
         gameState.deactivateBlessedCombo();
-        debugPrint('GameBoard: Blessed Combo effect deactivated');
+        debugPrint('[GameBoard] Blessed Combo effect deactivated');
       }
     });
   }
@@ -615,7 +615,7 @@ class _GameBoardState extends State<GameBoard>
   void _restartTimerWithCurrentSpeed() {
     _currentSpeed = gameState.dropSpeed;
     _startGameTimer();
-    debugPrint('GameBoard: Timer restarted with speed: ${_currentSpeed}ms');
+    debugPrint('[GameBoard] Timer restarted with speed: ${_currentSpeed}ms');
   }
 
   @override
@@ -644,11 +644,11 @@ class _GameBoardState extends State<GameBoard>
     switch (state) {
       case AppLifecycleState.resumed:
         // 應用恢復時，保持暫停狀態，讓玩家手動決定是否繼續
-        debugPrint('Game: App resumed, maintaining pause state');
+        debugPrint('[Game] App resumed, maintaining pause state');
 
         // 確保定時器在遊戲進行中時正常運行 (但不自動恢復)
         if (!gameState.isGameOver && _dropTimer?.isActive != true) {
-          debugPrint('Game: Restarting timer after app resume');
+          debugPrint('[Game] Restarting timer after app resume');
           _startGameTimer();
         }
 
@@ -656,7 +656,7 @@ class _GameBoardState extends State<GameBoard>
         if (!gameState.isGameOver &&
             !gameState.isPaused &&
             gameState.audioService.isMusicEnabled) {
-          debugPrint('Game: Resuming background music after app resume');
+          debugPrint('[Game] Resuming background music after app resume');
           gameState.audioService.resumeBackgroundMusic();
         }
         break;
@@ -666,7 +666,7 @@ class _GameBoardState extends State<GameBoard>
         // 應用暫停或失去焦點時，自動暫停遊戲並保存狀態
         if (!gameState.isGameOver) {
           if (!gameState.isPaused) {
-            debugPrint('Game: Auto-pausing due to app state change');
+            debugPrint('[Game] Auto-pausing due to app state change');
             gameState.isPaused = true;
             gameState.audioService.pauseBackgroundMusic();
             setState(() {});
@@ -676,9 +676,9 @@ class _GameBoardState extends State<GameBoard>
           if (gameState.isValidGameInProgress()) {
             gameState.saveState().then((success) {
               if (success) {
-                debugPrint('Game: State saved successfully on app pause');
+                debugPrint('[Game] State saved successfully on app pause');
               } else {
-                debugPrint('Game: Failed to save state on app pause');
+                debugPrint('[Game] Failed to save state on app pause');
               }
             });
           }
@@ -690,7 +690,7 @@ class _GameBoardState extends State<GameBoard>
         // 應用進程被系統終止前，確保保存狀態
         if (!gameState.isGameOver && gameState.isValidGameInProgress()) {
           gameState.saveState();
-          debugPrint('Game: State saved on app detached/hidden');
+          debugPrint('[Game] State saved on app detached/hidden');
         }
         break;
     }
@@ -699,7 +699,7 @@ class _GameBoardState extends State<GameBoard>
   /// Handle ad click by pausing the game immediately
   void _pauseGameForAdClick() {
     if (!gameState.isGameOver && !gameState.isPaused) {
-      debugPrint('Game: Pausing for ad click');
+      debugPrint('[Game] Pausing for ad click');
       gameState.isPaused = true;
       gameState.audioService.pauseBackgroundMusic();
       setState(() {});
@@ -714,7 +714,7 @@ class _GameBoardState extends State<GameBoard>
     _gameOverDialogShown = false; // 重置 Dialog 標誌
     _startGameTimer();
     setState(() {});
-    debugPrint('Game: New game started, saved state cleared');
+    debugPrint('[Game] New game started, saved state cleared');
   }
 
   // 📊 顯示遊戲結算畫面

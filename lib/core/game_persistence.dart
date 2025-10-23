@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/tetromino.dart';
 import '../game/rune_loadout.dart';
+import '../theme/tetromino_colors.dart';
 
 /// 遊戲狀態持久化工具類
 /// 負責將遊戲狀態序列化到本地存儲，並在需要時恢復
@@ -11,28 +12,6 @@ class GamePersistence {
   static const String _runeLoadoutKey = 'tetris_rune_loadout';
   static const int _stateVersion = 1;
   static const int _runeLoadoutVersion = 1;
-
-  /// 顏色到整數的映射表 (用於序列化)
-  static final Map<Color, int> _colorToInt = {
-    const Color(0xFF00E5FF): 1, // cyberpunkPrimary - I
-    const Color(0xFF0066FF): 2, // J
-    const Color(0xFFFF2ED1): 3, // cyberpunkSecondary - L
-    const Color(0xFFFCEE09): 4, // cyberpunkCaution - O
-    const Color(0xFF00FF88): 5, // S
-    const Color(0xFF8A2BE2): 6, // cyberpunkAccent - T
-    const Color(0xFFFF0066): 7, // Z
-  };
-
-  /// 整數到顏色的映射表 (用於反序列化)
-  static const Map<int, Color> _intToColor = {
-    1: Color(0xFF00E5FF), // I
-    2: Color(0xFF0066FF), // J
-    3: Color(0xFFFF2ED1), // L
-    4: Color(0xFFFCEE09), // O
-    5: Color(0xFF00FF88), // S
-    6: Color(0xFF8A2BE2), // T
-    7: Color(0xFFFF0066), // Z
-  };
 
   /// 保存遊戲狀態
   static Future<bool> saveGameState(GameStateData gameData) async {
@@ -184,21 +163,33 @@ class GamePersistence {
 
   /// 將棋盤轉換為整數列表
   static List<List<int>> _boardToIntList(List<List<Color?>> board) {
-    return board
-        .map((row) => row
-            .map((color) => color == null ? -1 : (_colorToInt[color] ?? 0))
-            .toList())
-        .toList();
+    return List<List<int>>.generate(
+      board.length,
+      (i) => List<int>.generate(
+        board[i].length,
+        (j) {
+          final color = board[i][j];
+          return color == null ? -1 : (TetrominoColors.colorToInt[color] ?? 0);
+        },
+      ),
+    );
   }
 
   /// 從整數列表還原棋盤
   static List<List<Color?>> _intListToBoard(List<dynamic> intList) {
-    return intList
-        .map((row) => (row as List<dynamic>)
-            .map((colorInt) =>
-                colorInt == -1 ? null : _intToColor[colorInt as int])
-            .toList())
-        .toList();
+    return List<List<Color?>>.generate(
+      intList.length,
+      (i) {
+        final row = intList[i] as List<dynamic>;
+        return List<Color?>.generate(
+          row.length,
+          (j) {
+            final colorInt = row[j] as int;
+            return colorInt == -1 ? null : TetrominoColors.intToColor[colorInt];
+          },
+        );
+      },
+    );
   }
 
   /// 將 Tetromino 轉換為 Map
@@ -234,7 +225,7 @@ class GamePersistence {
       };
       final jsonString = jsonEncode(loadoutMap);
       final result = await prefs.setString(_runeLoadoutKey, jsonString);
-      debugPrint('GamePersistence: Rune loadout saved - $loadout');
+      debugPrint('[GamePersistence] Rune loadout saved - $loadout');
       return result;
     } catch (e) {
       debugPrint('Failed to save rune loadout: $e');
@@ -248,7 +239,7 @@ class GamePersistence {
       final prefs = await SharedPreferences.getInstance();
       final jsonString = prefs.getString(_runeLoadoutKey);
       if (jsonString == null) {
-        debugPrint('GamePersistence: No saved rune loadout found');
+        debugPrint('[GamePersistence] No saved rune loadout found');
         return null;
       }
 
@@ -264,7 +255,7 @@ class GamePersistence {
 
       final loadoutData = loadoutMap['loadout'] as Map<String, dynamic>;
       final loadout = RuneLoadout.fromJson(loadoutData);
-      debugPrint('GamePersistence: Rune loadout loaded - $loadout');
+      debugPrint('[GamePersistence] Rune loadout loaded - $loadout');
       return loadout;
     } catch (e) {
       debugPrint('Failed to load rune loadout: $e');
@@ -277,7 +268,7 @@ class GamePersistence {
     try {
       final prefs = await SharedPreferences.getInstance();
       final result = await prefs.remove(_runeLoadoutKey);
-      debugPrint('GamePersistence: Rune loadout cleared');
+      debugPrint('[GamePersistence] Rune loadout cleared');
       return result;
     } catch (e) {
       debugPrint('Failed to clear rune loadout: $e');
@@ -378,7 +369,7 @@ class GameStateData {
     }
 
     // 規則 2：合法顏色檢查（只允許 7 種 Tetromino 顏色 + null）
-    final validColors = GamePersistence._colorToInt.keys.toSet();
+    final validColors = TetrominoColors.colorToInt.keys.toSet();
     for (int row = 0; row < board.length; row++) {
       for (int col = 0; col < board[row].length; col++) {
         final cell = board[row][col];

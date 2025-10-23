@@ -185,7 +185,7 @@ class GameState {
     runeSystem.setEnergyManager(runeEnergyManager);
     runeSystem.setBoardChangeCallback(() {
       // 棋盤變化通知，觸發UI更新
-      debugPrint('GameState: Board changed by rune system');
+      debugPrint('[GameState] Board changed by rune system');
       _notifyUIUpdate?.call();
     });
 
@@ -202,10 +202,10 @@ class GameState {
     // 初始化 Blessed Combo 修改器
     _blessedComboModifier = BlessedComboModifier(() => _isBlessedComboActive);
     scoringService.addModifier(_blessedComboModifier);
-    debugPrint('GameState: Blessed Combo modifier initialized');
+    debugPrint('[GameState] Blessed Combo modifier initialized');
 
     _runeSystemInitialized = true;
-    debugPrint('GameState: Rune system initialized');
+    debugPrint('[GameState] Rune system initialized');
   }
 
   Future<void> _loadHighScore() async {
@@ -219,10 +219,10 @@ class GameState {
     if (savedLoadout != null) {
       // 載入保存的配置
       runeLoadout.slots = List<RuneType?>.from(savedLoadout.slots);
-      debugPrint('GameState: Loaded saved rune loadout - $runeLoadout');
+      debugPrint('[GameState] Loaded saved rune loadout - $runeLoadout');
     } else {
       // 使用預設空配置
-      debugPrint('GameState: Using default empty rune loadout');
+      debugPrint('[GameState] Using default empty rune loadout');
     }
   }
 
@@ -232,7 +232,7 @@ class GameState {
     // 重新初始化符文系統槽位
     if (_runeSystemInitialized) {
       runeSystem.reloadLoadout();
-      debugPrint('GameState: Rune loadout saved and system reloaded');
+      debugPrint('[GameState] Rune loadout saved and system reloaded');
     }
   }
 
@@ -331,13 +331,13 @@ class GameState {
   void activateTimeChange() {
     _isTimeChangeActive = true;
     // 原始速度由 marathonSystem 管理，不需要額外存儲
-    debugPrint('GameState: Time Change activated - speed multiplier: ×10');
+    debugPrint('[GameState] Time Change activated - speed multiplier: ×10');
   }
 
   /// 停用 Time Change 效果
   void deactivateTimeChange() {
     _isTimeChangeActive = false;
-    debugPrint('GameState: Time Change deactivated - speed restored');
+    debugPrint('[GameState] Time Change deactivated - speed restored');
   }
 
   /// 檢查 Time Change 是否激活

@@ -83,7 +83,7 @@ class RuneEnergyManager {
       }
     }
 
-    debugPrint('RuneEnergy: Added $scoreToAdd score ($linesCleared lines), '
+    debugPrint('[RuneEnergy] Added $scoreToAdd score ($linesCleared lines), '
         'total: $_currentScore, bars: $_currentBars, '
         'progress: ${(currentPartialRatio * 100).toStringAsFixed(1)}%');
   }
@@ -108,7 +108,7 @@ class RuneEnergyManager {
 
     _onEnergyChanged?.call();
 
-    debugPrint('RuneEnergy: Consumed $bars bars '
+    debugPrint('[RuneEnergy] Consumed $bars bars '
         '(from $oldScore->$_currentScore score, $oldBars->$_currentBars bars)');
     return true;
   }
@@ -137,7 +137,7 @@ class RuneEnergyManager {
       }
     }
 
-    debugPrint('RuneEnergy: Refunded $bars bars, '
+    debugPrint('[RuneEnergy] Refunded $bars bars, '
         'total: $_currentScore score, $_currentBars bars');
   }
 
@@ -146,7 +146,7 @@ class RuneEnergyManager {
     _currentScore = 0;
     _currentBars = 0;
     _onEnergyChanged?.call();
-    debugPrint('RuneEnergy: System reset');
+    debugPrint('[RuneEnergy] System reset');
   }
 
   /// 获取能量状态摘要

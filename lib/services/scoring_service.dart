@@ -191,7 +191,7 @@ class ScoringService {
       int comboBonus = 50 * _comboCount * currentLevel;
       totalPoints += comboBonus;
       breakdown['combo'] = comboBonus;
-      achievements.add('${_comboCount} Combo');
+      achievements.add('$_comboCount Combo');
       _statistics['combos'] = (_statistics['combos'] ?? 0) + 1;
       _statistics['combo_count'] =
           (_statistics['combo_count'] ?? 0) + _comboCount;
@@ -330,14 +330,14 @@ class ScoringService {
   void addModifier(ScoreModifier modifier) {
     if (!_modifiers.contains(modifier)) {
       _modifiers.add(modifier);
-      debugPrint('ScoringService: Added modifier - ${modifier.description}');
+      debugPrint('[ScoringService] Added modifier - ${modifier.description}');
     }
   }
 
   /// 移除分數修改器
   void removeModifier(ScoreModifier modifier) {
     if (_modifiers.remove(modifier)) {
-      debugPrint('ScoringService: Removed modifier - ${modifier.description}');
+      debugPrint('[ScoringService] Removed modifier - ${modifier.description}');
     }
   }
 
@@ -345,7 +345,7 @@ class ScoringService {
   void clearModifiers() {
     final count = _modifiers.length;
     _modifiers.clear();
-    debugPrint('ScoringService: Cleared $count modifiers');
+    debugPrint('[ScoringService] Cleared $count modifiers');
   }
 
   /// 獲取激活的修改器數量

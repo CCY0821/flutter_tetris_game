@@ -195,7 +195,7 @@ class PieceProviderStack {
   /// 添加新的攔截器到堆疊頂部（LIFO）
   void push(IPieceProvider provider) {
     _stack.add(provider);
-    debugPrint('PieceProviderStack: Pushed ${provider.description}');
+    debugPrint('[PieceProviderStack] Pushed ${provider.description}');
   }
 
   /// 獲取下一個方塊類型
@@ -249,8 +249,9 @@ class PieceProviderStack {
 
   /// 獲取堆疊狀態描述（用於調試）
   String get stackDescription {
-    if (_stack.isEmpty)
+    if (_stack.isEmpty) {
       return 'Empty stack (using ${_baseProvider.description})';
+    }
 
     final descriptions = _stack.map((p) => p.description).toList();
     return 'Stack: ${descriptions.join(' -> ')} -> ${_baseProvider.description}';
@@ -258,7 +259,7 @@ class PieceProviderStack {
 
   /// 清空所有攔截器（用於重置遊戲狀態）
   void clear() {
-    debugPrint('PieceProviderStack: Clearing ${_stack.length} providers');
+    debugPrint('[PieceProviderStack] Clearing ${_stack.length} providers');
     _stack.clear();
   }
 

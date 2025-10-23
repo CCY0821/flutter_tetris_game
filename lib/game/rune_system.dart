@@ -370,16 +370,16 @@ class RuneSystem {
 
   /// 初始化符文槽
   void _initializeSlots() {
-    debugPrint('RuneSystem: Initializing slots...');
+    debugPrint('[RuneSystem] Initializing slots...');
     for (int i = 0; i < slots.length; i++) {
       final runeType = loadout.getSlot(i);
-      debugPrint('RuneSystem: Slot $i - runeType: $runeType');
+      debugPrint('[RuneSystem] Slot $i - runeType: $runeType');
       slots[i].runeType = runeType;
       slots[i].reset();
-      debugPrint('RuneSystem: Slot $i - after reset: state=${slots[i].state}');
+      debugPrint('[RuneSystem] Slot $i - after reset: state=${slots[i].state}');
     }
     _updateTemporalMutex();
-    debugPrint('RuneSystem: Slots initialized');
+    debugPrint('[RuneSystem] Slots initialized');
   }
 
   /// 訂閱事件
@@ -524,7 +524,7 @@ class RuneSystem {
 
       return RuneCastResult.success;
     } catch (e) {
-      debugPrint('RuneSystem: Cast error - $e');
+      debugPrint('[RuneSystem] Cast error - $e');
       return RuneCastResult.failure(RuneCastError.systemError, '施法失敗: $e');
     }
   }
@@ -576,7 +576,7 @@ class RuneSystem {
           return _executeElementMorph(board, gameContext);
       }
     } catch (e) {
-      debugPrint('RuneSystem: Execute error - $e');
+      debugPrint('[RuneSystem] Execute error - $e');
       return RuneCastResult.failure(RuneCastError.systemError, '效果執行失敗: $e');
     }
   }
