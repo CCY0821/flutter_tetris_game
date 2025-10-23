@@ -36,7 +36,7 @@
 
 ### 優先級 2：中優先級優化（7 項）
 
-#### 優化 7：提取棋盤座標計算邏輯 🔴 推薦優先
+#### 優化 7：提取棋盤座標計算邏輯 ✅ 已完成
 
 **位置**：`lib/game/rune_system.dart` 多處
 
@@ -46,27 +46,33 @@ final startRow = math.max(0, board.length - 20);
 ```
 此計算模式重複出現在多個符文執行方法中。
 
-**建議方案**：
+**實施方案**：
 ```dart
-// 在 lib/game/game_state.dart 添加
-static int getVisibleAreaStartRow(int boardHeight) {
-  return math.max(0, boardHeight - visibleRowCount);
+// 創建新檔案 lib/game/board_constants.dart
+class BoardConstants {
+  static int getVisibleAreaStartRow(int boardHeight) {
+    return boardHeight > visibleRowCount ? boardHeight - visibleRowCount : 0;
+  }
 }
 ```
 
-**影響**：✅ 無邏輯變化，提升可維護性
+**實施結果**：
+- ✅ 創建 `lib/game/board_constants.dart` 統一管理棋盤常數
+- ✅ 提取方法避免循環依賴問題
+- ✅ 替換 4 處重複計算：
+  - `lib/game/rune_targeting.dart` (3 處)
+  - `lib/game/rune_system.dart` (1 處)
+- ✅ 清理未使用的導入（`dart:math` in rune_targeting.dart）
+- ✅ flutter analyze 無新錯誤
+- ✅ flutter build 成功
 
-**實施步驟**：
-1. 在 `game_state.dart` 添加靜態方法
-2. 搜尋所有 `math.max(0, board.length - 20)` 模式
-3. 替換為 `GameState.getVisibleAreaStartRow(board.length)`
-4. 運行測試驗證
+**影響**：✅ 無邏輯變化，提升可維護性，消除循環依賴
 
-**預計時間**：15 分鐘
+**完成時間**：2025-10-23
 
 ---
 
-#### 優化 8：統一空值安全模式
+#### 優化 8：統一空值安全模式 ✅ 已完成
 
 **位置**：`lib/game/game_logic.dart` 多處
 
@@ -80,7 +86,7 @@ if (canMove(gameState.currentTetromino!, dx: -1)) { ... }
 ```
 兩種模式混用，缺乏一致性。
 
-**建議方案**：
+**實施方案**：
 統一使用局部變數模式：
 ```dart
 void moveLeft() {
@@ -93,18 +99,27 @@ void moveLeft() {
 }
 ```
 
-**影響**：✅ 無邏輯變化，提升代碼一致性
+**實施結果**：
+- ✅ 重構 7 個方法以使用一致的局部變數模式：
+  - `drop()` (line 169)
+  - `moveLeft()` (line 218)
+  - `moveRight()` (line 227)
+  - `moveDown()` (line 236)
+  - `hardDrop()` (line 252)
+  - `rotatePiece()` (line 291)
+  - `calculateGhostPiece()` (line 381)
+- ✅ 消除所有強制解包操作符 (`!`)
+- ✅ 提升代碼可讀性和一致性
+- ✅ flutter analyze 無新錯誤
+- ✅ flutter build 成功
 
-**實施步驟**：
-1. 檢查 `game_logic.dart` 中所有使用 `currentTetromino` 的方法
-2. 統一使用局部變數 + null 檢查模式
-3. 測試所有移動/旋轉操作
+**影響**：✅ 無邏輯變化，提升代碼一致性和安全性
 
-**預計時間**：20 分鐘
+**完成時間**：2025-10-23
 
 ---
 
-#### 優化 9：移除未使用的導入
+#### 優化 9：移除未使用的導入 ✅ 已完成
 
 **位置**：`tools/chroma_key_processor_v2.dart:2`
 
@@ -113,44 +128,50 @@ void moveLeft() {
 import 'dart:math' as math; // 未使用
 ```
 
-**建議方案**：
-刪除該行。
+**實施結果**：
+- ✅ 確認 `dart:math` 未在檔案中使用
+- ✅ 移除未使用的導入
+- ✅ 運行 `dart format` 格式化代碼
+- ✅ flutter analyze 確認警告已消除
 
-**影響**：✅ 無邏輯變化，清理代碼
+**影響**：✅ 無邏輯變化，清理代碼，消除 1 個 flutter analyze 警告
 
-**實施步驟**：
-1. 檢查檔案是否真的未使用 `math`
-2. 刪除該導入
-3. 運行 `flutter analyze` 確認
-
-**預計時間**：5 分鐘
+**完成時間**：2025-10-23
 
 ---
 
-#### 優化 10：清理過時註釋
+#### 優化 10：清理過時註釋 ✅ 已完成
 
-**位置**：`lib/game/game_logic.dart:557-558, 570-572`
+**位置**：`lib/game/rune_system.dart:563-564, 567-568, 575-578`
 
 **問題**：
 ```dart
 // case RuneType.earthquake: // 已移除
 //   return _executeEarthquake(board);
 
+// case RuneType.columnBreaker: // 已移除
+//   return _executeColumnBreaker(board, gameContext);
+
 // case RuneType.timeSlow: // 已移除
+//   return _executeTimeSlow();
+
 // case RuneType.timeStop: // 已移除
+//   return _executeTimeStop();
 ```
 
-**建議方案**：
-移除已註釋的舊代碼（這些代碼已經被標記為「已移除」超過一次提交週期）。
+**實施結果**：
+- ✅ 移除 4 處過時的註釋代碼：
+  - `RuneType.earthquake`
+  - `RuneType.columnBreaker`
+  - `RuneType.timeSlow`
+  - `RuneType.timeStop`
+- ✅ 清理 switch 語句，提升可讀性
+- ✅ 代碼可通過 git history 找回
+- ✅ flutter analyze 無錯誤
 
-**影響**：✅ 無邏輯變化，清理代碼
+**影響**：✅ 無邏輯變化，清理代碼，減少 8 行過時註釋
 
-**實施步驟**：
-1. 確認這些符文已完全移除
-2. 刪除註釋的代碼
-3. 檢查 git history 確保可以找回（如需要）
-
-**預計時間**：5 分鐘
+**完成時間**：2025-10-23
 
 ---
 
@@ -374,9 +395,9 @@ static int applyRowGravity(
 | 優先級 | 數量 | 已完成 | 待完成 | 預計總時間 |
 |--------|------|--------|--------|------------|
 | 優先級 1（高） | 6 | 6 ✅ | 0 | 已完成 |
-| 優先級 2（中） | 7 | 0 | 7 | ~1.5 小時 |
+| 優先級 2（中） | 7 | 4 ✅ | 3 | ~1.00 小時 |
 | 優先級 3（低） | 14+ | 0 | 14+ | ~4 小時 |
-| **總計** | **27+** | **6** | **21+** | **~5.5 小時** |
+| **總計** | **27+** | **10** | **17+** | **~5.00 小時** |
 
 ---
 
@@ -539,6 +560,21 @@ static const bool _dbgOnlyBoardAndSpell = false;
 
 ## 📝 更新日誌
 
+### 2025-10-23
+- ✅ 完成優先級 2 優化 7-10（共 4 項）
+- **優化 7**：提取棋盤座標計算邏輯
+  - 📁 新增檔案：`lib/game/board_constants.dart`
+  - 🔧 優化 4 處重複計算邏輯
+  - ✅ 避免循環依賴問題
+- **優化 8**：統一空值安全模式
+  - 🔧 重構 7 個方法使用一致的局部變數模式
+  - 🛡️ 消除所有強制解包操作符
+- **優化 9**：移除未使用的導入
+  - 🧹 移除 `tools/chroma_key_processor_v2.dart` 中的 `dart:math` 導入
+- **優化 10**：清理過時註釋
+  - 🧹 移除 4 處過時的符文註釋（earthquake, columnBreaker, timeSlow, timeStop）
+  - 📉 減少 8 行過時代碼
+
 ### 2025-10-22
 - ✅ 完成優先級 1 全部 6 項優化
 - ✅ Commit `23a6578` 已推送到 GitHub
@@ -547,12 +583,12 @@ static const bool _dbgOnlyBoardAndSpell = false;
 - 📊 提升文檔覆蓋率
 
 ### 下次更新
-- 待實施優先級 2 的優化項目
-- 更新完成狀態和統計數據
+- 待實施優先級 2 的優化項目 11-13
+- 待實施優先級 3 的優化項目
 
 ---
 
-**最後更新**：2025-10-22
-**文檔版本**：v1.0
+**最後更新**：2025-10-23
+**文檔版本**：v1.4
 **負責人**：Claude Code
-**狀態**：優先級 1 已完成，優先級 2-3 待實施
+**狀態**：優先級 1 已完成，優先級 2 進行中（4/7 完成，57%），優先級 3 待實施

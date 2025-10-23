@@ -1,7 +1,7 @@
-import 'dart:math' as math;
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import '../core/game_config.dart';
+import 'board_constants.dart';
 
 /// 符文目標選取系統 - 比例化和統計化
 class RuneTargeting {
@@ -28,7 +28,7 @@ class RuneTargeting {
     double ratio, {
     bool preferHighDensity = true,
   }) {
-    final visibleStartRow = math.max(0, board.length - 20);
+    final visibleStartRow = BoardConstants.getVisibleAreaStartRow(board.length);
     final visibleRows = <int>[];
 
     // 收集可見區域的行
@@ -85,10 +85,11 @@ class RuneTargeting {
   }
 
   /// 計算列密度（方塊數量 / 可見行數）
+  // ignore: unused_element
   static double _calculateColumnDensity(List<List<Color?>> board, int col) {
     if (board.isEmpty || col < 0 || col >= board[0].length) return 0.0;
 
-    final visibleStartRow = math.max(0, board.length - 20);
+    final visibleStartRow = BoardConstants.getVisibleAreaStartRow(board.length);
     int blockCount = 0;
     int totalRows = board.length - visibleStartRow;
 
@@ -101,7 +102,7 @@ class RuneTargeting {
 
   /// 獲取高密度行（用於智能目標選取）
   static List<int> getHighDensityRows(List<List<Color?>> board, int count) {
-    final visibleStartRow = math.max(0, board.length - 20);
+    final visibleStartRow = BoardConstants.getVisibleAreaStartRow(board.length);
     final rows = <int>[];
 
     for (int row = visibleStartRow; row < board.length; row++) {

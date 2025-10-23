@@ -11,6 +11,7 @@ import 'rune_loadout.dart';
 import 'rune_batch_processor.dart';
 import 'rune_energy_manager.dart';
 import 'piece_provider.dart';
+import 'board_constants.dart';
 
 /// 重力模式枚舉
 enum GravityMode {
@@ -559,22 +560,14 @@ class RuneSystem {
           return _executeThunderStrike(board, gameContext);
         case RuneType.thunderStrikeLeft:
           return _executeThunderStrikeLeft(board, gameContext);
-        // case RuneType.earthquake: // 已移除
-        //   return _executeEarthquake(board);
         case RuneType.angelsGrace:
           return _executeAngelsGrace(board);
-        // case RuneType.columnBreaker: // 已移除
-        //   return _executeColumnBreaker(board, gameContext);
         case RuneType.dragonRoar:
           return _executeDragonRoar(board, gameContext);
         case RuneType.gravityReset:
           return _executeGravityReset(board, gameContext);
         case RuneType.titanGravity:
           return _executeTitanGravity(board, gameContext);
-        // case RuneType.timeSlow: // 已移除
-        //   return _executeTimeSlow();
-        // case RuneType.timeStop: // 已移除
-        //   return _executeTimeStop();
         case RuneType.timeChange:
           return _executeTimeChange();
         case RuneType.blessedCombo:
@@ -594,7 +587,7 @@ class RuneSystem {
     int maxBlocks = 0;
 
     // 只檢查可見區域的行 (假設可見區域是底部20行)
-    final startRow = math.max(0, board.length - 20);
+    final startRow = BoardConstants.getVisibleAreaStartRow(board.length);
 
     for (int row = startRow; row < board.length; row++) {
       int blockCount = 0;

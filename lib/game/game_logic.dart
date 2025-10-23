@@ -167,10 +167,11 @@ class GameLogic {
   }
 
   void drop() {
-    if (gameState.currentTetromino == null) return;
+    final currentTetro = gameState.currentTetromino;
+    if (currentTetro == null) return;
 
-    if (canMove(gameState.currentTetromino!, dy: 1)) {
-      gameState.currentTetromino!.y++;
+    if (canMove(currentTetro, dy: 1)) {
+      currentTetro.y++;
     } else {
       // 播放方塊落地音效
       gameState.audioService.playSoundEffect('piece_drop');
@@ -215,20 +216,29 @@ class GameLogic {
   }
 
   void moveLeft() {
-    if (canMove(gameState.currentTetromino!, dx: -1)) {
-      gameState.currentTetromino!.x--;
+    final currentTetro = gameState.currentTetromino;
+    if (currentTetro == null) return;
+
+    if (canMove(currentTetro, dx: -1)) {
+      currentTetro.x--;
     }
   }
 
   void moveRight() {
-    if (canMove(gameState.currentTetromino!, dx: 1)) {
-      gameState.currentTetromino!.x++;
+    final currentTetro = gameState.currentTetromino;
+    if (currentTetro == null) return;
+
+    if (canMove(currentTetro, dx: 1)) {
+      currentTetro.x++;
     }
   }
 
   void moveDown() {
-    if (canMove(gameState.currentTetromino!, dy: 1)) {
-      gameState.currentTetromino!.y++;
+    final currentTetro = gameState.currentTetromino;
+    if (currentTetro == null) return;
+
+    if (canMove(currentTetro, dy: 1)) {
+      currentTetro.y++;
       // 軟降得分
       int softDropPoints = gameState.scoringService.calculateSoftDropScore(1);
       gameState.score += softDropPoints;
@@ -240,13 +250,14 @@ class GameLogic {
 
   /// 硬降 (Hard Drop) - 瞬間將方塊降到最底部並鎖定
   void hardDrop() {
-    if (gameState.currentTetromino == null) return;
+    final currentTetro = gameState.currentTetromino;
+    if (currentTetro == null) return;
 
     int dropDistance = 0;
 
     // 計算可以下降的距離
-    while (canMove(gameState.currentTetromino!, dy: 1)) {
-      gameState.currentTetromino!.y++;
+    while (canMove(currentTetro, dy: 1)) {
+      currentTetro.y++;
       dropDistance++;
     }
 
@@ -278,9 +289,8 @@ class GameLogic {
 
   /// 使用 SRS 系統執行旋轉
   void rotatePiece({bool clockwise = true}) {
-    if (gameState.currentTetromino == null) return;
-
-    final currentPiece = gameState.currentTetromino!;
+    final currentPiece = gameState.currentTetromino;
+    if (currentPiece == null) return;
 
     // 嘗試 SRS 旋轉
     final result = SRSSystem.attemptRotation(
@@ -369,10 +379,11 @@ class GameLogic {
   /// 計算Ghost piece的落地位置
   /// 返回當前方塊如果直接下落會到達的最終位置
   Tetromino? calculateGhostPiece() {
-    if (gameState.currentTetromino == null) return null;
+    final currentTetro = gameState.currentTetromino;
+    if (currentTetro == null) return null;
 
     // 創建當前方塊的副本作為Ghost piece
-    final ghostPiece = gameState.currentTetromino!.copy();
+    final ghostPiece = currentTetro.copy();
 
     // 不斷向下移動直到無法移動為止
     while (canMove(ghostPiece, dy: 1)) {
@@ -380,7 +391,7 @@ class GameLogic {
     }
 
     // 如果Ghost piece和當前方塊位置相同，則不顯示Ghost piece
-    if (ghostPiece.y == gameState.currentTetromino!.y) {
+    if (ghostPiece.y == currentTetro.y) {
       return null;
     }
 
