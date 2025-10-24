@@ -83,7 +83,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
               ),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.settings,
                     color: GameTheme.textPrimary,
                     size: 20,
@@ -101,7 +101,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.close,
                       color: GameTheme.textPrimary,
                       size: 20,
@@ -191,7 +191,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
             GameTheme.primaryDark.withOpacity(0.3),
           ],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadiusLarge),
         border: Border.all(
           color: GameTheme.gridLine.withOpacity(0.3),
           width: 1,
@@ -252,11 +252,11 @@ class _SettingsPanelState extends State<SettingsPanel> {
           GameTheme.accentBlue.withOpacity(0.8),
         ),
       ),
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.help_outline, size: 18),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Text('View Controls'),
         ],
       ),
@@ -271,11 +271,11 @@ class _SettingsPanelState extends State<SettingsPanel> {
           cyberpunkPrimary.withOpacity(0.8),
         ),
       ),
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.auto_awesome, size: 18, color: Colors.white),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Text('View Runes', style: TextStyle(color: Colors.white)),
         ],
       ),
@@ -290,11 +290,11 @@ class _SettingsPanelState extends State<SettingsPanel> {
           GameTheme.accentBlue.withOpacity(0.8),
         ),
       ),
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.tune, size: 18),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Text('Configure Loadout'),
         ],
       ),
@@ -395,7 +395,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(
+              child: const Text(
                 '確定',
                 style: GameTheme.accentStyle,
               ),
@@ -437,7 +437,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,

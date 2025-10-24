@@ -257,7 +257,8 @@ class GameUIComponents {
                               margin: const EdgeInsets.all(0.2),
                               decoration: BoxDecoration(
                                 color: c ?? GameTheme.gridLine.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(1),
+                                borderRadius: BorderRadius.circular(
+                                    cyberpunkBorderRadiusTiny),
                                 border: c != null
                                     ? null
                                     : Border.all(
@@ -377,6 +378,7 @@ class GameUIComponents {
   }
 
   // 垂直虛線繪製器
+  // ignore: unused_element
   static Widget _buildDashedDivider() {
     return Container(
       width: 1,
@@ -667,8 +669,8 @@ class GameUIComponents {
                                           color: c ??
                                               GameTheme.gridLine
                                                   .withOpacity(0.1),
-                                          borderRadius:
-                                              BorderRadius.circular(2),
+                                          borderRadius: BorderRadius.circular(
+                                              cyberpunkBorderRadiusSmall),
                                           border: c != null
                                               ? null
                                               : Border.all(
@@ -732,7 +734,7 @@ class GameUIComponents {
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: GameTheme.gameBoardBg.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadiusMedium),
       ),
       child: Column(
         children: preview
@@ -745,7 +747,8 @@ class GameUIComponents {
                           margin: const EdgeInsets.all(0.25),
                           decoration: BoxDecoration(
                             color: c ?? Colors.transparent,
-                            borderRadius: BorderRadius.circular(1),
+                            borderRadius: BorderRadius.circular(
+                                cyberpunkBorderRadiusTiny),
                           ),
                         ),
                       )
@@ -782,7 +785,7 @@ class GameUIComponents {
       padding: const EdgeInsets.all(1),
       decoration: BoxDecoration(
         color: GameTheme.gameBoardBg.withOpacity(0.4),
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadiusSmall),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -822,7 +825,7 @@ class GameUIComponents {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
         border: Border.all(
           color: _getComboColor(combo).withOpacity(0.5),
           width: 1,
@@ -892,7 +895,7 @@ class GameUIComponents {
             _getComboColor(combo).withOpacity(0.1),
           ],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadiusLarge),
         border: Border.all(
           color: _getComboColor(combo),
           width: 2,
@@ -944,7 +947,7 @@ class GameUIComponents {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: GameTheme.panelGradient,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadiusLarge),
         border: Border.all(
           color: GameTheme.boardBorder,
           width: 2,
@@ -991,7 +994,7 @@ class GameUIComponents {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: GameTheme.panelGradient,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadiusLarge),
         border: Border.all(
           color: GameTheme.boardBorder,
           width: 2,
@@ -1009,7 +1012,7 @@ class GameUIComponents {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: GameTheme.gameBoardBg.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
             ),
             child: Column(
               children: preview
@@ -1023,7 +1026,8 @@ class GameUIComponents {
                                 decoration: BoxDecoration(
                                   color:
                                       c ?? GameTheme.gridLine.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(2),
+                                  borderRadius: BorderRadius.circular(
+                                      cyberpunkBorderRadiusSmall),
                                   border: c != null
                                       ? null
                                       : Border.all(
@@ -1139,7 +1143,7 @@ class GameUIComponents {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
         border: Border.all(color: GameTheme.highlight.withOpacity(0.3)),
       ),
       child: Column(
@@ -1391,7 +1395,7 @@ class GameUIComponents {
                     color: AudioService().isMusicEnabled
                         ? GameTheme.buttonSuccess.withOpacity(0.8)
                         : GameTheme.primaryDark.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
                   ),
                   child: IconButton(
                     onPressed: () {
@@ -1415,7 +1419,7 @@ class GameUIComponents {
                     children: [
                       Text(
                         'MUSIC ${(AudioService().musicVolume * 100).round()}%',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: GameTheme.textAccent,
                           fontWeight: FontWeight.bold,
@@ -1461,7 +1465,7 @@ class GameUIComponents {
                     color: AudioService().isSfxEnabled
                         ? GameTheme.buttonSuccess.withOpacity(0.8)
                         : GameTheme.primaryDark.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
                   ),
                   child: IconButton(
                     onPressed: () {
@@ -1485,7 +1489,7 @@ class GameUIComponents {
                     children: [
                       Text(
                         'SFX ${(AudioService().sfxVolume * 100).round()}%',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: GameTheme.textAccent,
                           fontWeight: FontWeight.bold,
@@ -1536,7 +1540,7 @@ class GameUIComponents {
               color: isEnabled
                   ? GameTheme.buttonSuccess.withOpacity(0.8)
                   : GameTheme.primaryDark.withOpacity(0.8),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
             ),
             child: IconButton(
               onPressed: onToggle,
@@ -1570,7 +1574,7 @@ class GameUIComponents {
           Container(
             decoration: BoxDecoration(
               color: GameTheme.accentBlue.withOpacity(0.8),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
             ),
             child: IconButton(
               onPressed: () => _showControlHelp(context),
@@ -1653,7 +1657,7 @@ class GameUIComponents {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(
+              child: const Text(
                 '確定',
                 style: GameTheme.accentStyle,
               ),

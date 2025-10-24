@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/scoring_service.dart';
 import '../theme/game_theme.dart';
 import '../utils/game_colors.dart';
+import '../core/constants.dart';
 
 /// 連擊統計資訊面板
 class ComboStatsPanel extends StatelessWidget {
@@ -22,7 +23,7 @@ class ComboStatsPanel extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: GameTheme.panelGradient,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadiusLarge),
         border: Border.all(
           color: GameTheme.boardBorder,
           width: 2,

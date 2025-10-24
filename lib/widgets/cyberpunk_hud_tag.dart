@@ -24,7 +24,7 @@ class CyberpunkHudTag extends StatelessWidget {
       decoration: BoxDecoration(
         // 深底
         color: cyberpunkBgDeep,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadiusMedium),
         // 細描邊
         border: Border.all(
           color: cyberpunkPrimary.withOpacity(0.4),
@@ -62,7 +62,7 @@ class CyberpunkHudTag extends StatelessWidget {
             if (parts.isNotEmpty) TextSpan(text: parts[0]),
             TextSpan(
               text: highlightText,
-              style: TextStyle(
+              style: const TextStyle(
                 color: cyberpunkSecondary, // 強調鍵位用 secondary
                 fontWeight: FontWeight.bold,
               ),

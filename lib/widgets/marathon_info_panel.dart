@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../game/marathon_system.dart';
 import '../utils/game_colors.dart';
+import '../core/constants.dart';
 
 /// Marathon 模式資訊面板
 class MarathonInfoPanel extends StatelessWidget {
@@ -24,7 +25,7 @@ class MarathonInfoPanel extends StatelessWidget {
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.8),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
         border: Border.all(color: Colors.cyan, width: 2),
       ),
       child: Column(
@@ -139,7 +140,7 @@ class MarathonInfoPanel extends StatelessWidget {
           height: 8,
           decoration: BoxDecoration(
             color: Colors.grey[800],
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(cyberpunkBorderRadiusMedium),
           ),
           child: FractionallySizedBox(
             alignment: Alignment.centerLeft,
@@ -151,7 +152,8 @@ class MarathonInfoPanel extends StatelessWidget {
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius:
+                    BorderRadius.circular(cyberpunkBorderRadiusMedium),
               ),
             ),
           ),
@@ -262,7 +264,7 @@ class MarathonMiniInfo extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadiusMedium),
         border: Border.all(color: Colors.cyan.withOpacity(0.5)),
       ),
       child: Row(
@@ -292,7 +294,7 @@ class MarathonMiniInfo extends StatelessWidget {
             height: 3,
             decoration: BoxDecoration(
               color: Colors.grey[700],
-              borderRadius: BorderRadius.circular(1),
+              borderRadius: BorderRadius.circular(cyberpunkBorderRadiusTiny),
             ),
             child: FractionallySizedBox(
               alignment: Alignment.centerLeft,
@@ -300,7 +302,8 @@ class MarathonMiniInfo extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.cyan,
-                  borderRadius: BorderRadius.circular(1),
+                  borderRadius:
+                      BorderRadius.circular(cyberpunkBorderRadiusTiny),
                 ),
               ),
             ),

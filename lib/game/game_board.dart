@@ -768,7 +768,8 @@ class _GameBoardState extends State<GameBoard>
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: cyberpunkPanel,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius:
+                      BorderRadius.circular(cyberpunkBorderRadiusLarge),
                   border: Border.all(color: cyberpunkPrimary, width: 1),
                 ),
                 child: Column(
@@ -799,7 +800,8 @@ class _GameBoardState extends State<GameBoard>
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: cyberpunkPanel.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius:
+                      BorderRadius.circular(cyberpunkBorderRadiusLarge),
                   border: Border.all(
                       color: cyberpunkGridLine.withOpacity(0.3), width: 1),
                 ),
@@ -857,7 +859,8 @@ class _GameBoardState extends State<GameBoard>
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: cyberpunkPanel.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius:
+                      BorderRadius.circular(cyberpunkBorderRadiusLarge),
                   border: Border.all(
                       color: const Color(0xFFE0E0E0).withOpacity(0.2),
                       width: 1),
@@ -1219,7 +1222,8 @@ class _GameBoardState extends State<GameBoard>
                               ],
                             ),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(
+                                  cyberpunkBorderRadiusLarge),
                               child: Stack(
                                 children: [
                                   // 🌃 背景漸層（移到 Stack 最底層）
@@ -1311,7 +1315,8 @@ class _GameBoardState extends State<GameBoard>
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
                                   color: GameTheme.primaryDark.withOpacity(0.4),
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(
+                                      cyberpunkBorderRadiusLarge),
                                   border: Border.all(
                                     color:
                                         GameTheme.accentBlue.withOpacity(0.3),
@@ -1435,7 +1440,8 @@ class _GameBoardState extends State<GameBoard>
                                 decoration: BoxDecoration(
                                   color:
                                       GameTheme.secondaryDark.withOpacity(0.4),
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(
+                                      cyberpunkBorderRadiusLarge),
                                   border: Border.all(
                                     color: GameTheme.gridLine.withOpacity(0.3),
                                     width: 1,
@@ -1508,7 +1514,8 @@ class _GameBoardState extends State<GameBoard>
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color: GameTheme.primaryDark.withOpacity(0.5),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(
+                                    cyberpunkBorderRadiusLarge),
                                 border: Border.all(
                                   color: GameTheme.accentBlue.withOpacity(0.4),
                                   width: 1,

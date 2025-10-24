@@ -114,10 +114,19 @@ const double cyberpunkBorderWidth = 1.5;
 /// Cyberpunk 強調邊框寬度
 const double cyberpunkBorderWidthBold = 2.5;
 
-/// Cyberpunk 標準圓角
+/// Cyberpunk 極小圓角 - 用於細節裝飾、微小邊框
+const double cyberpunkBorderRadiusTiny = 1.0;
+
+/// Cyberpunk 小圓角 - 用於小型元素、細節組件
+const double cyberpunkBorderRadiusSmall = 2.0;
+
+/// Cyberpunk 中小圓角 - 用於按鈕、標籤、小卡片
+const double cyberpunkBorderRadiusMedium = 4.0;
+
+/// Cyberpunk 標準圓角 - 用於標準容器、面板
 const double cyberpunkBorderRadius = 8.0;
 
-/// Cyberpunk 大型圓角
+/// Cyberpunk 大型圓角 - 用於主要容器、大型面板
 const double cyberpunkBorderRadiusLarge = 12.0;
 
 // =============================================================================

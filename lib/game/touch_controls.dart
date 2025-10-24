@@ -348,7 +348,7 @@ class _TouchControlsState extends State<TouchControls> {
         height: slotSize,
         margin: const EdgeInsets.symmetric(vertical: 2),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -421,7 +421,8 @@ class _TouchControlsState extends State<TouchControls> {
                     padding: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.6),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius:
+                          BorderRadius.circular(cyberpunkBorderRadiusMedium),
                     ),
                     child: Builder(
                       builder: (context) {
@@ -463,7 +464,8 @@ class _TouchControlsState extends State<TouchControls> {
                     padding: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius:
+                          BorderRadius.circular(cyberpunkBorderRadiusMedium),
                       border: Border.all(
                         color: cyberpunkAccent.withOpacity(0.6),
                         width: 1,
@@ -524,7 +526,7 @@ class _TouchControlsState extends State<TouchControls> {
       height: slotSize,
       margin: const EdgeInsets.symmetric(vertical: 2),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -1094,7 +1096,7 @@ class _AnimatedToastState extends State<_AnimatedToast> {
                     widget.color.withOpacity(0.85),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
                 border: Border.all(
                   color: cyberpunkAccent.withOpacity(0.8),
                   width: 1.5,

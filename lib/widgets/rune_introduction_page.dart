@@ -23,7 +23,7 @@ class RuneIntroductionPage extends StatelessWidget {
           maxHeight: 800,
         ),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
@@ -31,7 +31,7 @@ class RuneIntroductionPage extends StatelessWidget {
               cyberpunkPanel,
               cyberpunkBgDeep,
             ],
-            stops: const [0.0, 0.5, 1.0],
+            stops: [0.0, 0.5, 1.0],
           ),
           borderRadius: BorderRadius.circular(cyberpunkBorderRadiusLarge),
           border: Border.all(
@@ -66,7 +66,7 @@ class RuneIntroductionPage extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.auto_awesome,
                     color: cyberpunkPrimary,
                     size: 24,
@@ -84,7 +84,7 @@ class RuneIntroductionPage extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.close,
                       color: cyberpunkPrimary,
                       size: 24,
@@ -92,7 +92,8 @@ class RuneIntroductionPage extends StatelessWidget {
                     style: IconButton.styleFrom(
                       backgroundColor: cyberpunkDanger.withOpacity(0.2),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius:
+                            BorderRadius.circular(cyberpunkBorderRadius),
                       ),
                     ),
                   ),
@@ -192,7 +193,7 @@ class RuneIntroductionPage extends StatelessWidget {
             cyberpunkBgDeep.withOpacity(0.5),
           ],
         ),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
         border: Border.all(
           color: rune.categoryColor.withOpacity(0.2),
           width: 1,
@@ -218,7 +219,7 @@ class RuneIntroductionPage extends StatelessWidget {
                   rune.categoryColor.withOpacity(0.1),
                 ],
               ),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
               border: Border.all(
                 color: rune.categoryColor.withOpacity(0.5),
                 width: 1.5,
@@ -272,7 +273,7 @@ class RuneIntroductionPage extends StatelessWidget {
                 Row(
                   children: [
                     if (rune.cooldown != null) ...[
-                      Icon(
+                      const Icon(
                         Icons.access_time,
                         size: 12,
                         color: cyberpunkTextSecondary,
@@ -288,7 +289,7 @@ class RuneIntroductionPage extends StatelessWidget {
                     ],
                     if (rune.duration != null) ...[
                       const SizedBox(width: 12),
-                      Icon(
+                      const Icon(
                         Icons.timer,
                         size: 12,
                         color: cyberpunkTextSecondary,
@@ -316,7 +317,7 @@ class RuneIntroductionPage extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
+        const Icon(
           Icons.battery_charging_full,
           size: 14,
           color: cyberpunkAccent,
@@ -333,7 +334,7 @@ class RuneIntroductionPage extends StatelessWidget {
                 color: index < cost
                     ? cyberpunkAccent
                     : cyberpunkAccent.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(cyberpunkBorderRadiusSmall),
                 boxShadow: index < cost
                     ? [
                         BoxShadow(

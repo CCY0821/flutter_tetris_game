@@ -163,7 +163,7 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
             style: IconButton.styleFrom(
               backgroundColor: Colors.red.withOpacity(0.2),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
               ),
             ),
           ),
@@ -291,7 +291,7 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
             color: index < cost
                 ? cyberpunkAccent
                 : cyberpunkAccent.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(1),
+            borderRadius: BorderRadius.circular(cyberpunkBorderRadiusTiny),
           ),
         ),
       ),
@@ -418,7 +418,7 @@ class _RuneSelectionPageState extends State<RuneSelectionPage> {
                 height: 48,
                 decoration: BoxDecoration(
                   color: definition.themeColor.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
                 ),
                 child: Icon(
                   definition.icon,

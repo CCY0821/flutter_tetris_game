@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 import '../config/ad_config.dart';
+import '../core/constants.dart';
 import '../services/ads/ad_factory.dart';
 import '../services/ads/ad_service_interface.dart';
 import '../services/ads/admob_service.dart';
@@ -273,7 +274,8 @@ class _AdBannerState extends State<AdBanner> with WidgetsBindingObserver {
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 decoration: BoxDecoration(
                   color: Colors.black54,
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius:
+                      BorderRadius.circular(cyberpunkBorderRadiusSmall),
                 ),
                 child: Text(
                   AdFactory.currentPlatformName,

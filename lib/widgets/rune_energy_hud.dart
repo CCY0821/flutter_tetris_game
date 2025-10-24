@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/pixel_snap.dart';
 import '../game/rune_energy_manager.dart';
+import '../core/constants.dart';
 
 /// 能量条实现方案
 enum EnergyCellImplementation {
@@ -234,7 +235,7 @@ class _EnergyCellState extends State<EnergyCell>
       width: pixelAlignedWidth,
       height: pixelAlignedHeight,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
         border: Border.all(
           color: widget.borderColor,
           width: snap(1.0, devicePixelRatio),
