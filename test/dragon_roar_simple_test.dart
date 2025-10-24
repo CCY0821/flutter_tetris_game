@@ -50,7 +50,7 @@ void main() {
       expect(gameState.currentTetromino, isNotNull); // 有活動方塊
 
       // 等待避免節流
-      await Future.delayed(Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 300));
 
       // 執行施法
       final result = gameLogic.castRune(0);
@@ -76,7 +76,7 @@ void main() {
       gameState.currentTetromino = null;
 
       // 等待避免節流
-      await Future.delayed(Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 300));
 
       final result = gameLogic.castRune(0);
 
@@ -96,7 +96,7 @@ void main() {
       runeSystem.setEnergyManager(energyManager);
 
       // 等待避免節流
-      await Future.delayed(Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 300));
 
       final result = gameLogic.castRune(0);
 
@@ -132,7 +132,7 @@ void main() {
       expect(blocksBefore, 9, reason: '應該有9個方塊（3行x3列）');
 
       // 等待避免節流
-      await Future.delayed(Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 300));
 
       // 執行施法
       final result = gameLogic.castRune(0);
@@ -156,7 +156,7 @@ void main() {
       gameState.currentTetromino = Tetromino.fromType(TetrominoType.T, 10);
 
       // 等待避免節流
-      await Future.delayed(Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 300));
 
       // 第一次施法
       final result1 = gameLogic.castRune(0);
@@ -166,7 +166,7 @@ void main() {
       energyManager.addScore(30);
 
       // 等待避免節流
-      await Future.delayed(Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 300));
 
       // 立即第二次施法應該失敗（冷卻中）
       final result2 = gameLogic.castRune(0);

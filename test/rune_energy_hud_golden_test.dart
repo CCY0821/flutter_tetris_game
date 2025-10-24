@@ -201,7 +201,7 @@ void main() {
             tester.view.resetDevicePixelRatio();
           });
 
-          final energyStatus = const RuneEnergyStatus(
+          const energyStatus = RuneEnergyStatus(
             currentBars: 2,
             maxBars: 3,
             currentScore: 275,
@@ -300,7 +300,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          MaterialApp(
+          const MaterialApp(
             home: Scaffold(
               body: Center(
                 child: RuneEnergyHUD(
