@@ -5,6 +5,7 @@ import '../services/audio_service.dart';
 import '../services/scoring_service.dart';
 import '../services/high_score_service.dart';
 import '../core/game_persistence.dart';
+import '../core/ui_constants.dart';
 import 'marathon_system.dart';
 import 'rune_energy_manager.dart';
 import 'rune_system.dart';
@@ -241,8 +242,8 @@ class GameState {
     _gameEpoch++;
     debugPrint('[GameState] Starting new game, epoch = $_gameEpoch');
 
-    // ✅ 凍結輸入 150ms，防止重複事件
-    freezeInput(const Duration(milliseconds: 150));
+    // ✅ 凍結輸入，防止重複事件
+    freezeInput(AnimationConstants.inputFreezeDuration);
 
     initBoard();
     score = 0;
@@ -409,8 +410,9 @@ class GameState {
       // 取消現有的計時器
       _shakeTimer?.cancel();
 
-      // 400ms後重置狀態
-      _shakeTimer = Timer(const Duration(milliseconds: 400), () {
+      // 震動結束後重置狀態
+      _shakeTimer = Timer(
+          const Duration(milliseconds: AnimationConstants.shakeDurationMs), () {
         _isScreenShaking = false;
         _shakeTimer = null;
       });

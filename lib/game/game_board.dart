@@ -16,6 +16,7 @@ import '../widgets/rune_energy_hud.dart';
 import '../theme/hud_spacing.dart';
 import '../core/pixel_snap.dart';
 import '../core/constants.dart';
+import '../core/ui_constants.dart';
 import 'rune_events.dart';
 import 'spell_animation_controller.dart';
 import 'shaders/chroma_key.dart';
@@ -329,8 +330,9 @@ class _GameBoardState extends State<GameBoard>
       // 取消現有計時器
       _shakeTimer?.cancel();
 
-      // 400ms後停止震動
-      _shakeTimer = Timer(const Duration(milliseconds: 400), () {
+      // 震動結束後停止
+      _shakeTimer = Timer(
+          const Duration(milliseconds: AnimationConstants.shakeDurationMs), () {
         if (mounted) {
           _shakeController.stop();
           _shakeController.reset();

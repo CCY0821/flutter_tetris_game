@@ -581,6 +581,33 @@ class RuneSystem {
     }
   }
 
+  /// 清除指定區域的方塊（通用工具函數）
+  ///
+  /// [board] 遊戲棋盤
+  /// [startRow] 起始行（包含）
+  /// [endRow] 結束行（不包含）
+  /// [startCol] 起始列（包含）
+  /// [endCol] 結束列（不包含）
+  /// 返回清除的方塊數量
+  int _clearRegion(
+    List<List<Color?>> board,
+    int startRow,
+    int endRow,
+    int startCol,
+    int endCol,
+  ) {
+    int clearedCount = 0;
+    for (int row = startRow; row < endRow && row < board.length; row++) {
+      for (int col = startCol; col < endCol && col < board[row].length; col++) {
+        if (board[row][col] != null) {
+          board[row][col] = null;
+          clearedCount++;
+        }
+      }
+    }
+    return clearedCount;
+  }
+
   /// 選擇最佳的清除目標行（已落地方塊最多的行）
   int _pickBestRowToClear(List<List<Color?>> board) {
     int bestRow = -1;
@@ -651,14 +678,10 @@ class RuneSystem {
     debugPrint(
         '[FlameBurst] Target row $targetRow has $blockCount blocks before clearing');
 
-    // 階段1：直接執行清除操作
-    int clearedCount = 0;
-    for (int col = 0; col < board[targetRow].length; col++) {
-      if (board[targetRow][col] != null) {
-        board[targetRow][col] = null;
-        clearedCount++;
-      }
-    }
+    // 階段1：直接執行清除操作（使用通用工具函數）
+    final boardWidth = board[targetRow].length;
+    final clearedCount =
+        _clearRegion(board, targetRow, targetRow + 1, 0, boardWidth);
     debugPrint('[FlameBurst] Cleared $clearedCount blocks from row $targetRow');
 
     // 階段2：上方方塊整體下移重力效果
@@ -714,18 +737,11 @@ class RuneSystem {
     // 可見區域範圍 (完全仿照 Flame Burst)
     final startRow = math.max(0, boardHeight - 20);
 
-    // 直接清除操作 - 雙列版本
+    // 直接清除操作 - 雙列版本（使用通用工具函數）
     int totalClearedBlocks = 0;
     for (int targetColumn in targetColumns) {
-      int columnClearedCount = 0;
-
-      // 清除單列 (仿照 Flame Burst 的行清除邏輯)
-      for (int row = startRow; row < boardHeight; row++) {
-        if (board[row][targetColumn] != null) {
-          board[row][targetColumn] = null;
-          columnClearedCount++;
-        }
-      }
+      final columnClearedCount = _clearRegion(
+          board, startRow, boardHeight, targetColumn, targetColumn + 1);
 
       debugPrint(
           '[ThunderStrike] Cleared $columnClearedCount blocks from column $targetColumn');
@@ -762,18 +778,11 @@ class RuneSystem {
     // 可見區域範圍 (完全仿照 Thunder Strike)
     final startRow = math.max(0, boardHeight - 20);
 
-    // 直接清除操作 - 雙列版本
+    // 直接清除操作 - 雙列版本（使用通用工具函數）
     int totalClearedBlocks = 0;
     for (int targetColumn in targetColumns) {
-      int columnClearedCount = 0;
-
-      // 清除單列 (仿照 Thunder Strike 的雙列清除邏輯)
-      for (int row = startRow; row < boardHeight; row++) {
-        if (board[row][targetColumn] != null) {
-          board[row][targetColumn] = null;
-          columnClearedCount++;
-        }
-      }
+      final columnClearedCount = _clearRegion(
+          board, startRow, boardHeight, targetColumn, targetColumn + 1);
 
       debugPrint(
           '[ThunderStrikeLeft] Cleared $columnClearedCount blocks from column $targetColumn');
@@ -807,18 +816,9 @@ class RuneSystem {
     debugPrint(
         '[AngelsGrace] Clearing visible area: rows $startRow-${boardHeight - 1} (all columns)');
 
-    // 直接清除操作 - 清空所有可視區域方塊
-    int totalClearedBlocks = 0;
-
-    // 清除可視區域的所有方塊
-    for (int row = startRow; row < boardHeight; row++) {
-      for (int col = 0; col < boardWidth; col++) {
-        if (board[row][col] != null) {
-          board[row][col] = null;
-          totalClearedBlocks++;
-        }
-      }
-    }
+    // 直接清除操作 - 清空所有可視區域方塊（使用通用工具函數）
+    final totalClearedBlocks =
+        _clearRegion(board, startRow, boardHeight, 0, boardWidth);
 
     debugPrint(
         '[AngelsGrace] Cleared $totalClearedBlocks blocks from visible area');
@@ -867,8 +867,10 @@ class RuneSystem {
     debugPrint(
         '[DragonRoar] Targeting visible area bottom 3 rows: ${targetRows.join(",")} (rows ${targetRows[0]}-${targetRows[2]})');
 
-    // 階段1：直接執行清除操作（仿照 Flame Burst）
+    // 階段1：直接執行清除操作（使用通用工具函數）
     int totalClearedBlocks = 0;
+    final boardWidth = board[0].length;
+
     for (int targetRow in targetRows) {
       // 檢查目標行在清除前的狀態
       int blockCount = 0;
@@ -880,16 +882,10 @@ class RuneSystem {
       debugPrint(
           '[DragonRoar] Target row $targetRow has $blockCount blocks before clearing');
 
-      int clearedCount = 0;
       debugPrint(
-          '[DragonRoar] Clearing row $targetRow: board width=${board[targetRow].length}');
-      for (int col = 0; col < board[targetRow].length; col++) {
-        if (board[targetRow][col] != null) {
-          debugPrint('[DragonRoar] Clearing block at [$targetRow, $col]');
-          board[targetRow][col] = null;
-          clearedCount++;
-        }
-      }
+          '[DragonRoar] Clearing row $targetRow: board width=$boardWidth');
+      final clearedCount =
+          _clearRegion(board, targetRow, targetRow + 1, 0, boardWidth);
       debugPrint(
           '[DragonRoar] Cleared $clearedCount blocks from row $targetRow');
 

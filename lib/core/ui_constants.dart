@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 
+// UI 動畫常數
+class AnimationConstants {
+  /// 畫面震動持續時間（毫秒）
+  static const int shakeDurationMs = 400;
+
+  /// 輸入凍結持續時間
+  static const Duration inputFreezeDuration = Duration(milliseconds: 150);
+}
+
 // UI 響應式常數
 class ResponsiveConstants {
   // cellSize 範圍
