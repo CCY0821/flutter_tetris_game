@@ -10,8 +10,8 @@ import '../core/constants.dart';
 import '../core/dual_logger.dart';
 
 /// 關鍵事件同步日誌，避免被節流沖掉
-void logCritical(String msg) {
-  logCrit(msg);
+void logCritical(String message) {
+  logCrit(message);
 }
 
 /// 浮動提示配置類
@@ -708,9 +708,9 @@ class _TouchControlsState extends State<TouchControls> {
                   Color(0xFF0D0D0D), // 更深底色
                 ],
               ),
-              boxShadow: [
+              boxShadow: const [
                 // 外框深色陰影
-                const BoxShadow(
+                BoxShadow(
                   color: Color(0x80000000),
                   offset: Offset(0, 2),
                   blurRadius: 4,
