@@ -131,10 +131,10 @@ class _GameBoardState extends State<GameBoard>
       debugPrint('[GameBoard] Loading Angel\'s Grace animation...');
       _angelsGraceAnimation = SpriteSheetAnimation(
         assetPath: "assets/animations/angels_grace.png",
-        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
-        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
-        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
-        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
+        animationType: AnimationType.fadeInOut,
+        fadeInDuration: AnimationConstants.spellFadeInDuration,
+        holdDuration: AnimationConstants.spellHoldDuration,
+        fadeOutDuration: AnimationConstants.spellFadeOutDuration,
       );
       await _angelsGraceAnimation!.load();
       debugPrint(
@@ -144,10 +144,10 @@ class _GameBoardState extends State<GameBoard>
       debugPrint('[GameBoard] Loading Flame Burst animation...');
       _flameBurstAnimation = SpriteSheetAnimation(
         assetPath: "assets/animations/flame_burst.png",
-        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
-        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
-        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
-        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
+        animationType: AnimationType.fadeInOut,
+        fadeInDuration: AnimationConstants.spellFadeInDuration,
+        holdDuration: AnimationConstants.spellHoldDuration,
+        fadeOutDuration: AnimationConstants.spellFadeOutDuration,
       );
       await _flameBurstAnimation!.load();
       debugPrint(
@@ -156,12 +156,11 @@ class _GameBoardState extends State<GameBoard>
       // 載入 Thunder Strike Left 動畫
       debugPrint('[GameBoard] Loading Thunder Strike Left animation...');
       _thunderStrikeLeftAnimation = SpriteSheetAnimation(
-        assetPath: "assets/animations/thunder_ strike_left.png",
-        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
-        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
-        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
-        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
-      );
+          assetPath: "assets/animations/thunder_ strike_left.png",
+          animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+          fadeInDuration: AnimationConstants.spellFadeInDuration,
+          holdDuration: AnimationConstants.spellHoldDuration,
+          fadeOutDuration: AnimationConstants.spellFadeOutDuration);
       await _thunderStrikeLeftAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Thunder Strike Left animation loaded successfully (${_thunderStrikeLeftAnimation!.isLoaded})');
@@ -169,12 +168,11 @@ class _GameBoardState extends State<GameBoard>
       // 載入 Thunder Strike Right 動畫
       debugPrint('[GameBoard] Loading Thunder Strike Right animation...');
       _thunderStrikeRightAnimation = SpriteSheetAnimation(
-        assetPath: "assets/animations/thunder_ strike_right.png",
-        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
-        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
-        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
-        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
-      );
+          assetPath: "assets/animations/thunder_ strike_right.png",
+          animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+          fadeInDuration: AnimationConstants.spellFadeInDuration,
+          holdDuration: AnimationConstants.spellHoldDuration,
+          fadeOutDuration: AnimationConstants.spellFadeOutDuration);
       await _thunderStrikeRightAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Thunder Strike Right animation loaded successfully (${_thunderStrikeRightAnimation!.isLoaded})');
@@ -182,12 +180,11 @@ class _GameBoardState extends State<GameBoard>
       // 載入 Blessed Combo 動畫
       debugPrint('[GameBoard] Loading Blessed Combo animation...');
       _blessedComboAnimation = SpriteSheetAnimation(
-        assetPath: "assets/animations/blessed_combo.png",
-        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
-        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
-        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
-        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
-      );
+          assetPath: "assets/animations/blessed_combo.png",
+          animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+          fadeInDuration: AnimationConstants.spellFadeInDuration,
+          holdDuration: AnimationConstants.spellHoldDuration,
+          fadeOutDuration: AnimationConstants.spellFadeOutDuration);
       await _blessedComboAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Blessed Combo animation loaded successfully (${_blessedComboAnimation!.isLoaded})');
@@ -195,12 +192,11 @@ class _GameBoardState extends State<GameBoard>
       // 載入 Dragon Roar 動畫
       debugPrint('[GameBoard] Loading Dragon Roar animation...');
       _dragonRoarAnimation = SpriteSheetAnimation(
-        assetPath: "assets/animations/dragon_roar.png",
-        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
-        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
-        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
-        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
-      );
+          assetPath: "assets/animations/dragon_roar.png",
+          animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+          fadeInDuration: AnimationConstants.spellFadeInDuration,
+          holdDuration: AnimationConstants.spellHoldDuration,
+          fadeOutDuration: AnimationConstants.spellFadeOutDuration);
       await _dragonRoarAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Dragon Roar animation loaded successfully (${_dragonRoarAnimation!.isLoaded})');
@@ -208,12 +204,11 @@ class _GameBoardState extends State<GameBoard>
       // 載入 Element Morph 動畫
       debugPrint('[GameBoard] Loading Element Morph animation...');
       _elementMorphAnimation = SpriteSheetAnimation(
-        assetPath: "assets/animations/element_morph.png",
-        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
-        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
-        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
-        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
-      );
+          assetPath: "assets/animations/element_morph.png",
+          animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+          fadeInDuration: AnimationConstants.spellFadeInDuration,
+          holdDuration: AnimationConstants.spellHoldDuration,
+          fadeOutDuration: AnimationConstants.spellFadeOutDuration);
       await _elementMorphAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Element Morph animation loaded successfully (${_elementMorphAnimation!.isLoaded})');
@@ -221,12 +216,11 @@ class _GameBoardState extends State<GameBoard>
       // 載入 Gravity Reset 動畫
       debugPrint('[GameBoard] Loading Gravity Reset animation...');
       _gravityResetAnimation = SpriteSheetAnimation(
-        assetPath: "assets/animations/gravity_reset.png",
-        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
-        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
-        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
-        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
-      );
+          assetPath: "assets/animations/gravity_reset.png",
+          animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+          fadeInDuration: AnimationConstants.spellFadeInDuration,
+          holdDuration: AnimationConstants.spellHoldDuration,
+          fadeOutDuration: AnimationConstants.spellFadeOutDuration);
       await _gravityResetAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Gravity Reset animation loaded successfully (${_gravityResetAnimation!.isLoaded})');
@@ -234,12 +228,11 @@ class _GameBoardState extends State<GameBoard>
       // 載入 Time Change 動畫
       debugPrint('[GameBoard] Loading Time Change animation...');
       _timeChangeAnimation = SpriteSheetAnimation(
-        assetPath: "assets/animations/time_change.png",
-        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
-        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
-        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
-        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
-      );
+          assetPath: "assets/animations/time_change.png",
+          animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+          fadeInDuration: AnimationConstants.spellFadeInDuration,
+          holdDuration: AnimationConstants.spellHoldDuration,
+          fadeOutDuration: AnimationConstants.spellFadeOutDuration);
       await _timeChangeAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Time Change animation loaded successfully (${_timeChangeAnimation!.isLoaded})');
@@ -247,12 +240,11 @@ class _GameBoardState extends State<GameBoard>
       // 載入 Titan Gravity 動畫
       debugPrint('[GameBoard] Loading Titan Gravity animation...');
       _titanGravityAnimation = SpriteSheetAnimation(
-        assetPath: "assets/animations/titan_gravity.png",
-        animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
-        fadeInDuration: const Duration(milliseconds: 200), // 淡入 0.2s
-        holdDuration: const Duration(milliseconds: 500), // 停留 0.5s
-        fadeOutDuration: const Duration(milliseconds: 200), // 淡出 0.2s
-      );
+          assetPath: "assets/animations/titan_gravity.png",
+          animationType: AnimationType.fadeInOut, // 使用淡入淡出模式
+          fadeInDuration: AnimationConstants.spellFadeInDuration,
+          holdDuration: AnimationConstants.spellHoldDuration,
+          fadeOutDuration: AnimationConstants.spellFadeOutDuration);
       await _titanGravityAnimation!.load();
       debugPrint(
           '[GameBoard] ✅ Titan Gravity animation loaded successfully (${_titanGravityAnimation!.isLoaded})');

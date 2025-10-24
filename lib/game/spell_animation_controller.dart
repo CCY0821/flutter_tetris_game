@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 import 'shaders/chroma_key.dart';
+import '../core/ui_constants.dart';
 
 /// 動畫類型枚舉
 enum AnimationType {
@@ -34,9 +35,9 @@ class SpriteSheetAnimation {
     this.columns = 4,
     int? totalFrames,
     this.frameDuration = const Duration(milliseconds: 60),
-    this.fadeInDuration = const Duration(milliseconds: 200),
-    this.holdDuration = const Duration(milliseconds: 500),
-    this.fadeOutDuration = const Duration(milliseconds: 200),
+    this.fadeInDuration = AnimationConstants.spellFadeInDuration,
+    this.holdDuration = AnimationConstants.spellHoldDuration,
+    this.fadeOutDuration = AnimationConstants.spellFadeOutDuration,
   }) : totalFrames = totalFrames ?? (rows * columns);
 
   /// 載入 sprite sheet 圖片（保留完整透明度）

@@ -7,6 +7,18 @@ class AnimationConstants {
 
   /// 輸入凍結持續時間
   static const Duration inputFreezeDuration = Duration(milliseconds: 150);
+
+  /// 法術動畫：淡入時間
+  static const Duration spellFadeInDuration = Duration(milliseconds: 200);
+
+  /// 法術動畫：持續顯示時間
+  static const Duration spellHoldDuration = Duration(milliseconds: 500);
+
+  /// 法術動畫：淡出時間
+  static const Duration spellFadeOutDuration = Duration(milliseconds: 200);
+
+  /// 幀更新間隔（60 FPS）
+  static const Duration frameUpdateInterval = Duration(milliseconds: 16);
 }
 
 // UI 響應式常數
