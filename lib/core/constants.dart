@@ -130,6 +130,49 @@ const double cyberpunkBorderRadius = 8.0;
 const double cyberpunkBorderRadiusLarge = 12.0;
 
 // =============================================================================
+// 🎨 方塊繪製視覺效果常數 🎨
+// =============================================================================
+
+/// 方塊外發光效果 - 激活狀態透明度
+const double blockGlowOpacityActive = 0.6;
+
+/// 方塊外發光效果 - 普通狀態透明度
+const double blockGlowOpacityNormal = 0.4;
+
+/// 方塊高光效果 - 激活狀態透明度
+const double blockHighlightOpacityActive = 0.5;
+
+/// 方塊高光效果 - 普通狀態透明度
+const double blockHighlightOpacityNormal = 0.3;
+
+/// 方塊頂部高光漸層 - 激活狀態起始透明度
+const double blockTopHighlightStartActive = 0.3;
+
+/// 方塊頂部高光漸層 - 普通狀態起始透明度
+const double blockTopHighlightStartNormal = 0.15;
+
+/// 方塊內描邊透明度
+const double blockInnerBorderOpacity = 0.4;
+
+/// 方塊主體漸層 - 上色調亮度增量
+const double blockGradientTopLighten = 0.1;
+
+/// Ghost piece 填充透明度
+const double ghostPieceFillOpacity = 0.3;
+
+/// Ghost piece 邊框透明度
+const double ghostPieceBorderOpacity = 0.6;
+
+/// Ghost piece 虛線透明度
+const double ghostPieceDashOpacity = 0.8;
+
+/// 格線主線透明度
+const double gridLineOpacity = 0.6;
+
+/// 格線微光透明度
+const double gridGlowOpacity = 0.2;
+
+// =============================================================================
 // 📺 CYBERPUNK SCANLINE 掃描線系統 📺
 // =============================================================================
 

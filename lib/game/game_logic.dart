@@ -80,10 +80,7 @@ class GameLogic {
     for (final point in gameState.currentTetromino!.shape) {
       final x = gameState.currentTetromino!.x + point.dx.toInt();
       final y = gameState.currentTetromino!.y + point.dy.toInt();
-      if (x >= 0 &&
-          x < GameState.colCount &&
-          y >= 0 &&
-          y < GameState.totalRowCount) {
+      if (GameState.isValidCoordinate(x, y)) {
         // ✅ 再次檢查 epoch（防止非同步延遲）
         if (currentEpoch != gameState.gameEpoch) {
           debugPrint(
@@ -139,20 +136,8 @@ class GameLogic {
       // 更新 Marathon 系統的行數計算
       gameState.updateLinesCleared(clearedRows);
 
-      // 播放相應音效（優先級：T-Spin > 連擊 > Tetris > 一般消行）
-      if (scoringResult.achievements.any((a) => a.contains('T-Spin'))) {
-        gameState.audioService.playSoundEffect('t_spin'); // 如果有的話
-      } else if (scoringResult.comboCount >= 4) {
-        // 高連擊特殊音效
-        gameState.audioService.playSoundEffect('combo_high'); // 如果有的話
-      } else if (scoringResult.comboCount > 0) {
-        // 一般連擊音效
-        gameState.audioService.playSoundEffect('combo'); // 如果有的話
-      } else if (clearedRows == 4) {
-        gameState.audioService.playSoundEffect('tetris'); // 如果有的話
-      } else {
-        gameState.audioService.playSoundEffect('line_clear');
-      }
+      // 播放相應音效
+      _playLineClearSound(scoringResult, clearedRows);
 
       // 在矩陣頂部添加新的空行
       for (int i = 0; i < clearedRows; i++) {
@@ -164,6 +149,24 @@ class GameLogic {
 
     // 總是儲存最後一次得分結果供 UI 顯示（即使是0分也要顯示COMBO重置）
     gameState.lastScoringResult = scoringResult;
+  }
+
+  /// 根據得分結果選擇並播放相應的音效
+  /// 優先級：T-Spin > 高連擊 > 一般連擊 > Tetris > 一般消行
+  void _playLineClearSound(ScoringResult scoringResult, int clearedRows) {
+    if (scoringResult.achievements.any((a) => a.contains('T-Spin'))) {
+      gameState.audioService.playSoundEffect('t_spin');
+    } else if (scoringResult.comboCount >= 4) {
+      // 高連擊特殊音效
+      gameState.audioService.playSoundEffect('combo_high');
+    } else if (scoringResult.comboCount > 0) {
+      // 一般連擊音效
+      gameState.audioService.playSoundEffect('combo');
+    } else if (clearedRows == 4) {
+      gameState.audioService.playSoundEffect('tetris');
+    } else {
+      gameState.audioService.playSoundEffect('line_clear');
+    }
   }
 
   void drop() {

@@ -446,12 +446,18 @@ class GameStateData {
           bool hasNeighbor = false;
 
           // 檢查上下左右 4 個方向
-          if (row > 0 && board[row - 1][col] != null) hasNeighbor = true;
-          if (row < board.length - 1 && board[row + 1][col] != null)
+          if (row > 0 && board[row - 1][col] != null) {
             hasNeighbor = true;
-          if (col > 0 && board[row][col - 1] != null) hasNeighbor = true;
-          if (col < board[row].length - 1 && board[row][col + 1] != null)
+          }
+          if (row < board.length - 1 && board[row + 1][col] != null) {
             hasNeighbor = true;
+          }
+          if (col > 0 && board[row][col - 1] != null) {
+            hasNeighbor = true;
+          }
+          if (col < board[row].length - 1 && board[row][col + 1] != null) {
+            hasNeighbor = true;
+          }
 
           // 孤立方塊且不在底部 → 視為損壞
           if (!hasNeighbor && row < board.length - 1) {

@@ -72,6 +72,18 @@ class GameState {
   /// @deprecated 使用 visibleRowCount 替代以保持語義清晰
   static const int rowCount = visibleRowCount;
 
+  /// 檢查座標是否在遊戲板有效範圍內（包含緩衝區）
+  /// 返回 true 如果座標在有效範圍內
+  static bool isValidCoordinate(int x, int y) {
+    return x >= 0 && x < colCount && y >= 0 && y < totalRowCount;
+  }
+
+  /// 檢查座標是否在可視區域內（不包含緩衝區）
+  /// 返回 true 如果座標在可視區域內
+  static bool isInVisibleArea(int y) {
+    return y >= bufferRowCount && y < totalRowCount;
+  }
+
   List<List<Color?>> board = [];
   Tetromino? currentTetromino;
   Tetromino? nextTetromino;
