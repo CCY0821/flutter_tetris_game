@@ -40,9 +40,12 @@ class _GameBoardState extends State<GameBoard>
 
   double _calculateCellSize(BoxConstraints constraints) {
     // 響應式計算格子大小 - 左側區域約佔60%寬度
-    final gameAreaWidth = constraints.maxWidth * 0.6 - 32; // 60%減去padding
+    final gameAreaWidth =
+        constraints.maxWidth * ResponsiveConstants.gameAreaWidthRatio -
+            ResponsiveConstants.gameAreaPadding;
     final calculatedCellSize = gameAreaWidth / GameState.colCount;
-    return calculatedCellSize.clamp(14.0, 22.0); // 限制在合理範圍內
+    return calculatedCellSize.clamp(ResponsiveConstants.gameBoardMinCellSize,
+        ResponsiveConstants.gameBoardMaxCellSize);
   }
 
   late GameState gameState;

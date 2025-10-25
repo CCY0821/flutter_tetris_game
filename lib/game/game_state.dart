@@ -6,6 +6,7 @@ import '../services/scoring_service.dart';
 import '../services/high_score_service.dart';
 import '../core/game_persistence.dart';
 import '../core/ui_constants.dart';
+import '../core/constants.dart';
 import 'marathon_system.dart';
 import 'rune_energy_manager.dart';
 import 'rune_system.dart';
@@ -389,7 +390,7 @@ class GameState {
       bool leveledUp = marathonSystem.updateLinesCleared(lines);
       if (leveledUp) {
         // 可以在這裡添加升級音效或特效
-        audioService.playSoundEffect('level_up'); // 如果有的話
+        audioService.playSoundEffect(sfxLevelUp);
       }
 
       // 自然消除行数产生符文能量

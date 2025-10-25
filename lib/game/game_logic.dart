@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/tetromino.dart';
 import '../services/high_score_service.dart';
 import '../services/scoring_service.dart';
+import '../core/constants.dart';
 import 'game_state.dart';
 import 'srs_system.dart';
 import 'rune_system.dart';
@@ -155,17 +156,17 @@ class GameLogic {
   /// 優先級：T-Spin > 高連擊 > 一般連擊 > Tetris > 一般消行
   void _playLineClearSound(ScoringResult scoringResult, int clearedRows) {
     if (scoringResult.achievements.any((a) => a.contains('T-Spin'))) {
-      gameState.audioService.playSoundEffect('t_spin');
+      gameState.audioService.playSoundEffect(sfxTSpin);
     } else if (scoringResult.comboCount >= 4) {
       // 高連擊特殊音效
-      gameState.audioService.playSoundEffect('combo_high');
+      gameState.audioService.playSoundEffect(sfxComboHigh);
     } else if (scoringResult.comboCount > 0) {
       // 一般連擊音效
-      gameState.audioService.playSoundEffect('combo');
+      gameState.audioService.playSoundEffect(sfxCombo);
     } else if (clearedRows == 4) {
-      gameState.audioService.playSoundEffect('tetris');
+      gameState.audioService.playSoundEffect(sfxTetris);
     } else {
-      gameState.audioService.playSoundEffect('line_clear');
+      gameState.audioService.playSoundEffect(sfxLineClear);
     }
   }
 
@@ -177,7 +178,7 @@ class GameLogic {
       currentTetro.y++;
     } else {
       // 播放方塊落地音效
-      gameState.audioService.playSoundEffect('piece_drop');
+      gameState.audioService.playSoundEffect(sfxPieceDrop);
       lockTetromino();
       spawnTetromino();
     }
@@ -207,7 +208,7 @@ class GameLogic {
     } else {
       gameState.isGameOver = true;
       // 播放遊戲結束音效
-      gameState.audioService.playSoundEffect('game_over');
+      gameState.audioService.playSoundEffect(sfxGameOver);
       // 停止背景音樂
       gameState.audioService.stopBackgroundMusic();
 
@@ -277,7 +278,7 @@ class GameLogic {
     spawnTetromino();
 
     // 播放硬降音效
-    gameState.audioService.playSoundEffect('hard_drop');
+    gameState.audioService.playSoundEffect(sfxHardDrop);
   }
 
   /// SRS 旋轉系統 - 順時針旋轉
@@ -317,9 +318,9 @@ class GameLogic {
 
       // 播放適當的音效
       if (result.usedWallKick) {
-        gameState.audioService.playSoundEffect('wall_kick'); // 如果有的話
+        gameState.audioService.playSoundEffect(sfxWallKick);
       } else {
-        gameState.audioService.playSoundEffect('piece_rotate');
+        gameState.audioService.playSoundEffect(sfxPieceRotate);
       }
 
       // 檢查 T-Spin

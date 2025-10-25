@@ -37,6 +37,20 @@ class ResponsiveConstants {
   // 縮放選項
   static const List<double> scaleOptions = [0.8, 0.9, 1.0, 1.1, 1.2];
   static const double defaultScale = 1.0;
+
+  // 佈局比例
+  /// 遊戲區域佔螢幕寬度的比例（60%）
+  static const double gameAreaWidthRatio = 0.6;
+
+  /// 遊戲區域內邊距（像素）
+  static const double gameAreaPadding = 32.0;
+
+  // GameBoard 專用 cellSize 範圍（適用於特定佈局）
+  /// GameBoard 最小 cellSize
+  static const double gameBoardMinCellSize = 14.0;
+
+  /// GameBoard 最大 cellSize
+  static const double gameBoardMaxCellSize = 22.0;
 }
 
 class CellSizeCalculator {

@@ -173,6 +173,43 @@ const double gridLineOpacity = 0.6;
 const double gridGlowOpacity = 0.2;
 
 // =============================================================================
+// 🔊 音效名稱常數 🔊
+// =============================================================================
+
+/// 音效：T-Spin
+const String sfxTSpin = 't_spin';
+
+/// 音效：高連擊（4連擊以上）
+const String sfxComboHigh = 'combo_high';
+
+/// 音效：一般連擊
+const String sfxCombo = 'combo';
+
+/// 音效：Tetris（消除4行）
+const String sfxTetris = 'tetris';
+
+/// 音效：一般消行
+const String sfxLineClear = 'line_clear';
+
+/// 音效：方塊落地
+const String sfxPieceDrop = 'piece_drop';
+
+/// 音效：遊戲結束
+const String sfxGameOver = 'game_over';
+
+/// 音效：硬降
+const String sfxHardDrop = 'hard_drop';
+
+/// 音效：壁踢
+const String sfxWallKick = 'wall_kick';
+
+/// 音效：方塊旋轉
+const String sfxPieceRotate = 'piece_rotate';
+
+/// 音效：升級
+const String sfxLevelUp = 'level_up';
+
+// =============================================================================
 // 📺 CYBERPUNK SCANLINE 掃描線系統 📺
 // =============================================================================
 
