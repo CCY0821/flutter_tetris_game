@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
+import '../game/game_state.dart';
 
 /// 俄羅斯方塊類型枚舉
 enum TetrominoType { I, O, T, S, Z, L, J }
@@ -47,8 +48,8 @@ class Tetromino {
 
   /// 生成隨機方塊
   factory Tetromino.random(int boardWidth) {
+    const types = TetrominoType.values;
     final rand = Random();
-    final types = TetrominoType.values;
     final type = types[rand.nextInt(types.length)];
 
     return Tetromino.fromType(type, boardWidth);
@@ -59,24 +60,11 @@ class Tetromino {
     final color = typeColors[type]!;
     final shape = List<Offset>.from(initialShapes[type]!);
 
-    // 計算起始位置
-    int startX;
-    int startY;
-
-    switch (type) {
-      case TetrominoType.I:
-        startX = boardWidth ~/ 2;
-        startY = 18; // I型在緩衝區內生成，稍微高一點
-        break;
-      case TetrominoType.O:
-        startX = boardWidth ~/ 2;
-        startY = 19; // 在緩衝區內生成
-        break;
-      default:
-        startX = boardWidth ~/ 2;
-        startY = 19; // 在緩衝區內生成
-        break;
-    }
+    // 計算起始位置（使用棋盤中央 X 座標）
+    final startX = GameState.centerX;
+    final startY = (type == TetrominoType.I)
+        ? GameState.spawnYForI
+        : GameState.spawnYForOthers;
 
     return Tetromino(
       type: type,

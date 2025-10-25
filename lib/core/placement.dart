@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'game_config.dart';
 import '../models/tetromino.dart';
+import '../game/game_state.dart';
 
 class PlacementSystem {
   static bool inBounds(int x, int y, GameConfig config) {
@@ -35,11 +36,8 @@ class PlacementSystem {
   }
 
   static int computeSpawnY(TetrominoType type) {
-    switch (type) {
-      case TetrominoType.I:
-        return 18; // I型在緩衝區稍高
-      default:
-        return 19; // 標準緩衝區高度
-    }
+    return (type == TetrominoType.I)
+        ? GameState.spawnYForI
+        : GameState.spawnYForOthers;
   }
 }

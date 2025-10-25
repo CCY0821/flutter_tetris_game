@@ -73,6 +73,15 @@ class GameState {
   /// @deprecated 使用 visibleRowCount 替代以保持語義清晰
   static const int rowCount = visibleRowCount;
 
+  /// 棋盤中央的 X 座標（用於方塊生成位置）
+  static const int centerX = colCount ~/ 2;
+
+  /// I型方塊生成的 Y 座標（在緩衝區內，稍微高一點）
+  static const int spawnYForI = 18;
+
+  /// 其他類型方塊生成的 Y 座標（在緩衝區內）
+  static const int spawnYForOthers = 19;
+
   /// 檢查座標是否在遊戲板有效範圍內（包含緩衝區）
   /// 返回 true 如果座標在有效範圍內
   static bool isValidCoordinate(int x, int y) {

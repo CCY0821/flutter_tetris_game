@@ -189,9 +189,9 @@ class GameLogic {
     debugPrint('[GameLogic] Spawning tetromino type: ${newTetro.type}');
 
     // 在緩衝區中設置生成位置
-    newTetro.x = GameState.colCount ~/ 2;
-    // 在緩衝區內生成：I型在第18行，其他在第19行
-    newTetro.y = newTetro.isI ? 18 : 19;
+    newTetro.x = GameState.centerX;
+    newTetro.y =
+        newTetro.isI ? GameState.spawnYForI : GameState.spawnYForOthers;
     newTetro.rotation = 0;
 
     if (canMove(newTetro)) {
