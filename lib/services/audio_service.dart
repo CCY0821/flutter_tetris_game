@@ -1,6 +1,8 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:logging/logging.dart';
 
 class AudioService {
+  static final _log = Logger('AudioService');
   static final AudioService _instance = AudioService._internal();
   factory AudioService() => _instance;
   AudioService._internal();
@@ -30,7 +32,7 @@ class AudioService {
       await _backgroundMusicPlayer.setVolume(_musicVolume);
       await _sfxPlayer.setVolume(_sfxVolume);
     } catch (e) {
-      print('AudioService initialization error: $e');
+      _log.warning('AudioService initialization error: $e');
     }
   }
 
@@ -39,8 +41,8 @@ class AudioService {
     if (!_isMusicEnabled) return;
 
     try {
-      print('Attempting to play background music...');
-      print('Music enabled: $_isMusicEnabled');
+      _log.fine(
+          'Attempting to play background music (enabled: $_isMusicEnabled)');
 
       // 先停止現有音樂，避免重疊播放
       await _backgroundMusicPlayer.stop();
@@ -50,11 +52,10 @@ class AudioService {
       await _backgroundMusicPlayer.play(
         AssetSource('audio/background_music.mp3'),
       );
-      print('Background music started successfully!');
+      _log.fine('Background music started successfully');
     } catch (e) {
-      print('Error playing background music: $e'); // 暫時開啟除錯
-      print('Audio file path: assets/audio/background_music.mp3');
-      print('Music enabled: $_isMusicEnabled');
+      _log.warning(
+          'Error playing background music: $e (path: assets/audio/background_music.mp3)');
       // 如果音樂檔案不存在，使用預設的靜音處理
     }
   }
@@ -121,7 +122,7 @@ class AudioService {
       await _backgroundMusicPlayer.dispose();
       await _sfxPlayer.dispose();
     } catch (e) {
-      print('AudioService dispose error: $e');
+      _log.warning('AudioService dispose error: $e');
     }
   }
 }

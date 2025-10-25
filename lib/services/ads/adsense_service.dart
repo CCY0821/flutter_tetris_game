@@ -18,6 +18,7 @@ class AdSenseService implements AdServiceInterface {
   bool _isInitialized = false;
 
   /// Track banner ad load state
+  // ignore: unused_field
   AdLoadState _loadState = AdLoadState.notInitialized;
 
   /// AdSense script load completer
@@ -198,6 +199,7 @@ class _AdSenseBannerWidget extends StatefulWidget {
 
 class _AdSenseBannerWidgetState extends State<_AdSenseBannerWidget> {
   static final Logger _logger = Logger('AdSenseBanner');
+  // ignore: unused_field
   late String _containerId;
 
   @override

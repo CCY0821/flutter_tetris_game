@@ -27,6 +27,7 @@ class AdMobService implements AdServiceInterface {
   int _retryCount = 0;
 
   /// Flag to track if ad needs refresh after app resume
+  // ignore: unused_field
   bool _needsRefresh = false;
 
   /// Callback to pause game when ad is clicked

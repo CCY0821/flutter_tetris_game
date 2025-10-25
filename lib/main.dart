@@ -6,6 +6,7 @@ import 'game/spell_animation_controller.dart';
 import 'theme/game_theme.dart';
 import 'core/constants.dart';
 import 'core/dual_logger.dart';
+import 'core/game_persistence.dart';
 import 'widgets/scanline_overlay.dart';
 
 void main() async {
@@ -13,6 +14,11 @@ void main() async {
 
   // 初始化雙路徑日誌系統
   await DualLogger.instance.init();
+
+  // 🩹 一次性止血：清除可能損壞的遊戲狀態存儲
+  // 注意：只清除遊戲進行狀態，不影響符文配置、高分等設定
+  await GamePersistence.clearGameState();
+  debugPrint('[Boot] Cleared potentially corrupted game state (one-time fix)');
 
   // 鎖定直式方向
   await SystemChrome.setPreferredOrientations([

@@ -53,6 +53,9 @@ dependencies:
   # Path provider for file logging
   path_provider: ^2.1.1
 
+  # Image processing for chroma key
+  image: ^4.0.17
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -79,6 +82,7 @@ flutter:
   assets:
     - assets/audio/
     - assets/animations/
+    - assets/shaders/chroma_key.frag
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
