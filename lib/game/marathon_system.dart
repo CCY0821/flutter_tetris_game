@@ -2,12 +2,14 @@
 /// 基於 Tetris.wiki 的標準 Marathon 模式規格
 class MarathonSystem {
   // 基本設定
-  static const int maxLevel = 30;
+  static const int maxLevel = 999;
+  static const int maxSpeedLevel = 500; // LV500 達到最高速
   static const int linesPerLevel = 10;
 
   // 速度曲線參數
   static const double baseGravity = 0.01667; // 1G = 1/60 秒 = 16.67ms
   static const double maxGravity = 20.0; // 20G
+  static const double _gravitySlope = 19.0 / 499; // 線性增長係數
 
   int _currentLevel = 1;
   int _totalLinesCleared = 0;
@@ -68,7 +70,7 @@ class MarathonSystem {
   }
 
   /// 獲取當前關卡的重力值 (G)
-  /// 使用遊戲體驗優化的速度曲線
+  /// 使用線性增長速度曲線 (LV1-500)
   double getCurrentGravity() {
     if (_gravityCache.containsKey(_currentLevel)) {
       return _gravityCache[_currentLevel]!;
@@ -76,20 +78,11 @@ class MarathonSystem {
 
     double gravity;
 
-    if (_currentLevel <= 8) {
-      // 1-8級：漸進式加速，從1G開始
-      gravity = 1.0 + (_currentLevel - 1) * 0.3;
-    } else if (_currentLevel <= 15) {
-      // 9-15級：中速加速
-      gravity = 3.0 + (_currentLevel - 8) * 0.5;
-    } else if (_currentLevel <= 18) {
-      // 16-18級：快速加速
-      gravity = 6.5 + (_currentLevel - 15) * 1.0;
-    } else if (_currentLevel == 19) {
-      // 19級：接近最大速度
-      gravity = 15.0;
+    if (_currentLevel <= maxSpeedLevel) {
+      // LV1-500: 線性增長從 1.0G 到 20.0G
+      gravity = 1.0 + (_currentLevel - 1) * _gravitySlope;
     } else {
-      // 20級以後達到20G
+      // LV501+: 維持最高速 20G
       gravity = maxGravity;
     }
 
@@ -119,6 +112,8 @@ class MarathonSystem {
   /// 獲取關卡顯示名稱
   String getLevelDisplayName() {
     if (_currentLevel <= 9) {
+      return '00$_currentLevel';
+    } else if (_currentLevel <= 99) {
       return '0$_currentLevel';
     }
     return _currentLevel.toString();
@@ -128,14 +123,14 @@ class MarathonSystem {
   String getSpeedDescription() {
     double gravity = getCurrentGravity();
 
-    if (gravity < 0.1) {
-      return '慢速';
-    } else if (gravity < 1.0) {
+    if (gravity < 5.0) {
       return '中速';
-    } else if (gravity < 5.0) {
+    } else if (gravity < 10.0) {
       return '快速';
     } else if (gravity < 15.0) {
       return '極速';
+    } else if (gravity < 20.0) {
+      return '超速';
     } else {
       return '光速';
     }
@@ -143,20 +138,11 @@ class MarathonSystem {
 
   /// 計算特定關卡的重力值（用於預覽）
   double calculateGravityForLevel(int level) {
-    if (level <= 8) {
-      // 1-8級：漸進式加速，從1G開始
-      return 1.0 + (level - 1) * 0.3;
-    } else if (level <= 15) {
-      // 9-15級：中速加速
-      return 3.0 + (level - 8) * 0.5;
-    } else if (level <= 18) {
-      // 16-18級：快速加速
-      return 6.5 + (level - 15) * 1.0;
-    } else if (level == 19) {
-      // 19級：接近最大速度
-      return 15.0;
+    if (level <= maxSpeedLevel) {
+      // LV1-500: 線性增長從 1.0G 到 20.0G
+      return 1.0 + (level - 1) * _gravitySlope;
     } else {
-      // 20級以後達到20G
+      // LV501+: 維持最高速 20G
       return maxGravity;
     }
   }
