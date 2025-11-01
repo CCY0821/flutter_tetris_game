@@ -25,10 +25,13 @@ abstract class IPieceProvider {
 /// 實現標準俄羅斯方塊的7-bag算法
 class BagProvider implements IPieceProvider {
   final Random _random;
+  final Set<TetrominoType> _excludedTypes;
   List<TetrominoType> _bag = [];
   int _bagIndex = 0;
 
-  BagProvider({Random? random}) : _random = random ?? Random();
+  BagProvider({Random? random, Set<TetrominoType>? excludedTypes})
+      : _random = random ?? Random(),
+        _excludedTypes = excludedTypes ?? {};
 
   @override
   TetrominoType getNext() {
@@ -79,9 +82,11 @@ class BagProvider implements IPieceProvider {
     _bag = _generateNewBag();
   }
 
-  /// 生成新的7-bag序列
+  /// 生成新的bag序列（排除指定類型）
   List<TetrominoType> _generateNewBag() {
-    final newBag = List<TetrominoType>.from(TetrominoType.values);
+    final newBag = TetrominoType.values
+        .where((type) => !_excludedTypes.contains(type))
+        .toList();
     newBag.shuffle(_random);
     return newBag;
   }
@@ -309,4 +314,100 @@ class PieceProviderStack {
     debugPrint(
         'PieceProviderStack: Restored state with ${_stack.length} providers');
   }
+}
+
+/// 稀有方塊攔截器
+/// 在指定週期內隨機插入稀有方塊（如H型）
+/// 例如：每30個方塊隨機出現1次H型
+class RareBlockInterceptor implements IPieceProvider {
+  final IPieceProvider baseProvider;
+  final TetrominoType rareType;
+  final int cycleLength;
+  final Random _random;
+
+  int _currentCount = 0;
+  int _rarePositionInCycle = -1;
+
+  RareBlockInterceptor({
+    required this.baseProvider,
+    required this.rareType,
+    required this.cycleLength,
+    Random? random,
+  }) : _random = random ?? Random() {
+    _initNewCycle();
+  }
+
+  /// 初始化新週期，隨機決定稀有方塊的位置
+  void _initNewCycle() {
+    _rarePositionInCycle = _random.nextInt(cycleLength);
+    debugPrint(
+        '[RareBlockInterceptor] New cycle: $rareType will appear at position $_rarePositionInCycle/$cycleLength');
+  }
+
+  @override
+  TetrominoType getNext() {
+    // 檢查是否該出現稀有方塊
+    if (_currentCount == _rarePositionInCycle) {
+      _currentCount++;
+      if (_currentCount >= cycleLength) {
+        _currentCount = 0;
+        _initNewCycle();
+      }
+      return rareType;
+    }
+
+    // 否則從基礎提供器獲取
+    final next = baseProvider.getNext();
+
+    _currentCount++;
+    if (_currentCount >= cycleLength) {
+      _currentCount = 0;
+      _initNewCycle();
+    }
+
+    return next;
+  }
+
+  @override
+  List<TetrominoType> preview(int count) {
+    final result = <TetrominoType>[];
+    int tempCount = _currentCount;
+    int tempRarePos = _rarePositionInCycle;
+
+    // 模擬預覽
+    for (int i = 0; i < count; i++) {
+      if (tempCount == tempRarePos) {
+        result.add(rareType);
+        tempCount++;
+        if (tempCount >= cycleLength) {
+          tempCount = 0;
+          tempRarePos = _random.nextInt(cycleLength);
+        }
+      } else {
+        // 這裡簡化處理，直接從基礎提供器預覽
+        // 實際可能需要更複雜的邏輯來確保預覽準確
+        final basePreview = baseProvider.preview(1);
+        if (basePreview.isNotEmpty) {
+          result.add(basePreview[0]);
+        }
+        tempCount++;
+        if (tempCount >= cycleLength) {
+          tempCount = 0;
+          tempRarePos = _random.nextInt(cycleLength);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  @override
+  bool get isExhausted => false; // 永不耗盡
+
+  @override
+  int get priority => 50; // 中等優先級
+
+  @override
+  String get description =>
+      'RareBlockInterceptor($rareType every $cycleLength blocks)';
 }

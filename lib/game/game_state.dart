@@ -25,7 +25,15 @@ class GameState {
   // 私有構造函數
   GameState._internal() {
     // 初始化方塊供應器系統
-    pieceProviderStack = PieceProviderStack(baseProvider: BagProvider());
+    // H型方塊設為稀有方塊：每30個方塊隨機出現1次
+    final bagWithoutH =
+        BagProvider(excludedTypes: {TetrominoType.H}); // 9種方塊的bag
+    final rareH = RareBlockInterceptor(
+      baseProvider: bagWithoutH,
+      rareType: TetrominoType.H,
+      cycleLength: 30, // 每30個方塊出現1次H型
+    );
+    pieceProviderStack = PieceProviderStack(baseProvider: rareH);
   }
 
   // 工廠構造函數
