@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/constants.dart';
 
 /// 俄羅斯方塊類型枚舉
-enum TetrominoType { I, O, T, S, Z, L, J, D, U }
+enum TetrominoType { I, O, T, S, Z, L, J, D, U, H }
 
 /// 俄羅斯方塊類別，支援SRS旋轉系統
 class Tetromino {
@@ -34,6 +34,7 @@ class Tetromino {
     TetrominoType.Z: Color(0xFFFF0066), // Z: 霓虹紅 (洋紅偏紅)
     TetrominoType.D: Color(0xFFFF6600), // D: 霓虹橙 (熾熱橙光)
     TetrominoType.U: Color(0xFFFF1493), // U: 霓虹粉紅 (深粉紅電光)
+    TetrominoType.H: Color(0xFFCCFF00), // H: 霓虹青檸 (電光黃綠)
   };
 
   /// 初始形狀定義（北向，旋轉狀態0）
@@ -51,6 +52,15 @@ class Tetromino {
       Offset(1, 0),
       Offset(-1, 1),
       Offset(0, 1),
+      Offset(1, 1)
+    ],
+    TetrominoType.H: [
+      Offset(-1, -1),
+      Offset(1, -1),
+      Offset(-1, 0),
+      Offset(0, 0),
+      Offset(1, 0),
+      Offset(-1, 1),
       Offset(1, 1)
     ],
   };

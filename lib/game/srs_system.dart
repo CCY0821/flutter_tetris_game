@@ -227,6 +227,46 @@ class SRSSystem {
     ], // 西：開口向左
   };
 
+  /// 方塊旋轉形狀定義 - H 型方塊（七格 H 型）
+  static const Map<int, List<Offset>> _hShapes = {
+    0: [
+      Offset(-1, -1),
+      Offset(1, -1),
+      Offset(-1, 0),
+      Offset(0, 0),
+      Offset(1, 0),
+      Offset(-1, 1),
+      Offset(1, 1)
+    ], // 北：垂直 H
+    1: [
+      Offset(-1, -1),
+      Offset(0, -1),
+      Offset(1, -1),
+      Offset(0, 0),
+      Offset(-1, 1),
+      Offset(0, 1),
+      Offset(1, 1)
+    ], // 東：水平 H
+    2: [
+      Offset(-1, -1),
+      Offset(1, -1),
+      Offset(-1, 0),
+      Offset(0, 0),
+      Offset(1, 0),
+      Offset(-1, 1),
+      Offset(1, 1)
+    ], // 南：垂直 H（同北）
+    3: [
+      Offset(-1, -1),
+      Offset(0, -1),
+      Offset(1, -1),
+      Offset(0, 0),
+      Offset(-1, 1),
+      Offset(0, 1),
+      Offset(1, 1)
+    ], // 西：水平 H（同東）
+  };
+
   /// 獲取方塊在指定旋轉狀態下的形狀
   static List<Offset> getShapeForRotation(TetrominoType type, int rotation) {
     switch (type) {
@@ -248,6 +288,8 @@ class SRSSystem {
         return _dShapes[rotation] ?? _dShapes[0]!;
       case TetrominoType.U:
         return _uShapes[rotation] ?? _uShapes[0]!;
+      case TetrominoType.H:
+        return _hShapes[rotation] ?? _hShapes[0]!;
     }
   }
 
