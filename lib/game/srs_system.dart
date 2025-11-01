@@ -187,6 +187,14 @@ class SRSSystem {
     3: [Offset(0, 0), Offset(1, 0), Offset(0, 1), Offset(1, 1)],
   };
 
+  /// 方塊旋轉形狀定義 - D 型方塊（Domino 雙格）
+  static const Map<int, List<Offset>> _dShapes = {
+    0: [Offset(0, 0), Offset(0, 1)], // 垂直
+    1: [Offset(0, 0), Offset(1, 0)], // 水平
+    2: [Offset(0, 0), Offset(0, 1)], // 垂直
+    3: [Offset(0, 0), Offset(1, 0)], // 水平
+  };
+
   /// 獲取方塊在指定旋轉狀態下的形狀
   static List<Offset> getShapeForRotation(TetrominoType type, int rotation) {
     switch (type) {
@@ -204,6 +212,8 @@ class SRSSystem {
         return _zShapes[rotation] ?? _zShapes[0]!;
       case TetrominoType.O:
         return _oShapes[rotation] ?? _oShapes[0]!;
+      case TetrominoType.D:
+        return _dShapes[rotation] ?? _dShapes[0]!;
     }
   }
 
