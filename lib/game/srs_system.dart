@@ -195,6 +195,38 @@ class SRSSystem {
     3: [Offset(0, 0), Offset(1, 0)], // 水平
   };
 
+  /// 方塊旋轉形狀定義 - U 型方塊（五格 U 型）
+  static const Map<int, List<Offset>> _uShapes = {
+    0: [
+      Offset(-1, 0),
+      Offset(1, 0),
+      Offset(-1, 1),
+      Offset(0, 1),
+      Offset(1, 1)
+    ], // 北：開口向上
+    1: [
+      Offset(0, -1),
+      Offset(1, -1),
+      Offset(0, 0),
+      Offset(0, 1),
+      Offset(1, 1)
+    ], // 東：開口向右
+    2: [
+      Offset(-1, -1),
+      Offset(0, -1),
+      Offset(1, -1),
+      Offset(-1, 0),
+      Offset(1, 0)
+    ], // 南：開口向下
+    3: [
+      Offset(-1, -1),
+      Offset(0, -1),
+      Offset(0, 0),
+      Offset(-1, 1),
+      Offset(0, 1)
+    ], // 西：開口向左
+  };
+
   /// 獲取方塊在指定旋轉狀態下的形狀
   static List<Offset> getShapeForRotation(TetrominoType type, int rotation) {
     switch (type) {
@@ -214,6 +246,8 @@ class SRSSystem {
         return _oShapes[rotation] ?? _oShapes[0]!;
       case TetrominoType.D:
         return _dShapes[rotation] ?? _dShapes[0]!;
+      case TetrominoType.U:
+        return _uShapes[rotation] ?? _uShapes[0]!;
     }
   }
 
