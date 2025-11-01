@@ -374,6 +374,13 @@ class RareBlockInterceptor implements IPieceProvider {
     int tempCount = _currentCount;
     int tempRarePos = _rarePositionInCycle;
 
+    // 預先獲取足夠的基礎方塊預覽（最壞情況：所有位置都不是稀有方塊）
+    final basePreview = baseProvider.preview(count);
+    int baseIndex = 0;
+
+    // 使用獨立的隨機數生成器來模擬未來週期（不污染實際狀態）
+    final previewRandom = Random(_random.nextInt(1000000));
+
     // 模擬預覽
     for (int i = 0; i < count; i++) {
       if (tempCount == tempRarePos) {
@@ -381,19 +388,18 @@ class RareBlockInterceptor implements IPieceProvider {
         tempCount++;
         if (tempCount >= cycleLength) {
           tempCount = 0;
-          tempRarePos = _random.nextInt(cycleLength);
+          tempRarePos = previewRandom.nextInt(cycleLength);
         }
       } else {
-        // 這裡簡化處理，直接從基礎提供器預覽
-        // 實際可能需要更複雜的邏輯來確保預覽準確
-        final basePreview = baseProvider.preview(1);
-        if (basePreview.isNotEmpty) {
-          result.add(basePreview[0]);
+        // 從預先獲取的基礎預覽中取方塊
+        if (baseIndex < basePreview.length) {
+          result.add(basePreview[baseIndex]);
+          baseIndex++;
         }
         tempCount++;
         if (tempCount >= cycleLength) {
           tempCount = 0;
-          tempRarePos = _random.nextInt(cycleLength);
+          tempRarePos = previewRandom.nextInt(cycleLength);
         }
       }
     }
