@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '../models/tetromino.dart';
 import '../services/high_score_service.dart';
 import '../services/scoring_service.dart';
+import '../core/constants.dart';
 import 'game_state.dart';
 import 'srs_system.dart';
 import 'rune_system.dart';
-import 'piece_provider.dart';
 
 class GameLogic {
   final GameState gameState;
@@ -78,9 +78,6 @@ class GameLogic {
     // ✅ Epoch 守門：拒絕過期世代的操作
     final currentEpoch = gameState.gameEpoch;
 
-    // 🔥 檢查是否是惡魔方塊（在鎖定前）
-    final isDemonBlock = gameState.currentTetromino?.isDemon ?? false;
-
     for (final point in gameState.currentTetromino!.shape) {
       final x = gameState.currentTetromino!.x + point.dx.toInt();
       final y = gameState.currentTetromino!.y + point.dy.toInt();
@@ -97,13 +94,6 @@ class GameLogic {
 
     // 📊 統計：方塊鎖定計數（只添加統計，不影響邏輯）
     gameState.totalPiecesPlaced++;
-
-    // 🔥 如果是惡魔方塊，啟動分數加成
-    if (isDemonBlock) {
-      gameState.startScoreMultiplier();
-      debugPrint(
-          '[GameLogic] Demon block locked! Score multiplier activated (×3 for 10s)');
-    }
 
     clearFullRows();
   }
@@ -133,18 +123,10 @@ class GameLogic {
     );
 
     if (clearedRows > 0) {
-      // 🔥 應用分數加成（惡魔方塊系統）
-      final points = (scoringResult.points * gameState.scoreMultiplier).round();
-      gameState.score += points;
+      gameState.score += scoringResult.points;
 
       // 🔧 修復：添加消行能量獲得 (每消行1行 = +50分，每100分 = 1格能量)
       gameState.runeEnergyManager.addScore(clearedRows);
-
-      // 🔥 檢查是否應該觸發惡魔方塊
-      _checkDemonSpawn();
-
-      // ⏱️ 檢查分數加成是否過期
-      gameState.checkMultiplierExpiry();
 
       // 即時檢查高分更新
       _checkHighScoreRealtime();
@@ -174,17 +156,17 @@ class GameLogic {
   /// 優先級：T-Spin > 高連擊 > 一般連擊 > Tetris > 一般消行
   void _playLineClearSound(ScoringResult scoringResult, int clearedRows) {
     if (scoringResult.achievements.any((a) => a.contains('T-Spin'))) {
-      gameState.audioService.playSoundEffect('t_spin');
+      gameState.audioService.playSoundEffect(sfxTSpin);
     } else if (scoringResult.comboCount >= 4) {
       // 高連擊特殊音效
-      gameState.audioService.playSoundEffect('combo_high');
+      gameState.audioService.playSoundEffect(sfxComboHigh);
     } else if (scoringResult.comboCount > 0) {
       // 一般連擊音效
-      gameState.audioService.playSoundEffect('combo');
+      gameState.audioService.playSoundEffect(sfxCombo);
     } else if (clearedRows == 4) {
-      gameState.audioService.playSoundEffect('tetris');
+      gameState.audioService.playSoundEffect(sfxTetris);
     } else {
-      gameState.audioService.playSoundEffect('line_clear');
+      gameState.audioService.playSoundEffect(sfxLineClear);
     }
   }
 
@@ -196,7 +178,7 @@ class GameLogic {
       currentTetro.y++;
     } else {
       // 播放方塊落地音效
-      gameState.audioService.playSoundEffect('piece_drop');
+      gameState.audioService.playSoundEffect(sfxPieceDrop);
       lockTetromino();
       spawnTetromino();
     }
@@ -207,9 +189,9 @@ class GameLogic {
     debugPrint('[GameLogic] Spawning tetromino type: ${newTetro.type}');
 
     // 在緩衝區中設置生成位置
-    newTetro.x = GameState.colCount ~/ 2;
-    // 在緩衝區內生成：I型在第18行，其他在第19行
-    newTetro.y = newTetro.isI ? 18 : 19;
+    newTetro.x = GameState.centerX;
+    newTetro.y =
+        newTetro.isI ? GameState.spawnYForI : GameState.spawnYForOthers;
     newTetro.rotation = 0;
 
     if (canMove(newTetro)) {
@@ -226,7 +208,7 @@ class GameLogic {
     } else {
       gameState.isGameOver = true;
       // 播放遊戲結束音效
-      gameState.audioService.playSoundEffect('game_over');
+      gameState.audioService.playSoundEffect(sfxGameOver);
       // 停止背景音樂
       gameState.audioService.stopBackgroundMusic();
 
@@ -263,12 +245,7 @@ class GameLogic {
       currentTetro.y++;
       // 軟降得分
       int softDropPoints = gameState.scoringService.calculateSoftDropScore(1);
-      // 🔥 應用分數加成（惡魔方塊系統）
-      final points = (softDropPoints * gameState.scoreMultiplier).round();
-      gameState.score += points;
-
-      // ⏱️ 檢查分數加成是否過期
-      gameState.checkMultiplierExpiry();
+      gameState.score += softDropPoints;
 
       // 即時檢查高分更新
       _checkHighScoreRealtime();
@@ -291,12 +268,7 @@ class GameLogic {
     // 硬降獲得額外分數
     int hardDropPoints =
         gameState.scoringService.calculateHardDropScore(dropDistance);
-    // 🔥 應用分數加成（惡魔方塊系統）
-    final points = (hardDropPoints * gameState.scoreMultiplier).round();
-    gameState.score += points;
-
-    // ⏱️ 檢查分數加成是否過期
-    gameState.checkMultiplierExpiry();
+    gameState.score += hardDropPoints;
 
     // 即時檢查高分更新
     _checkHighScoreRealtime();
@@ -306,7 +278,7 @@ class GameLogic {
     spawnTetromino();
 
     // 播放硬降音效
-    gameState.audioService.playSoundEffect('hard_drop');
+    gameState.audioService.playSoundEffect(sfxHardDrop);
   }
 
   /// SRS 旋轉系統 - 順時針旋轉
@@ -346,9 +318,9 @@ class GameLogic {
 
       // 播放適當的音效
       if (result.usedWallKick) {
-        gameState.audioService.playSoundEffect('wall_kick'); // 如果有的話
+        gameState.audioService.playSoundEffect(sfxWallKick);
       } else {
-        gameState.audioService.playSoundEffect('piece_rotate');
+        gameState.audioService.playSoundEffect(sfxPieceRotate);
       }
 
       // 檢查 T-Spin
@@ -447,57 +419,6 @@ class GameLogic {
       gameState.highScore = gameState.score;
     }
   }
-
-  /// 檢查是否應該觸發惡魔方塊
-  void _checkDemonSpawn() {
-    debugPrint(
-        '[GameLogic] _checkDemonSpawn called with score=${gameState.score}');
-
-    if (gameState.demonSpawnManager.shouldSpawn(gameState.score)) {
-      debugPrint('');
-      debugPrint('═══════════════════════════════════════════');
-      debugPrint('🔥🔥🔥 DEMON BLOCK TRIGGERED! 🔥🔥🔥');
-      debugPrint('Current Score: ${gameState.score}');
-      debugPrint('Next piece will be: DEMON (10 cells, GOLD color)');
-      debugPrint('═══════════════════════════════════════════');
-      debugPrint('');
-
-      // 創建一個單次惡魔方塊提供器並推入堆疊
-      gameState.pieceProviderStack.push(_DemonBlockProvider());
-
-      // 更新預覽隊列
-      gameState.updatePreviewQueue();
-
-      debugPrint(
-          '[GameLogic] Demon block queued! Next piece will be a demon block.');
-    }
-  }
-}
-
-/// 臨時惡魔方塊提供器（用於單次惡魔方塊生成）
-class _DemonBlockProvider implements IPieceProvider {
-  bool _used = false;
-
-  @override
-  TetrominoType getNext() {
-    _used = true;
-    return TetrominoType.demon;
-  }
-
-  @override
-  List<TetrominoType> preview(int count) {
-    if (_used) return [];
-    return [TetrominoType.demon];
-  }
-
-  @override
-  bool get isExhausted => _used;
-
-  @override
-  int get priority => 1; // 高優先級
-
-  @override
-  String get description => 'DemonBlockProvider(used: $_used)';
 }
 
 /// 遊戲上下文類

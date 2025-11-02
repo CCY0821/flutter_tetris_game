@@ -13,6 +13,7 @@ import 'rune_loadout.dart';
 import 'rune_events.dart';
 import 'monotonic_timer.dart';
 import 'piece_provider.dart';
+import 'demon_spawn_manager.dart';
 
 class GameState {
   // 單例模式
@@ -26,10 +27,13 @@ class GameState {
   GameState._internal() {
     // 初始化方塊供應器系統
     // H型方塊設為稀有方塊：每30個方塊隨機出現1次
-    final bagWithoutH =
-        BagProvider(excludedTypes: {TetrominoType.H}); // 9種方塊的bag
+    // 🔥 Demon 方塊不應該被隨機生成，只能通過 DemonSpawnManager 觸發
+    final bagWithoutSpecial = BagProvider(excludedTypes: {
+      TetrominoType.H,
+      TetrominoType.demon
+    }); // 排除 H 和 Demon，剩餘 8 種標準方塊
     final rareH = RareBlockInterceptor(
-      baseProvider: bagWithoutH,
+      baseProvider: bagWithoutSpecial,
       rareType: TetrominoType.H,
       cycleLength: 30, // 每30個方塊出現1次H型
     );
@@ -104,6 +108,9 @@ class GameState {
   final ScoringService scoringService = ScoringService();
   final RuneEnergyManager runeEnergyManager = RuneEnergyManager();
 
+  // 惡魔方塊系統
+  final DemonSpawnManager demonSpawnManager = DemonSpawnManager();
+
   // 符文系統
   final RuneLoadout runeLoadout = RuneLoadout();
   late RuneSystem runeSystem;
@@ -142,6 +149,10 @@ class GameState {
   // Blessed Combo 效果狀態
   bool _isBlessedComboActive = false;
   late BlessedComboModifier _blessedComboModifier;
+
+  // 惡魔方塊分數加成系統
+  double scoreMultiplier = 1.0; // 分數乘數（1.0 或 3.0）
+  DateTime? multiplierEndTime; // 加成結束時間
 
   // 遊戲模式：固定使用 Marathon 模式
 
@@ -299,6 +310,14 @@ class GameState {
     scoringService.reset();
     runeEnergyManager.reset();
 
+    // 重置惡魔方塊系統
+    debugPrint('[GameState] Resetting demon spawn manager...');
+    demonSpawnManager.reset();
+    scoreMultiplier = 1.0;
+    multiplierEndTime = null;
+    debugPrint(
+        '[GameState] Score reset to: $score, Multiplier: $scoreMultiplier');
+
     // 重新載入符文配置（清除運行時狀態）
     runeSystem.reloadLoadout();
 
@@ -312,6 +331,66 @@ class GameState {
   Tetromino _createTetrominoFromType(TetrominoType type) {
     return Tetromino.fromType(type, colCount);
   }
+
+  // ==================== 惡魔方塊分數加成系統 ====================
+
+  /// 啟動分數加成（支援疊加）
+  /// 當惡魔方塊放置後調用，啟動 10 秒的 ×3 分數加成
+  ///
+  /// [duration] 加成持續時間（預設 10 秒）
+  ///
+  /// 疊加規則：
+  /// - 如果當前仍在加成期間，新的加成時間會疊加到剩餘時間上
+  /// - 例如：剩餘 5 秒時再次觸發，總時間變為 15 秒
+  void startScoreMultiplier({Duration duration = const Duration(seconds: 10)}) {
+    final now = DateTime.now();
+
+    if (multiplierEndTime != null && now.isBefore(multiplierEndTime!)) {
+      // 當前仍在加成期間，疊加時間
+      final remaining = multiplierEndTime!.difference(now);
+      multiplierEndTime = now.add(remaining + duration);
+
+      debugPrint(
+          '[GameState] Score multiplier stacked! Total time: ${remaining.inSeconds + duration.inSeconds}s');
+    } else {
+      // 加成已結束或未啟動，重新開始
+      multiplierEndTime = now.add(duration);
+      debugPrint(
+          '[GameState] Score multiplier activated! Duration: ${duration.inSeconds}s');
+    }
+
+    scoreMultiplier = 3.0;
+  }
+
+  /// 檢查分數加成是否到期
+  /// 應該在遊戲循環中每幀調用（或使用 Timer）
+  void checkMultiplierExpiry() {
+    if (multiplierEndTime != null) {
+      final now = DateTime.now();
+      // 使用 !isBefore 來包含相等的情況（處理零持續時間）
+      if (!now.isBefore(multiplierEndTime!)) {
+        // 加成時間到期
+        scoreMultiplier = 1.0;
+        multiplierEndTime = null;
+        debugPrint('[GameState] Score multiplier expired');
+      }
+    }
+  }
+
+  /// 獲取分數加成剩餘時間（秒）
+  /// 返回 null 表示沒有加成
+  double? getMultiplierRemainingSeconds() {
+    if (multiplierEndTime == null) return null;
+
+    final remaining = multiplierEndTime!.difference(DateTime.now());
+    if (remaining.isNegative) return null;
+
+    return remaining.inMilliseconds / 1000.0;
+  }
+
+  /// 檢查是否有分數加成激活
+  bool get hasActiveMultiplier =>
+      multiplierEndTime != null && DateTime.now().isBefore(multiplierEndTime!);
 
   /// 更新預覽隊列（當有新的攔截器時調用）
   void updatePreviewQueue() {

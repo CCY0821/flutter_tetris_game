@@ -353,6 +353,8 @@ class RareBlockInterceptor implements IPieceProvider {
         _currentCount = 0;
         _initNewCycle();
       }
+      debugPrint(
+          '[RareBlockInterceptor] 🌟 Generating rare block: $rareType (7 cells, YELLOW-GREEN color)');
       return rareType;
     }
 
