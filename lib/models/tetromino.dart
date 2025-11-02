@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
+import '../game/demon_piece_generator.dart';
 
 /// 俄羅斯方塊類型枚舉
 enum TetrominoType { I, O, T, S, Z, L, J, D, U, H, demon }
@@ -77,6 +78,11 @@ class Tetromino {
 
   /// 根據類型創建方塊
   factory Tetromino.fromType(TetrominoType type, int boardWidth) {
+    // 惡魔方塊使用專用建構函式
+    if (type == TetrominoType.demon) {
+      return Tetromino.demon(boardWidth);
+    }
+
     final color = typeColors[type]!;
     final shape = List<Offset>.from(initialShapes[type]!);
 
@@ -105,6 +111,32 @@ class Tetromino {
       shape: shape,
       x: startX,
       y: startY,
+      rotation: 0,
+    );
+  }
+
+  /// 創建惡魔方塊（10格隨機形狀，無法旋轉）
+  factory Tetromino.demon(int boardWidth) {
+    // 生成 5×5 布林矩陣
+    final grid = DemonPieceGenerator.generateShape();
+
+    // 轉換為 List<Offset> 格式
+    final shape = <Offset>[];
+    for (int y = 0; y < grid.length; y++) {
+      for (int x = 0; x < grid[y].length; x++) {
+        if (grid[y][x]) {
+          // 以 (2, 2) 為中心點，轉換為相對偏移
+          shape.add(Offset((x - 2).toDouble(), (y - 2).toDouble()));
+        }
+      }
+    }
+
+    return Tetromino(
+      type: TetrominoType.demon,
+      color: typeColors[TetrominoType.demon]!,
+      shape: shape,
+      x: boardWidth ~/ 2,
+      y: 19, // 在緩衝區內生成
       rotation: 0,
     );
   }
@@ -152,6 +184,9 @@ class Tetromino {
 
   /// 檢查是否為O型方塊（不需旋轉）
   bool get isO => type == TetrominoType.O;
+
+  /// 檢查是否為惡魔方塊（無法旋轉）
+  bool get isDemon => type == TetrominoType.demon;
 
   @override
   String toString() {

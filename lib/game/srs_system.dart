@@ -290,6 +290,9 @@ class SRSSystem {
         return _uShapes[rotation] ?? _uShapes[0]!;
       case TetrominoType.H:
         return _hShapes[rotation] ?? _hShapes[0]!;
+      case TetrominoType.demon:
+        // 惡魔方塊無法旋轉，始終返回空列表（實際形狀在 Tetromino 中維護）
+        return [];
     }
   }
 
@@ -345,6 +348,18 @@ class SRSSystem {
     if (currentPiece.type == TetrominoType.O) {
       return SRSRotationResult(
         success: true,
+        newX: currentPiece.x,
+        newY: currentPiece.y,
+        newRotation: currentPiece.rotation,
+        newShape: currentPiece.shape,
+        kickUsed: 0,
+      );
+    }
+
+    // 惡魔方塊無法旋轉（直接返回原狀態）
+    if (currentPiece.type == TetrominoType.demon) {
+      return SRSRotationResult(
+        success: false, // 旋轉失敗，保持原樣
         newX: currentPiece.x,
         newY: currentPiece.y,
         newRotation: currentPiece.rotation,
