@@ -663,9 +663,11 @@ class _TouchControlsState extends State<TouchControls> {
     required VoidCallback onPressed,
     bool allowRepeat = false,
     double size = 72,
+    bool isRotateDisabled = false, // 新增：用於惡魔方塊旋轉禁用
   }) {
-    final bool isDisabled =
-        widget.gameState.isPaused || widget.gameState.isGameOver;
+    final bool isDisabled = widget.gameState.isPaused ||
+        widget.gameState.isGameOver ||
+        isRotateDisabled;
     final bool isActive = _activeButton == action && !isDisabled;
 
     // 所有控制按鈕都使用增強效果
@@ -957,6 +959,8 @@ class _TouchControlsState extends State<TouchControls> {
                     onPressed: widget.gameLogic.rotateCounterClockwise,
                     allowRepeat: false,
                     size: 56,
+                    isRotateDisabled:
+                        widget.gameState.currentTetromino?.isDemon ?? false,
                   ),
                   _buildControlButton(
                     icon: Icons.rotate_right,
@@ -964,6 +968,8 @@ class _TouchControlsState extends State<TouchControls> {
                     onPressed: widget.gameLogic.rotate,
                     allowRepeat: false,
                     size: 60,
+                    isRotateDisabled:
+                        widget.gameState.currentTetromino?.isDemon ?? false,
                   ),
                   _buildControlButton(
                     icon: Icons.vertical_align_bottom,

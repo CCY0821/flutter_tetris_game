@@ -9,6 +9,7 @@ import 'controller_handler.dart';
 import 'game_ui_components.dart';
 import 'board_painter.dart';
 import 'touch_controls.dart';
+import 'multiplier_timer_widget.dart';
 import '../theme/game_theme.dart';
 import '../widgets/settings_panel.dart';
 import '../widgets/ad_banner.dart';
@@ -1154,6 +1155,9 @@ class _GameBoardState extends State<GameBoard>
             ),
           ),
 
+          // 分數加成計時器（惡魔方塊系統）
+          MultiplierTimerWidget(gameState: gameState),
+
           const SizedBox(height: 8),
 
           // 主遊戲區域
@@ -1254,6 +1258,7 @@ class _GameBoardState extends State<GameBoard>
                                       child: CustomPaint(
                                         painter: BoardPainter(
                                           gameState.board,
+                                          gameState.boardTypes,
                                           gameState.currentTetromino,
                                           ghostPiece: gameLogic
                                                   .shouldShowGhostPiece()
@@ -1501,9 +1506,9 @@ class _GameBoardState extends State<GameBoard>
                             // NEXT 預覽模組
                             // RepaintBoundary: 隔離 NEXT 預覽，只在換方塊時更新
                             RepaintBoundary(
-                              child: GameUIComponents.nextPiecePreview(
-                                gameState.nextTetromino,
-                                gameState.nextTetrominos,
+                              child: DemonWarningNextPiecePreview(
+                                nextTetromino: gameState.nextTetromino,
+                                nextTetrominos: gameState.nextTetrominos,
                               ),
                             ),
 

@@ -92,6 +92,7 @@ class GameLogic {
           return;
         }
         gameState.board[y][x] = gameState.currentTetromino!.color;
+        gameState.boardTypes[y][x] = gameState.currentTetromino!.type;
       }
     }
 
@@ -110,6 +111,7 @@ class GameLogic {
 
   void clearFullRows() {
     List<List<Color?>> newBoard = [];
+    List<List<TetrominoType?>> newBoardTypes = [];
     int clearedRows = 0;
 
     // 檢查整個矩陣（包含緩衝區）
@@ -118,6 +120,7 @@ class GameLogic {
         clearedRows++;
       } else {
         newBoard.add(List<Color?>.from(gameState.board[y]));
+        newBoardTypes.add(List<TetrominoType?>.from(gameState.boardTypes[y]));
       }
     }
 
@@ -161,9 +164,11 @@ class GameLogic {
       // 在矩陣頂部添加新的空行
       for (int i = 0; i < clearedRows; i++) {
         newBoard.insert(0, List.generate(GameState.colCount, (_) => null));
+        newBoardTypes.insert(0, List.generate(GameState.colCount, (_) => null));
       }
 
       gameState.board = newBoard;
+      gameState.boardTypes = newBoardTypes;
     }
 
     // 總是儲存最後一次得分結果供 UI 顯示（即使是0分也要顯示COMBO重置）

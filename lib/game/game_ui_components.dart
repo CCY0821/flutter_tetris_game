@@ -9,6 +9,126 @@ import '../widgets/integrated_stats_panel.dart';
 import '../game/marathon_system.dart';
 import '../services/audio_service.dart';
 
+/// 帶有惡魔方塊預警動畫的 Next Piece Preview
+class DemonWarningNextPiecePreview extends StatefulWidget {
+  final Tetromino? nextTetromino;
+  final List<Tetromino> nextTetrominos;
+
+  const DemonWarningNextPiecePreview({
+    super.key,
+    required this.nextTetromino,
+    required this.nextTetrominos,
+  });
+
+  @override
+  State<DemonWarningNextPiecePreview> createState() =>
+      _DemonWarningNextPiecePreviewState();
+}
+
+class _DemonWarningNextPiecePreviewState
+    extends State<DemonWarningNextPiecePreview>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    _pulseAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _pulseController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  @override
+  void didUpdateWidget(DemonWarningNextPiecePreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 檢測是否為惡魔方塊，啟動或停止動畫
+    if (widget.nextTetromino?.isDemon == true) {
+      if (!_pulseController.isAnimating) {
+        _pulseController.repeat(reverse: true);
+      }
+    } else {
+      _pulseController.stop();
+      _pulseController.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDemon = widget.nextTetromino?.isDemon ?? false;
+
+    return AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
+        return Container(
+          decoration: isDemon
+              ? BoxDecoration(
+                  borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFDC143C)
+                          .withOpacity(_pulseAnimation.value * 0.6),
+                      blurRadius: 15 * _pulseAnimation.value,
+                      spreadRadius: 3 * _pulseAnimation.value,
+                    ),
+                  ],
+                )
+              : null,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GameUIComponents.nextPiecePreview(
+                widget.nextTetromino,
+                widget.nextTetrominos,
+              ),
+              if (isDemon) ...[
+                const SizedBox(height: 8),
+                Opacity(
+                  opacity: _pulseAnimation.value,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDC143C).withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: const Color(0xFFDC143C)
+                            .withOpacity(_pulseAnimation.value),
+                        width: 1,
+                      ),
+                    ),
+                    child: const Text(
+                      '⚠️ 惡魔方塊',
+                      style: TextStyle(
+                        color: Color(0xFFDC143C),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
 class GameUIComponents {
   static const double cellSize = 12;
 

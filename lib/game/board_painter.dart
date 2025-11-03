@@ -6,6 +6,7 @@ import 'game_state.dart';
 
 class BoardPainter extends CustomPainter {
   final List<List<Color?>> board;
+  final List<List<TetrominoType?>> boardTypes; // 新增：儲存每個格子的方塊類型
   final Tetromino? tetromino;
   final Tetromino? ghostPiece;
   final double cellSize;
@@ -33,11 +34,17 @@ class BoardPainter extends CustomPainter {
   // 快取 Gradient 物件（參數化，避免每次重建）
   static const List<double> _gradientStops = [0.0, 1.0];
 
-  BoardPainter(this.board, this.tetromino,
+  BoardPainter(this.board, this.boardTypes, this.tetromino,
       {this.ghostPiece, this.cellSize = 20});
 
   void _drawBlock(Canvas canvas, double x, double y, Color blockColor,
-      {bool isActive = false}) {
+      {bool isActive = false, TetrominoType? type}) {
+    // 惡魔方塊使用特殊渲染
+    if (type == TetrominoType.demon) {
+      _drawDemonCell(canvas, x, y, isActive: isActive);
+      return;
+    }
+
     final rect = Rect.fromLTWH(x * cellSize, y * cellSize, cellSize, cellSize);
 
     // 🌟 Step 1: 外發光效果 (依顏色調整強度) - 增強版
@@ -93,10 +100,91 @@ class BoardPainter extends CustomPainter {
     );
   }
 
-  void _drawGhostBlock(Canvas canvas, double x, double y, Color blockColor) {
+  /// 繪製惡魔方塊單格（徑向漸層：金色→紅色）
+  void _drawDemonCell(Canvas canvas, double x, double y,
+      {bool isActive = false}) {
     final rect = Rect.fromLTWH(x * cellSize, y * cellSize, cellSize, cellSize);
 
-    // Ghost piece 使用半透明邊框樣式
+    // 徑向漸層 Paint：金色中心 → 紅色邊緣
+    final demonPaint = Paint()
+      ..shader = const RadialGradient(
+        center: Alignment.center,
+        radius: 0.7,
+        colors: [
+          Color(0xFFFFD700), // 金色中心 #FFD700
+          Color(0xFFDC143C), // 深紅邊緣 #DC143C
+        ],
+        stops: [0.0, 1.0],
+      ).createShader(rect);
+
+    // 繪製主體（圓角矩形）
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(2)),
+      demonPaint,
+    );
+
+    // 深紅色邊框 (#8B0000, 2px)
+    final borderPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = const Color(0xFF8B0000)
+      ..strokeWidth = 2.0;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(2)),
+      borderPaint,
+    );
+
+    // 如果是當前方塊，添加額外的發光效果
+    if (isActive) {
+      final glowPaint = Paint()
+        ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 3.0)
+        ..color = const Color(0xFFDC143C).withOpacity(0.6);
+
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(rect.inflate(1), const Radius.circular(3)),
+        glowPaint,
+      );
+    }
+  }
+
+  /// 繪製幽靈方塊（惡魔方塊保持徑向漸層效果）
+  void _drawGhostBlock(Canvas canvas, double x, double y, Color blockColor,
+      {TetrominoType? type}) {
+    final rect = Rect.fromLTWH(x * cellSize, y * cellSize, cellSize, cellSize);
+
+    // 如果是惡魔方塊，使用半透明的徑向漸層
+    if (type == TetrominoType.demon) {
+      final demonGhostPaint = Paint()
+        ..shader = const RadialGradient(
+          center: Alignment.center,
+          radius: 0.7,
+          colors: [
+            Color(0xFFFFD700), // 金色中心
+            Color(0xFFDC143C), // 深紅邊緣
+          ],
+          stops: [0.0, 1.0],
+        ).createShader(rect)
+        ..color = blockColor.withOpacity(0.4); // 半透明效果
+
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(rect, const Radius.circular(2)),
+        demonGhostPaint,
+      );
+
+      // 半透明邊框
+      final borderPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..color = const Color(0xFF8B0000).withOpacity(0.4)
+        ..strokeWidth = 2.0;
+
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(rect, const Radius.circular(2)),
+        borderPaint,
+      );
+      return;
+    }
+
+    // 一般方塊使用半透明邊框樣式
     _ghostPaint.color = blockColor.withOpacity(ghostPieceFillOpacity);
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect, const Radius.circular(2)),
@@ -189,7 +277,11 @@ class BoardPainter extends CustomPainter {
         if (board[y][x] != null) {
           // 將緩衝區座標轉換為可見區域座標
           final visibleY = y - GameState.bufferRowCount;
-          _drawBlock(canvas, x.toDouble(), visibleY.toDouble(), board[y][x]!);
+          final type = (y < boardTypes.length && x < boardTypes[y].length)
+              ? boardTypes[y][x]
+              : null;
+          _drawBlock(canvas, x.toDouble(), visibleY.toDouble(), board[y][x]!,
+              type: type);
         }
       }
     }
@@ -204,7 +296,8 @@ class BoardPainter extends CustomPainter {
         if (GameState.isValidCoordinate(x, y) && GameState.isInVisibleArea(y)) {
           final visibleY = y - GameState.bufferRowCount;
           _drawGhostBlock(
-              canvas, x.toDouble(), visibleY.toDouble(), ghostPiece!.color);
+              canvas, x.toDouble(), visibleY.toDouble(), ghostPiece!.color,
+              type: ghostPiece!.type);
         }
       }
     }
@@ -220,7 +313,7 @@ class BoardPainter extends CustomPainter {
           final visibleY = y - GameState.bufferRowCount;
           _drawBlock(
               canvas, x.toDouble(), visibleY.toDouble(), tetromino!.color,
-              isActive: true);
+              isActive: true, type: tetromino!.type);
         }
       }
     }
@@ -229,6 +322,7 @@ class BoardPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant BoardPainter oldDelegate) {
     return board != oldDelegate.board ||
+        boardTypes != oldDelegate.boardTypes ||
         tetromino != oldDelegate.tetromino ||
         ghostPiece != oldDelegate.ghostPiece ||
         cellSize != oldDelegate.cellSize;

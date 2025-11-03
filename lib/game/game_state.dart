@@ -97,6 +97,7 @@ class GameState {
   }
 
   List<List<Color?>> board = [];
+  List<List<TetrominoType?>> boardTypes = []; // 儲存每個格子的方塊類型（用於渲染）
   Tetromino? currentTetromino;
   Tetromino? nextTetromino;
   List<Tetromino> nextTetrominos = []; // 下三個方塊預覽隊列
@@ -159,6 +160,10 @@ class GameState {
   void initBoard() {
     // 創建包含緩衝區的完整矩陣 (40行 x 10列)
     board = List.generate(
+      totalRowCount,
+      (_) => List.generate(colCount, (_) => null),
+    );
+    boardTypes = List.generate(
       totalRowCount,
       (_) => List.generate(colCount, (_) => null),
     );
