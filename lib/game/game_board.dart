@@ -662,7 +662,7 @@ class _GameBoardState extends State<GameBoard>
         if (!gameState.isGameOver) {
           if (!gameState.isPaused) {
             debugPrint('[Game] Auto-pausing due to app state change');
-            gameState.isPaused = true;
+            gameState.pauseGame(); // 使用新的暫停方法
             gameState.audioService.pauseBackgroundMusic();
             setState(() {});
           }
@@ -695,7 +695,7 @@ class _GameBoardState extends State<GameBoard>
   void _pauseGameForAdClick() {
     if (!gameState.isGameOver && !gameState.isPaused) {
       debugPrint('[Game] Pausing for ad click');
-      gameState.isPaused = true;
+      gameState.pauseGame(); // 使用新的暫停方法
       gameState.audioService.pauseBackgroundMusic();
       setState(() {});
     }
@@ -960,6 +960,9 @@ class _GameBoardState extends State<GameBoard>
         setState(() {
           gameLogic.drop();
 
+          // ⏱️ 檢查分數加成計時器是否過期
+          gameState.checkMultiplierExpiry();
+
           // 檢查速度是否需要更新
           int newSpeed = gameState.dropSpeed;
           if (newSpeed != _currentSpeed && newSpeed > 0) {
@@ -1000,11 +1003,12 @@ class _GameBoardState extends State<GameBoard>
 
     // 處理系統鍵
     if (key == LogicalKeyboardKey.keyP && !gameState.isGameOver) {
-      gameState.isPaused = !gameState.isPaused;
       if (gameState.isPaused) {
-        gameState.audioService.pauseBackgroundMusic();
-      } else {
+        gameState.resumeGame(); // 使用新的恢復方法
         gameState.audioService.resumeBackgroundMusic();
+      } else {
+        gameState.pauseGame(); // 使用新的暫停方法
+        gameState.audioService.pauseBackgroundMusic();
       }
       setState(() {});
       return;
@@ -1087,11 +1091,12 @@ class _GameBoardState extends State<GameBoard>
         gameLogic.hardDrop();
         stateChanged = true;
       } else if (key == LogicalKeyboardKey.numpadDecimal) {
-        gameState.isPaused = !gameState.isPaused;
         if (gameState.isPaused) {
-          gameState.audioService.pauseBackgroundMusic();
-        } else {
+          gameState.resumeGame(); // 使用新的恢復方法
           gameState.audioService.resumeBackgroundMusic();
+        } else {
+          gameState.pauseGame(); // 使用新的暫停方法
+          gameState.audioService.pauseBackgroundMusic();
         }
         stateChanged = true;
       } else if (key == LogicalKeyboardKey.numpadSubtract) {
@@ -1109,7 +1114,7 @@ class _GameBoardState extends State<GameBoard>
     // 暫停遊戲和背景音樂（如果遊戲正在進行）
     bool wasGameRunning = !gameState.isGameOver && !gameState.isPaused;
     if (wasGameRunning) {
-      gameState.isPaused = true;
+      gameState.pauseGame(); // 使用新的暫停方法
       gameState.audioService.pauseBackgroundMusic();
     }
 
@@ -1368,14 +1373,14 @@ class _GameBoardState extends State<GameBoard>
                                             horizontal: 2),
                                         child: ElevatedButton(
                                           onPressed: () => setState(() {
-                                            gameState.isPaused =
-                                                !gameState.isPaused;
                                             if (gameState.isPaused) {
-                                              gameState.audioService
-                                                  .pauseBackgroundMusic();
-                                            } else {
+                                              gameState.resumeGame();
                                               gameState.audioService
                                                   .resumeBackgroundMusic();
+                                            } else {
+                                              gameState.pauseGame();
+                                              gameState.audioService
+                                                  .pauseBackgroundMusic();
                                             }
                                           }),
                                           style: (gameState.isPaused

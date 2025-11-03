@@ -154,6 +154,7 @@ class GameState {
   // 惡魔方塊分數加成系統
   double scoreMultiplier = 1.0; // 分數乘數（1.0 或 3.0）
   DateTime? multiplierEndTime; // 加成結束時間
+  Duration? _pausedMultiplierRemaining; // 暫停時儲存剩餘時間
 
   // 遊戲模式：固定使用 Marathon 模式
 
@@ -396,6 +397,29 @@ class GameState {
   /// 檢查是否有分數加成激活
   bool get hasActiveMultiplier =>
       multiplierEndTime != null && DateTime.now().isBefore(multiplierEndTime!);
+
+  /// 暫停遊戲（同時暫停計時器）
+  void pauseGame() {
+    isPaused = true;
+    // 保存分數加成剩餘時間
+    if (multiplierEndTime != null) {
+      _pausedMultiplierRemaining =
+          multiplierEndTime!.difference(DateTime.now());
+      debugPrint(
+          '[GameState] Paused with ${_pausedMultiplierRemaining!.inSeconds}s multiplier remaining');
+    }
+  }
+
+  /// 恢復遊戲（同時恢復計時器）
+  void resumeGame() {
+    isPaused = false;
+    // 恢復分數加成計時器
+    if (_pausedMultiplierRemaining != null) {
+      multiplierEndTime = DateTime.now().add(_pausedMultiplierRemaining!);
+      _pausedMultiplierRemaining = null;
+      debugPrint('[GameState] Resumed with multiplier timer restored');
+    }
+  }
 
   /// 更新預覽隊列（當有新的攔截器時調用）
   void updatePreviewQueue() {
