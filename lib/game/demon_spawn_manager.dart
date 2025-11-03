@@ -3,10 +3,10 @@ import 'package:flutter/foundation.dart';
 
 /// 惡魔方塊觸發管理器
 /// 負責管理惡魔方塊的觸發時機與頻率控制
-/// 使用加速式難度曲線（n^1.2），最多觸發 15 次
+/// 使用加速式難度曲線（n^1.2），無次數上限
 class DemonSpawnManager {
-  /// 最大觸發次數（防止後期過度頻繁）
-  static const int maxSpawns = 15;
+  /// 默認門檻表顯示範圍（僅用於調試顯示）
+  static const int defaultTableSize = 30;
 
   /// 指數基數（用於計算觸發門檻）
   static const double exponent = 1.2;
@@ -28,12 +28,8 @@ class DemonSpawnManager {
   /// - n=1: 10,000
   /// - n=2: 23,097
   /// - n=3: 39,189
-  /// - n=15: 411,101
+  /// - n=30: 1,445,439
   int getNextThreshold() {
-    if (_spawnCount >= maxSpawns) {
-      return -1; // 已達上限，返回無效值（永遠不會觸發）
-    }
-
     final n = _spawnCount + 1; // 下一次的序號（1-based）
     final threshold = (baseThreshold * pow(n, exponent)).round();
 
@@ -43,18 +39,12 @@ class DemonSpawnManager {
   /// 檢查是否應該生成惡魔方塊
   ///
   /// 觸發條件：
-  /// 1. 尚未達到最大次數（< 15）
-  /// 2. 當前分數 >= 下一個門檻
-  /// 3. 當前分數 > 上次觸發的分數（防止重複觸發）
+  /// 1. 當前分數 >= 下一個門檻
+  /// 2. 當前分數 > 上次觸發的分數（防止重複觸發）
   ///
   /// [currentScore] 當前遊戲分數
   /// 返回 true 表示應該生成惡魔方塊
   bool shouldSpawn(int currentScore) {
-    // 已達最大次數
-    if (_spawnCount >= maxSpawns) {
-      return false;
-    }
-
     final threshold = getNextThreshold();
 
     // 🐛 詳細調試日誌
@@ -68,8 +58,7 @@ class DemonSpawnManager {
 
       debugPrint(
           '[DemonSpawnManager] ✅ Spawn #$_spawnCount triggered at score $currentScore (threshold: $threshold)');
-      debugPrint(
-          '[DemonSpawnManager] Next threshold: ${_spawnCount < maxSpawns ? getNextThreshold() : "MAX_REACHED"}');
+      debugPrint('[DemonSpawnManager] Next threshold: ${getNextThreshold()}');
 
       return true;
     }
@@ -88,25 +77,19 @@ class DemonSpawnManager {
   /// 獲取當前已觸發次數
   int get spawnCount => _spawnCount;
 
-  /// 獲取剩餘可觸發次數
-  int get remainingSpawns => maxSpawns - _spawnCount;
-
-  /// 檢查是否已達最大次數
-  bool get hasReachedMax => _spawnCount >= maxSpawns;
+  /// 檢查是否已達最大次數（無上限，永遠返回 false）
+  bool get hasReachedMax => false;
 
   /// 獲取當前狀態描述（用於調試）
   String get statusDescription {
-    if (_spawnCount >= maxSpawns) {
-      return 'DemonSpawnManager: MAX_REACHED ($maxSpawns/$maxSpawns)';
-    }
-
-    return 'DemonSpawnManager: $_spawnCount/$maxSpawns spawned, next threshold: ${getNextThreshold()}';
+    return 'DemonSpawnManager: $_spawnCount spawned, next threshold: ${getNextThreshold()}';
   }
 
   /// 獲取完整的觸發門檻表（用於調試和顯示）
-  static List<int> getThresholdTable() {
+  /// [count] 要顯示的門檻數量，默認為 30
+  static List<int> getThresholdTable({int count = defaultTableSize}) {
     final thresholds = <int>[];
-    for (int n = 1; n <= maxSpawns; n++) {
+    for (int n = 1; n <= count; n++) {
       final threshold = (baseThreshold * pow(n, exponent)).round();
       thresholds.add(threshold);
     }
@@ -119,9 +102,11 @@ class DemonSpawnManager {
   }
 
   /// 獲取帶關卡估算的觸發門檻表（用於顯示）
-  static Map<int, Map<String, dynamic>> getDetailedThresholdTable() {
+  /// [count] 要顯示的門檻數量，默認為 30
+  static Map<int, Map<String, dynamic>> getDetailedThresholdTable(
+      {int count = defaultTableSize}) {
     final table = <int, Map<String, dynamic>>{};
-    for (int n = 1; n <= maxSpawns; n++) {
+    for (int n = 1; n <= count; n++) {
       final threshold = (baseThreshold * pow(n, exponent)).round();
       final estimatedLevel = estimateLevel(threshold);
 
@@ -153,11 +138,6 @@ class DemonSpawnManager {
   /// 強制觸發惡魔方塊（用於測試或特殊事件）
   /// ⚠️ 警告：會增加計數器，慎用
   void forceSpawn() {
-    if (_spawnCount >= maxSpawns) {
-      debugPrint('[DemonSpawnManager] Cannot force spawn: max spawns reached');
-      return;
-    }
-
     _spawnCount++;
     debugPrint('[DemonSpawnManager] Force spawned demon block #$_spawnCount');
   }
