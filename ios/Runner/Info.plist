@@ -45,20 +45,53 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	
+
+	<!-- ✅ iOS 14.5+ 強制要求：說明為何需要追蹤使用者 -->
+	<key>NSUserTrackingUsageDescription</key>
+	<string>我們使用您的資料來提供個人化廣告，以支持遊戲的免費運營。您可以隨時在設定中變更此選項。</string>
+
 	<!-- Google AdMob App ID for iOS -->
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-3940256099942544~1458002511</string>
 	
 	<!-- App Transport Security Settings for AdMob -->
+	<!-- ✅ 資安修復：僅為 AdMob 必要域名開放例外，符合 App Store 審核標準 -->
 	<key>NSAppTransportSecurity</key>
 	<dict>
+		<!-- 🔒 預設禁止所有非 HTTPS 連線 -->
 		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-		<key>NSAllowsArbitraryLoadsForMedia</key>
-		<true/>
-		<key>NSAllowsArbitraryLoadsInWebContent</key>
-		<true/>
+		<false/>
+
+		<!-- 🎯 AdMob 專用白名單：僅允許必要的廣告服務域名 -->
+		<key>NSExceptionDomains</key>
+		<dict>
+			<!-- Google 廣告投放域名 -->
+			<key>googlesyndication.com</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+
+			<!-- Google 廣告服務域名 -->
+			<key>googleadservices.com</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+
+			<!-- Google 廣告 API 域名 -->
+			<key>googleapis.com</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<false/>
+			</dict>
+		</dict>
 	</dict>
 	
 	<!-- SKAdNetwork IDs for iOS 14.5+ attribution -->
