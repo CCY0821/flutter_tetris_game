@@ -1053,7 +1053,26 @@ class RuneSystem {
     }
 
     debugPrint(
-        '[TitanGravity] Execution complete - processed $boardWidth columns, moved $totalMovedBlocks blocks');
+        '[TitanGravity] Compression complete - processed $boardWidth columns, moved $totalMovedBlocks blocks');
+
+    // 🔧 BUG FIX: 壓實完成後，立即檢查並清除滿行
+    // 原因：壓實可能形成滿行，如果不立即清除，會在下次放置方塊時才清除，導致異常消行
+    debugPrint('[TitanGravity] Checking for full rows after compression...');
+
+    try {
+      if (gameContext?.gameLogic != null) {
+        // 調用遊戲邏輯的消行函數
+        gameContext.gameLogic.clearFullRows();
+        debugPrint('[TitanGravity] Full rows cleared successfully after compression');
+      } else {
+        debugPrint('[TitanGravity] Warning: gameContext.gameLogic is null, skipping row clearing');
+      }
+    } catch (e) {
+      debugPrint('[TitanGravity] Error clearing rows: $e');
+      // 不返回錯誤，因為壓實本身已經成功
+    }
+
+    debugPrint('[TitanGravity] Execution complete');
 
     return RuneCastResult.success;
   }
