@@ -29,6 +29,12 @@ class AdMobService implements AdServiceInterface {
   /// Flag to track if ad needs refresh after app resume
   bool _needsRefresh = false;
 
+  /// Track last refresh time to avoid excessive refreshes
+  DateTime? _lastRefreshTime;
+
+  /// Minimum interval between ad refreshes (in seconds)
+  static const int _minRefreshIntervalSeconds = 300; // 5 minutes
+
   /// Callback to pause game when ad is clicked
   GamePauseCallback? _onAdClickCallback;
 
@@ -150,6 +156,9 @@ class AdMobService implements AdServiceInterface {
       );
 
       await _bannerAd!.load();
+
+      // Update last refresh time
+      _lastRefreshTime = DateTime.now();
     } catch (error, stackTrace) {
       _logger.severe('Exception loading banner ad: $error', error, stackTrace);
       _loadState = AdLoadState.failed;
@@ -216,20 +225,49 @@ class AdMobService implements AdServiceInterface {
 
   /// Handle app resume event - refresh ad if needed
   ///
-  /// Call this method when the app resumes from background to ensure
-  /// ads are properly refreshed after external navigation.
+  /// Call this method when the app resumes from background.
+  /// Only refreshes ad in specific cases to avoid unnecessary flickering:
+  /// 1. Ad was clicked and needs refresh (_needsRefresh = true)
+  /// 2. Ad failed to load (_loadState = failed)
+  /// 3. Sufficient time has passed since last refresh
   Future<void> onAppResumed() async {
-    if (_isInitialized) {
-      _logger.info('App resumed - checking ad state');
+    if (!_isInitialized) {
+      return;
+    }
 
-      // Always refresh the ad after app resume to ensure clickability
-      // This is especially important after users return from ad clicks
-      if (_bannerAd != null) {
-        _logger.info(
-            'Refreshing banner ad after app resume to ensure clickability');
-        _needsRefresh = false;
-        await _loadBannerAd();
+    _logger.info('App resumed - checking if ad refresh needed');
+
+    // Check if ad needs refresh
+    bool shouldRefresh = false;
+    String reason = '';
+
+    // Case 1: Ad was clicked and marked for refresh
+    if (_needsRefresh) {
+      shouldRefresh = true;
+      reason = 'ad was clicked';
+      _needsRefresh = false;
+    }
+    // Case 2: Ad failed to load
+    else if (_loadState == AdLoadState.failed) {
+      shouldRefresh = true;
+      reason = 'ad load failed';
+    }
+    // Case 3: Minimum refresh interval passed
+    else if (_lastRefreshTime != null) {
+      final timeSinceLastRefresh = DateTime.now().difference(_lastRefreshTime!);
+      if (timeSinceLastRefresh.inSeconds > _minRefreshIntervalSeconds) {
+        shouldRefresh = true;
+        reason =
+            'minimum refresh interval passed (${timeSinceLastRefresh.inMinutes} minutes)';
       }
+    }
+
+    if (shouldRefresh) {
+      _logger.info('Refreshing banner ad: $reason');
+      await _loadBannerAd();
+    } else {
+      _logger.info(
+          'Skipping ad refresh - ad is stable and clickable (state: $_loadState)');
     }
   }
 
@@ -242,6 +280,7 @@ class AdMobService implements AdServiceInterface {
     _loadState = AdLoadState.notInitialized;
     _retryCount = 0;
     _needsRefresh = false;
+    _lastRefreshTime = null;
 
     _logger.info('AdMob service disposed');
   }

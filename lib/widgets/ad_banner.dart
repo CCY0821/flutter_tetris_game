@@ -68,19 +68,20 @@ class _AdBannerState extends State<AdBanner> with WidgetsBindingObserver {
     _logger.info('App lifecycle state changed: $state');
 
     if (state == AppLifecycleState.resumed && _adService != null) {
-      _logger.info('App resumed - refreshing ad widget');
+      _logger.info('App resumed - notifying ad service');
 
-      // Check if the service has an onAppResumed method
+      // Notify ad service of app resume - it will decide if refresh is needed
       if (_adService is AdMobService) {
         (_adService as AdMobService).onAppResumed().then((_) {
-          // Force a rebuild after ad refresh is complete to ensure UI updates
+          // Only rebuild if ad service actually refreshed
+          // AdMobService now has smart refresh logic to avoid unnecessary reloads
           if (mounted) {
-            _logger.info('Rebuilding AdBanner after ad refresh');
+            _logger.info('Ad service handled app resume, updating UI');
             setState(() {});
           }
         });
       } else {
-        // For other ad services, just force a rebuild
+        // For other ad services, just update UI
         if (mounted) {
           setState(() {});
         }
