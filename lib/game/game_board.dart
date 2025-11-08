@@ -1191,11 +1191,7 @@ class _GameBoardState extends State<GameBoard>
             ),
           ),
 
-          // 分數加成計時器（惡魔方塊系統）
-          MultiplierTimerWidget(gameState: gameState),
-
-          // 符文效果計時器（時間系符文）
-          RuneEffectTimerWidget(gameState: gameState),
+          // 計時器已移至棋盤 Stack 中作為 Overlay 浮動層
 
           const SizedBox(height: 8),
 
@@ -1321,6 +1317,30 @@ class _GameBoardState extends State<GameBoard>
                                     if (gameState.isGameOver)
                                       GameUIComponents.overlayText(
                                           'GAME OVER', GameTheme.highlight),
+
+                                  // 🎯 計時器浮動層 (Overlay 模式)
+                                  // 定位在棋盤頂部，半透明背景，不佔用佈局空間
+                                  Positioned(
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // 惡魔方塊三倍加成計時器
+                                        if (gameState.multiplierEndTime != null)
+                                          MultiplierTimerWidget(
+                                            gameState: gameState,
+                                            isOverlayMode: true,
+                                          ),
+                                        // 時間系符文效果計時器
+                                        RuneEffectTimerWidget(
+                                          gameState: gameState,
+                                          isOverlayMode: true,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),

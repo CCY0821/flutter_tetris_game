@@ -11,10 +11,12 @@ import 'effect_timer_widget.dart';
 /// - 最後 3 秒閃爍效果
 class RuneEffectTimerWidget extends StatelessWidget {
   final GameState gameState;
+  final bool isOverlayMode; // 是否為浮動層模式
 
   const RuneEffectTimerWidget({
     super.key,
     required this.gameState,
+    this.isOverlayMode = false,
   });
 
   @override
@@ -28,6 +30,7 @@ class RuneEffectTimerWidget extends StatelessWidget {
           emoji: '⏰',
           primaryColor: const Color(0xFF673AB7), // 紫色
           secondaryColor: const Color(0xFF2196F3), // 藍色
+          isOverlayMode: isOverlayMode,
         ),
       );
     }
@@ -41,6 +44,7 @@ class RuneEffectTimerWidget extends StatelessWidget {
           emoji: '⭐',
           primaryColor: const Color(0xFFFF9800), // 橙色
           secondaryColor: const Color(0xFFFFD700), // 金色
+          isOverlayMode: isOverlayMode,
         ),
       );
     }

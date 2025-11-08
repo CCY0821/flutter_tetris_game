@@ -9,6 +9,7 @@ class EffectTimerConfig {
   final String emoji;
   final Color primaryColor;
   final Color secondaryColor;
+  final bool isOverlayMode; // 是否為浮動層模式（半透明背景）
 
   const EffectTimerConfig({
     required this.endTime,
@@ -16,6 +17,7 @@ class EffectTimerConfig {
     required this.emoji,
     required this.primaryColor,
     required this.secondaryColor,
+    this.isOverlayMode = false, // 預設為非浮動層模式
   });
 }
 
@@ -140,13 +142,23 @@ class _EffectTimerWidgetState extends State<EffectTimerWidget>
       builder: (context, child) {
         final opacity = _remainingSeconds <= 3.0 ? _blinkAnimation.value : 1.0;
 
+        // Overlay 模式：半透明背景 + 較小邊距
+        // 一般模式：不透明背景 + 標準邊距
+        final bgOpacity = widget.config.isOverlayMode ? 0.85 : 1.0;
+        final margin = widget.config.isOverlayMode
+            ? const EdgeInsets.symmetric(horizontal: 8, vertical: 4)
+            : const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
+        final padding = widget.config.isOverlayMode
+            ? const EdgeInsets.all(8)
+            : const EdgeInsets.all(12);
+
         return Opacity(
           opacity: opacity,
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: const EdgeInsets.all(12),
+            margin: margin,
+            padding: padding,
             decoration: BoxDecoration(
-              color: cyberpunkPanel,
+              color: cyberpunkPanel.withOpacity(bgOpacity),
               borderRadius: BorderRadius.circular(cyberpunkBorderRadius),
               border: Border.all(
                 color: widget.config.primaryColor.withOpacity(opacity * 0.8),

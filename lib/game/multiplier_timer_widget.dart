@@ -10,10 +10,12 @@ import 'effect_timer_widget.dart';
 /// - 最後 3 秒閃爍效果
 class MultiplierTimerWidget extends StatelessWidget {
   final GameState gameState;
+  final bool isOverlayMode; // 是否為浮動層模式
 
   const MultiplierTimerWidget({
     super.key,
     required this.gameState,
+    this.isOverlayMode = false,
   });
 
   @override
@@ -25,6 +27,7 @@ class MultiplierTimerWidget extends StatelessWidget {
         emoji: '🔥',
         primaryColor: const Color(0xFFDC143C), // 紅色
         secondaryColor: const Color(0xFFFFD700), // 金色
+        isOverlayMode: isOverlayMode,
       ),
     );
   }
