@@ -501,6 +501,9 @@ class _GameBoardState extends State<GameBoard>
       return;
     }
 
+    // 🔊 播放符文音效
+    gameState.audioService.playSoundEffect('rune_angels_grace');
+
     debugPrint('[GameBoard] Playing Angel\'s Grace animation');
     widget.spellAnimationController.play(_angelsGraceAnimation!);
   }
@@ -511,6 +514,9 @@ class _GameBoardState extends State<GameBoard>
       debugPrint('[GameBoard] Flame Burst animation not ready');
       return;
     }
+
+    // 🔊 播放符文音效
+    gameState.audioService.playSoundEffect('rune_flame_burst');
 
     debugPrint('[GameBoard] Playing Flame Burst animation');
     widget.spellAnimationController.play(_flameBurstAnimation!);
@@ -524,6 +530,9 @@ class _GameBoardState extends State<GameBoard>
       return;
     }
 
+    // 🔊 播放符文音效
+    gameState.audioService.playSoundEffect('rune_thunder_strike_right');
+
     debugPrint('[GameBoard] Playing Thunder Strike Right animation');
     widget.spellAnimationController.play(_thunderStrikeRightAnimation!);
   }
@@ -536,6 +545,9 @@ class _GameBoardState extends State<GameBoard>
       return;
     }
 
+    // 🔊 播放符文音效
+    gameState.audioService.playSoundEffect('rune_thunder_strike_left');
+
     debugPrint('[GameBoard] Playing Thunder Strike Left animation');
     widget.spellAnimationController.play(_thunderStrikeLeftAnimation!);
   }
@@ -546,6 +558,9 @@ class _GameBoardState extends State<GameBoard>
       debugPrint('[GameBoard] Blessed Combo animation not ready');
       return;
     }
+
+    // 🔊 播放符文音效
+    gameState.audioService.playSoundEffect('rune_blessed_combo');
 
     debugPrint('[GameBoard] Playing Blessed Combo animation');
     widget.spellAnimationController.play(_blessedComboAnimation!);
@@ -558,6 +573,9 @@ class _GameBoardState extends State<GameBoard>
       return;
     }
 
+    // 🔊 播放符文音效
+    gameState.audioService.playSoundEffect('rune_dragon_roar');
+
     debugPrint('[GameBoard] Playing Dragon Roar animation');
     widget.spellAnimationController.play(_dragonRoarAnimation!);
   }
@@ -568,6 +586,9 @@ class _GameBoardState extends State<GameBoard>
       debugPrint('[GameBoard] Element Morph animation not ready');
       return;
     }
+
+    // 🔊 播放符文音效
+    gameState.audioService.playSoundEffect('rune_element_morph');
 
     debugPrint('[GameBoard] Playing Element Morph animation');
     widget.spellAnimationController.play(_elementMorphAnimation!);
@@ -580,6 +601,9 @@ class _GameBoardState extends State<GameBoard>
       return;
     }
 
+    // 🔊 播放符文音效
+    gameState.audioService.playSoundEffect('rune_gravity_reset');
+
     debugPrint('[GameBoard] Playing Gravity Reset animation');
     widget.spellAnimationController.play(_gravityResetAnimation!);
   }
@@ -591,6 +615,9 @@ class _GameBoardState extends State<GameBoard>
       return;
     }
 
+    // 🔊 播放符文音效
+    gameState.audioService.playSoundEffect('rune_time_change');
+
     debugPrint('[GameBoard] Playing Time Change animation');
     widget.spellAnimationController.play(_timeChangeAnimation!);
   }
@@ -601,6 +628,9 @@ class _GameBoardState extends State<GameBoard>
       debugPrint('[GameBoard] Titan Gravity animation not ready');
       return;
     }
+
+    // 🔊 播放符文音效
+    gameState.audioService.playSoundEffect('rune_titan_gravity');
 
     debugPrint('[GameBoard] Playing Titan Gravity animation');
     widget.spellAnimationController.play(_titanGravityAnimation!);
