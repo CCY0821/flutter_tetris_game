@@ -10,6 +10,7 @@ import 'game_ui_components.dart';
 import 'board_painter.dart';
 import 'touch_controls.dart';
 import 'multiplier_timer_widget.dart';
+import 'rune_effect_timer_widget.dart';
 import '../theme/game_theme.dart';
 import '../widgets/settings_panel.dart';
 import '../widgets/ad_banner.dart';
@@ -1192,6 +1193,9 @@ class _GameBoardState extends State<GameBoard>
 
           // 分數加成計時器（惡魔方塊系統）
           MultiplierTimerWidget(gameState: gameState),
+
+          // 符文效果計時器（時間系符文）
+          RuneEffectTimerWidget(gameState: gameState),
 
           const SizedBox(height: 8),
 

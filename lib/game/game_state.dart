@@ -146,9 +146,11 @@ class GameState {
 
   // Time Change 效果狀態
   bool _isTimeChangeActive = false;
+  DateTime? _timeChangeEndTime;
 
   // Blessed Combo 效果狀態
   bool _isBlessedComboActive = false;
+  DateTime? _blessedComboEndTime;
   late BlessedComboModifier _blessedComboModifier;
 
   // 惡魔方塊分數加成系統
@@ -459,6 +461,7 @@ class GameState {
   /// 激活 Time Change 效果
   void activateTimeChange() {
     _isTimeChangeActive = true;
+    _timeChangeEndTime = DateTime.now().add(const Duration(seconds: 10));
     // 原始速度由 marathonSystem 管理，不需要額外存儲
     debugPrint('[GameState] Time Change activated - speed multiplier: ×10');
   }
@@ -466,15 +469,20 @@ class GameState {
   /// 停用 Time Change 效果
   void deactivateTimeChange() {
     _isTimeChangeActive = false;
+    _timeChangeEndTime = null;
     debugPrint('[GameState] Time Change deactivated - speed restored');
   }
 
   /// 檢查 Time Change 是否激活
   bool get isTimeChangeActive => _isTimeChangeActive;
 
+  /// 獲取 Time Change 效果結束時間
+  DateTime? get timeChangeEndTime => _timeChangeEndTime;
+
   /// 激活 Blessed Combo 效果
   void activateBlessedCombo() {
     _isBlessedComboActive = true;
+    _blessedComboEndTime = DateTime.now().add(const Duration(seconds: 10));
     debugPrint(
         'GameState: Blessed Combo activated - natural line clear score ×3 for 10 seconds');
   }
@@ -482,12 +490,16 @@ class GameState {
   /// 停用 Blessed Combo 效果
   void deactivateBlessedCombo() {
     _isBlessedComboActive = false;
+    _blessedComboEndTime = null;
     debugPrint(
         'GameState: Blessed Combo deactivated - score multiplier restored');
   }
 
   /// 檢查 Blessed Combo 是否激活
   bool get isBlessedComboActive => _isBlessedComboActive;
+
+  /// 獲取 Blessed Combo 效果結束時間
+  DateTime? get blessedComboEndTime => _blessedComboEndTime;
 
   // 獲取下一個速度等級所需分數 (Marathon 模式不基於分數升級)
   int get nextLevelScore {
