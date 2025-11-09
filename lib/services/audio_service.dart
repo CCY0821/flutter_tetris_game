@@ -6,7 +6,11 @@ class AudioService {
   AudioService._internal();
 
   final AudioPlayer _backgroundMusicPlayer = AudioPlayer();
-  final AudioPlayer _sfxPlayer = AudioPlayer();
+
+  // 🔊 音效播放器池 - 支援同時播放多個音效
+  final List<AudioPlayer> _sfxPlayerPool = [];
+  static const int _maxSfxPlayers = 5; // 最多同時播放5個音效
+  int _currentSfxPlayerIndex = 0;
 
   bool _isMusicEnabled = true;
   bool _isSfxEnabled = true;
@@ -24,11 +28,22 @@ class AudioService {
     try {
       // 確保先停止現有播放器
       await _backgroundMusicPlayer.stop();
-      await _sfxPlayer.stop();
+
+      // 🔊 初始化音效播放器池
+      _sfxPlayerPool.clear();
+      for (int i = 0; i < _maxSfxPlayers; i++) {
+        final player = AudioPlayer();
+        await player.setVolume(_sfxVolume);
+        // 設定釋放模式為釋放（播放完後自動準備下次播放）
+        await player.setReleaseMode(ReleaseMode.release);
+        _sfxPlayerPool.add(player);
+      }
 
       // 重新設置音量
       await _backgroundMusicPlayer.setVolume(_musicVolume);
-      await _sfxPlayer.setVolume(_sfxVolume);
+
+      print(
+          'AudioService initialized with ${_sfxPlayerPool.length} SFX players');
     } catch (e) {
       print('AudioService initialization error: $e');
     }
@@ -77,12 +92,35 @@ class AudioService {
 
   // 播放音效
   Future<void> playSoundEffect(String soundName) async {
-    if (!_isSfxEnabled) return;
+    if (!_isSfxEnabled) {
+      print('[AudioService] SFX disabled, skipping: $soundName');
+      return;
+    }
+
+    // 🔊 如果播放器池尚未初始化，先初始化
+    if (_sfxPlayerPool.isEmpty) {
+      print('[AudioService] Initializing SFX pool...');
+      await initialize();
+    }
 
     try {
-      await _sfxPlayer.play(AssetSource('audio/$soundName.mp3'));
+      // 使用輪詢方式選擇播放器，避免音效互相覆蓋
+      final player = _sfxPlayerPool[_currentSfxPlayerIndex];
+      final playerIndex = _currentSfxPlayerIndex;
+      _currentSfxPlayerIndex = (_currentSfxPlayerIndex + 1) % _maxSfxPlayers;
+
+      print(
+          '[AudioService] 🔊 Playing: $soundName on player #$playerIndex (volume: $_sfxVolume)');
+
+      // 🎯 立即播放音效，不等待（允許同時播放多個音效）
+      // 使用 unawaited 明確表示我們故意不等待
+      player.play(AssetSource('audio/$soundName.mp3')).then((_) {
+        print('[AudioService] ✅ Started: $soundName');
+      }).catchError((e) {
+        print('❌ [AudioService] Error loading $soundName: $e');
+      });
     } catch (e) {
-      // print('Error playing sound effect $soundName: $e'); // 生產環境中移除
+      print('❌ [AudioService] Error playing sound effect $soundName: $e');
     }
   }
 
@@ -110,16 +148,24 @@ class AudioService {
   // 設定音效音量
   Future<void> setSfxVolume(double volume) async {
     _sfxVolume = volume.clamp(0.0, 1.0);
-    await _sfxPlayer.setVolume(_sfxVolume);
+    // 🔊 更新所有音效播放器的音量
+    for (final player in _sfxPlayerPool) {
+      await player.setVolume(_sfxVolume);
+    }
   }
 
   // 清理資源
   Future<void> dispose() async {
     try {
       await _backgroundMusicPlayer.stop();
-      await _sfxPlayer.stop();
       await _backgroundMusicPlayer.dispose();
-      await _sfxPlayer.dispose();
+
+      // 🔊 清理所有音效播放器
+      for (final player in _sfxPlayerPool) {
+        await player.stop();
+        await player.dispose();
+      }
+      _sfxPlayerPool.clear();
     } catch (e) {
       print('AudioService dispose error: $e');
     }

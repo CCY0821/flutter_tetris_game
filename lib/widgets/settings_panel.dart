@@ -3,7 +3,6 @@ import '../theme/game_theme.dart';
 import '../core/constants.dart';
 import '../game/game_state.dart';
 import '../game/game_ui_components.dart';
-import 'cyberpunk_hud_tag.dart';
 import 'rune_introduction_page.dart';
 import 'rune_selection_page.dart';
 
@@ -341,7 +340,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
             ),
           ),
           title: Text(
-            '🎮 CONTROL INTERFACE',
+            '📱 TOUCH CONTROLS',
             style: GameTheme.titleStyle.copyWith(
               fontSize: 18,
               letterSpacing: 2.0,
@@ -350,43 +349,61 @@ class _SettingsPanelState extends State<SettingsPanel> {
           ),
           content: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.8,
+              maxWidth: MediaQuery.of(context).size.width * 0.85,
               maxHeight: MediaQuery.of(context).size.height * 0.6,
             ),
             child: SingleChildScrollView(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildCyberpunkControlSection(
-                    '⌨️ KEYBOARD',
-                    [
-                      {'key': '← →', 'text': '← → 移動方塊'},
-                      {'key': '↓', 'text': '↓ 軟降落'},
-                      {'key': '↑', 'text': '↑ 旋轉方塊'},
-                      {'key': 'SPACE', 'text': 'SPACE 快速降落'},
-                      {'key': 'P', 'text': 'P 暫停/繼續'},
-                      {'key': 'R', 'text': 'R 重新開始'},
-                      {'key': 'H', 'text': 'H 顯示說明'},
-                    ],
+                  _buildTouchControlRow(
+                    Icons.settings,
+                    '設定',
+                    '開啟遊戲設定',
                   ),
-                  const SizedBox(height: 20),
-                  _buildCyberpunkControlSection(
-                    '🎮 WASD',
-                    [
-                      {'key': 'A D', 'text': 'A D 移動方塊'},
-                      {'key': 'S', 'text': 'S 軟降落'},
-                      {'key': 'W', 'text': 'W 旋轉方塊'},
-                    ],
+                  _buildTouchControlRow(
+                    Icons.pause,
+                    '暫停/繼續',
+                    '暫停或繼續遊戲',
                   ),
-                  const SizedBox(height: 16),
-                  _buildControlSection(
-                    '🎯 手把控制',
-                    [
-                      '十字鍵  移動和降落',
-                      'A按鈕  旋轉方塊',
-                      'Start  暫停/繼續',
-                    ],
+                  const Divider(color: cyberpunkAccent, height: 24),
+                  _buildTouchControlRow(
+                    Icons.keyboard_arrow_left,
+                    '左移',
+                    '方塊向左移動',
+                  ),
+                  _buildTouchControlRow(
+                    Icons.keyboard_arrow_down,
+                    '快降',
+                    '方塊加速下降',
+                  ),
+                  _buildTouchControlRow(
+                    Icons.keyboard_arrow_right,
+                    '右移',
+                    '方塊向右移動',
+                  ),
+                  const Divider(color: cyberpunkAccent, height: 24),
+                  _buildTouchControlRow(
+                    Icons.rotate_left,
+                    '逆時針旋轉',
+                    '方塊逆時針旋轉',
+                  ),
+                  _buildTouchControlRow(
+                    Icons.rotate_right,
+                    '順時針旋轉',
+                    '方塊順時針旋轉',
+                  ),
+                  _buildTouchControlRow(
+                    Icons.vertical_align_bottom,
+                    '硬降',
+                    '方塊瞬間落地',
+                  ),
+                  const Divider(color: cyberpunkAccent, height: 24),
+                  _buildTouchControlRow(
+                    Icons.auto_awesome,
+                    '符文槽',
+                    '點擊施放符文法術',
                   ),
                 ],
               ),
@@ -406,50 +423,61 @@ class _SettingsPanelState extends State<SettingsPanel> {
     );
   }
 
-  Widget _buildControlSection(String title, List<String> controls) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: GameTheme.subtitleStyle.copyWith(
-            fontWeight: FontWeight.bold,
-            color: GameTheme.textAccent,
-          ),
-        ),
-        const SizedBox(height: 8),
-        ...controls.map((control) => Padding(
-              padding: const EdgeInsets.only(left: 16, bottom: 4),
-              child: Text(
-                control,
-                style: GameTheme.bodyStyle,
+  Widget _buildTouchControlRow(IconData icon, String name, String description) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          // 圖標
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  cyberpunkPrimary.withOpacity(0.3),
+                  cyberpunkPrimary.withOpacity(0.1),
+                ],
               ),
-            )),
-      ],
-    );
-  }
-
-  /// 建立 Cyberpunk 風格控制區段
-  Widget _buildCyberpunkControlSection(
-      String title, List<Map<String, String>> controls) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
-            color: cyberpunkAccent,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: cyberpunkAccent.withOpacity(0.5),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              icon,
+              color: cyberpunkAccent,
+              size: 24,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        CyberpunkControlHints(
-          controls: controls,
-          isCompact: false,
-        ),
-      ],
+          const SizedBox(width: 12),
+          // 功能名稱與說明
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: GameTheme.subtitleStyle.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: GameTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: GameTheme.bodyStyle.copyWith(
+                    fontSize: 12,
+                    color: GameTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

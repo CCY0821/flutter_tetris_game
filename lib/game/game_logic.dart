@@ -158,8 +158,10 @@ class GameLogic {
       // 更新 Marathon 系統的行數計算
       gameState.updateLinesCleared(clearedRows);
 
-      // 播放相應音效
-      _playLineClearSound(scoringResult, clearedRows);
+      // 🎵 延遲播放消行音效，讓方塊落地音效有時間播放
+      Future.delayed(const Duration(milliseconds: 100), () {
+        _playLineClearSound(scoringResult, clearedRows);
+      });
 
       // 在矩陣頂部添加新的空行
       for (int i = 0; i < clearedRows; i++) {
@@ -200,6 +202,7 @@ class GameLogic {
     if (canMove(currentTetro, dy: 1)) {
       currentTetro.y++;
     } else {
+      debugPrint('[GameLogic] 🎯 Piece landing - playing piece_drop sound');
       // 播放方塊落地音效
       gameState.audioService.playSoundEffect('piece_drop');
       lockTetromino();
