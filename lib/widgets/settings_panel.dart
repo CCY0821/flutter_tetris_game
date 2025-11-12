@@ -5,6 +5,7 @@ import '../game/game_state.dart';
 import '../game/game_ui_components.dart';
 import 'rune_introduction_page.dart';
 import 'rune_selection_page.dart';
+import 'game_mechanics_page.dart';
 
 class SettingsPanel extends StatefulWidget {
   final GameState gameState;
@@ -143,6 +144,15 @@ class _SettingsPanelState extends State<SettingsPanel> {
 
                     const SizedBox(height: 20),
 
+                    // 遊戲機制
+                    _buildSettingSection(
+                      'GAME MECHANICS',
+                      Icons.info_outline,
+                      child: _buildGameMechanicsButton(),
+                    ),
+
+                    const SizedBox(height: 20),
+
                     // 符文配置
                     _buildSettingSection(
                       'RUNE LOADOUT',
@@ -262,6 +272,25 @@ class _SettingsPanelState extends State<SettingsPanel> {
     );
   }
 
+  Widget _buildGameMechanicsButton() {
+    return ElevatedButton(
+      onPressed: () => _showGameMechanics(context),
+      style: GameTheme.primaryButtonStyle.copyWith(
+        backgroundColor: WidgetStateProperty.all(
+          GameTheme.accentBlue.withOpacity(0.8),
+        ),
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.info_outline, size: 18),
+          SizedBox(width: 8),
+          Text('View Mechanics'),
+        ],
+      ),
+    );
+  }
+
   Widget _buildRuneCompendiumButton() {
     return ElevatedButton(
       onPressed: () => _showRuneCompendium(context),
@@ -322,6 +351,15 @@ class _SettingsPanelState extends State<SettingsPanel> {
       context: context,
       builder: (BuildContext context) {
         return const RuneIntroductionPage();
+      },
+    );
+  }
+
+  void _showGameMechanics(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const GameMechanicsPage();
       },
     );
   }
