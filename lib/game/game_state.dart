@@ -172,6 +172,28 @@ class GameState {
     );
   }
 
+  /// 確保 boardTypes 與 board 的尺寸同步
+  /// 如果 boardTypes 尺寸小於 board，則擴展它
+  void ensureBoardTypesSync() {
+    if (boardTypes.length < board.length) {
+      debugPrint('[GameState] Syncing boardTypes length: ${boardTypes.length} -> ${board.length}');
+      while (boardTypes.length < board.length) {
+        boardTypes.add(List.generate(colCount, (_) => null));
+      }
+    }
+
+    // 確保每一行的列數也匹配
+    for (int row = 0; row < board.length; row++) {
+      if (row >= boardTypes.length) {
+        boardTypes.add(List.generate(colCount, (_) => null));
+      } else if (boardTypes[row].length < board[row].length) {
+        while (boardTypes[row].length < board[row].length) {
+          boardTypes[row].add(null);
+        }
+      }
+    }
+  }
+
   // 設置震動回調
   void setShakeCallback(VoidCallback callback) {
     _onShakeRequested = callback;
@@ -599,6 +621,14 @@ class GameState {
 
       // 恢復基本遊戲狀態
       board = List.from(gameData.board.map((row) => List<Color?>.from(row)));
+
+      // 🔧 重建 boardTypes 以匹配 board 的尺寸（存檔中沒有保存 boardTypes）
+      boardTypes = List.generate(
+        board.length,
+        (row) => List.generate(board[row].length, (_) => null),
+      );
+      debugPrint('[GameState] Rebuilt boardTypes: ${boardTypes.length} rows');
+
       currentTetromino = gameData.currentTetromino?.copy();
       nextTetromino = gameData.nextTetromino?.copy();
       nextTetrominos = gameData.nextTetrominos.map((t) => t.copy()).toList();

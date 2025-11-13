@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../game/demon_piece_generator.dart';
+import '../theme/tetromino_colors.dart';
 
 /// 俄羅斯方塊類型枚舉
 enum TetrominoType { I, O, T, S, Z, L, J, D, U, H, demon }
@@ -25,18 +26,19 @@ class Tetromino {
   });
 
   /// 方塊類型與霓虹顏色對應表 - Cyberpunk 2077 風格
+  /// 🔧 使用 TetrominoColors 常量確保序列化一致性
   static const Map<TetrominoType, Color> typeColors = {
-    TetrominoType.I: cyberpunkPrimary, // I: 霓虹青色 #00E5FF (primary)
-    TetrominoType.J: Color(0xFF0066FF), // J: 純藍霓虹 (深邃電藍)
-    TetrominoType.L: cyberpunkSecondary, // L: 霓虹洋紅 #FF2ED1 (secondary)
-    TetrominoType.O: cyberpunkCaution, // O: 賽博黃 #FCEE09 (警示霓虹)
-    TetrominoType.S: Color(0xFF00FF88), // S: 霓虹綠 (青綠電光)
-    TetrominoType.T: cyberpunkAccent, // T: 電光紫 #8A2BE2 (accent)
-    TetrominoType.Z: Color(0xFFFF0066), // Z: 霓虹紅 (洋紅偏紅)
-    TetrominoType.D: Color(0xFFFF6600), // D: 霓虹橙 (熾熱橙光)
-    TetrominoType.U: Color(0xFFFF1493), // U: 霓虹粉紅 (深粉紅電光)
-    TetrominoType.H: Color(0xFFCCFF00), // H: 霓虹青檸 (電光黃綠)
-    TetrominoType.demon: Color(0xFFFFD700), // DEMON: 金色 (實際渲染使用徑向漸層)
+    TetrominoType.I: TetrominoColors.I, // I: 霓虹青色 #00E5FF
+    TetrominoType.J: TetrominoColors.J, // J: 純藍霓虹 (深邃電藍)
+    TetrominoType.L: TetrominoColors.L, // L: 霓虹洋紅 #FF2ED1
+    TetrominoType.O: TetrominoColors.O, // O: 賽博黃 #FCEE09
+    TetrominoType.S: TetrominoColors.S, // S: 霓虹綠 (青綠電光)
+    TetrominoType.T: TetrominoColors.T, // T: 電光紫 #8A2BE2
+    TetrominoType.Z: TetrominoColors.Z, // Z: 霓虹紅 (洋紅偏紅)
+    TetrominoType.D: TetrominoColors.D, // D: 霓虹橙 (熾熱橙光)
+    TetrominoType.U: TetrominoColors.U, // U: 霓虹粉紅 (深粉紅電光)
+    TetrominoType.H: TetrominoColors.H, // H: 霓虹青檸 (電光黃綠)
+    TetrominoType.demon: TetrominoColors.demon, // DEMON: 金色
   };
 
   /// 初始形狀定義（北向，旋轉狀態0）

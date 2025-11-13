@@ -12,6 +12,7 @@ import 'rune_batch_processor.dart';
 import 'rune_energy_manager.dart';
 import 'piece_provider.dart';
 import 'board_constants.dart';
+import 'game_state.dart';
 
 /// 重力模式枚舉
 enum GravityMode {
@@ -242,11 +243,13 @@ class GravityProcessor {
   /// 應用重力效果到指定的清除行
   ///
   /// [board] 遊戲棋盤
+  /// [boardTypes] 方塊類型棋盤
   /// [clearedRows] 被清除的行號列表（必須由下而上排序）
   /// [mode] 重力模式
   /// 返回移動的方塊數量
   static int applyGravity(
     List<List<Color?>> board,
+    List<List<TetrominoType?>> boardTypes,
     List<int> clearedRows,
     GravityMode mode,
   ) {
@@ -258,14 +261,14 @@ class GravityProcessor {
 
     switch (mode) {
       case GravityMode.row:
-        return _applyRowGravity(board, sortedRows);
+        return _applyRowGravity(board, boardTypes, sortedRows);
       case GravityMode.column:
-        return _applyColumnGravity(board, sortedRows);
+        return _applyColumnGravity(board, boardTypes, sortedRows);
     }
   }
 
   /// Row Gravity: 整列下移，保留列內空洞結構
-  static int _applyRowGravity(List<List<Color?>> board, List<int> sortedRows) {
+  static int _applyRowGravity(List<List<Color?>> board, List<List<TetrominoType?>> boardTypes, List<int> sortedRows) {
     int totalMoved = 0;
     final boardHeight = board.length;
     final boardWidth = board[0].length;
@@ -278,6 +281,10 @@ class GravityProcessor {
       for (int row = clearedRow; row > 0; row--) {
         for (int col = 0; col < boardWidth; col++) {
           board[row][col] = board[row - 1][col];
+          if (row < boardTypes.length && col < boardTypes[row].length &&
+              (row - 1) < boardTypes.length && col < boardTypes[row - 1].length) {
+            boardTypes[row][col] = boardTypes[row - 1][col];
+          }
           if (board[row][col] != null) totalMoved++;
         }
       }
@@ -285,6 +292,9 @@ class GravityProcessor {
       // 最上方補空行
       for (int col = 0; col < boardWidth; col++) {
         board[0][col] = null;
+        if (boardTypes.isNotEmpty && col < boardTypes[0].length) {
+          boardTypes[0][col] = null;
+        }
       }
     }
 
@@ -293,7 +303,7 @@ class GravityProcessor {
 
   /// Column Gravity: 逐列壓實，消除所有縱向空洞
   static int _applyColumnGravity(
-      List<List<Color?>> board, List<int> sortedRows) {
+      List<List<Color?>> board, List<List<TetrominoType?>> boardTypes, List<int> sortedRows) {
     int totalMoved = 0;
     final boardHeight = board.length;
     final boardWidth = board[0].length;
@@ -301,22 +311,34 @@ class GravityProcessor {
     // 對每一列進行壓實
     for (int col = 0; col < boardWidth; col++) {
       final columnBlocks = <Color?>[];
+      final columnTypes = <TetrominoType?>[];
 
-      // 收集該列中所有非空的方塊
+      // 收集該列中所有非空的方塊及其類型
       for (int row = boardHeight - 1; row >= 0; row--) {
         if (board[row][col] != null) {
           columnBlocks.add(board[row][col]);
+          if (row < boardTypes.length && col < boardTypes[row].length) {
+            columnTypes.add(boardTypes[row][col]);
+          } else {
+            columnTypes.add(null);
+          }
         }
       }
 
       // 清空該列
       for (int row = 0; row < boardHeight; row++) {
         board[row][col] = null;
+        if (row < boardTypes.length && col < boardTypes[row].length) {
+          boardTypes[row][col] = null;
+        }
       }
 
       // 將方塊從底部開始填回（壓實效果）
       for (int i = 0; i < columnBlocks.length; i++) {
         board[boardHeight - 1 - i][col] = columnBlocks[i];
+        if ((boardHeight - 1 - i) < boardTypes.length && col < boardTypes[boardHeight - 1 - i].length) {
+          boardTypes[boardHeight - 1 - i][col] = columnTypes[i];
+        }
         totalMoved++;
       }
     }
@@ -419,10 +441,10 @@ class RuneSystem {
   }
 
   /// 執行批處理操作
-  void executeBatch(List<List<Color?>> board) {
+  void executeBatch(List<List<Color?>> board, List<List<TetrominoType?>> boardTypes) {
     debugPrint(
         'RuneSystem: executeBatch called, pending operations: ${batchProcessor.pendingOperationCount}');
-    batchProcessor.execute(board);
+    batchProcessor.execute(board, boardTypes);
   }
 
   /// 嘗試施法
@@ -589,6 +611,7 @@ class RuneSystem {
   /// [startCol] 起始列（包含）
   /// [endCol] 結束列（不包含）
   /// 返回清除的方塊數量
+  /// 注意：此函數只操作 board，boardTypes 的同步由 ensureBoardTypesSync() 保證
   int _clearRegion(
     List<List<Color?>> board,
     int startRow,
@@ -689,9 +712,14 @@ class RuneSystem {
     int movedBlocks = 0;
 
     // 將消除行上方的所有行整體下移一行
+    final boardTypes = GameState.instance.boardTypes;
     for (int row = targetRow; row > 0; row--) {
       for (int col = 0; col < board[row].length; col++) {
         board[row][col] = board[row - 1][col]; // 上一行內容複製到當前行
+        if (row < boardTypes.length && col < boardTypes[row].length &&
+            (row - 1) < boardTypes.length && col < boardTypes[row - 1].length) {
+          boardTypes[row][col] = boardTypes[row - 1][col];
+        }
         if (board[row][col] != null) {
           movedBlocks++;
         }
@@ -701,6 +729,9 @@ class RuneSystem {
     // 最上方補一行空行
     for (int col = 0; col < board[0].length; col++) {
       board[0][col] = null;
+      if (boardTypes.isNotEmpty && col < boardTypes[0].length) {
+        boardTypes[0][col] = null;
+      }
     }
 
     debugPrint(
@@ -898,6 +929,7 @@ class RuneSystem {
     int totalMovedBlocks = 0;
 
     // 對每個清除的行都執行重力效果（從最上面的清除行開始）
+    final boardTypes = GameState.instance.boardTypes;
     for (int i = 0; i < targetRows.length; i++) {
       int targetRow = targetRows[i];
 
@@ -905,6 +937,10 @@ class RuneSystem {
       for (int row = targetRow; row > 0; row--) {
         for (int col = 0; col < board[row].length; col++) {
           board[row][col] = board[row - 1][col]; // 上一行內容複製到當前行
+          if (row < boardTypes.length && col < boardTypes[row].length &&
+              (row - 1) < boardTypes.length && col < boardTypes[row - 1].length) {
+            boardTypes[row][col] = boardTypes[row - 1][col];
+          }
           if (board[row][col] != null) {
             totalMovedBlocks++;
           }
@@ -914,6 +950,9 @@ class RuneSystem {
       // 最上方補一行空行
       for (int col = 0; col < board[0].length; col++) {
         board[0][col] = null;
+        if (boardTypes.isNotEmpty && col < boardTypes[0].length) {
+          boardTypes[0][col] = null;
+        }
       }
 
       debugPrint('[DragonRoar] Applied gravity for cleared row $targetRow');
@@ -1015,13 +1054,20 @@ class RuneSystem {
     int totalMovedBlocks = 0;
 
     // 分段壓實：逐列處理
+    final boardTypes = GameState.instance.boardTypes;
     for (int col = 0; col < boardWidth; col++) {
-      // 收集該列在可視區域的所有非空方塊
+      // 收集該列在可視區域的所有非空方塊及其類型
       final columnBlocks = <Color?>[];
+      final columnTypes = <TetrominoType?>[];
 
       for (int row = boardHeight - 1; row >= startRow; row--) {
         if (board[row][col] != null) {
           columnBlocks.add(board[row][col]);
+          if (row < boardTypes.length && col < boardTypes[row].length) {
+            columnTypes.add(boardTypes[row][col]);
+          } else {
+            columnTypes.add(null);
+          }
         }
       }
 
@@ -1034,11 +1080,17 @@ class RuneSystem {
       // 清空該列的可視區域
       for (int row = startRow; row < boardHeight; row++) {
         board[row][col] = null;
+        if (row < boardTypes.length && col < boardTypes[row].length) {
+          boardTypes[row][col] = null;
+        }
       }
 
       // 將方塊從底部開始填回（壓實效果）
       for (int i = 0; i < columnBlocks.length; i++) {
         board[boardHeight - 1 - i][col] = columnBlocks[i];
+        if ((boardHeight - 1 - i) < boardTypes.length && col < boardTypes[boardHeight - 1 - i].length) {
+          boardTypes[boardHeight - 1 - i][col] = columnTypes[i];
+        }
         totalMovedBlocks++;
       }
 

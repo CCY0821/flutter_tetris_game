@@ -10,7 +10,7 @@ import '../theme/tetromino_colors.dart';
 class GamePersistence {
   static const String _gameStateKey = 'tetris_game_state';
   static const String _runeLoadoutKey = 'tetris_rune_loadout';
-  static const int _stateVersion = 1;
+  static const int _stateVersion = 3; // 🔧 升級到版本 3：添加 D/U 型方塊映射，修正索引
   static const int _runeLoadoutVersion = 1;
 
   /// 保存遊戲狀態
@@ -169,7 +169,16 @@ class GamePersistence {
         board[i].length,
         (j) {
           final color = board[i][j];
-          return color == null ? -1 : (TetrominoColors.colorToInt[color] ?? 0);
+          if (color == null) return -1;
+
+          final colorInt = TetrominoColors.colorToInt[color];
+          if (colorInt == null) {
+            // 🚨 未映射的顏色 - 打印警告並標記為損壞
+            debugPrint(
+                '[GamePersistence] ⚠️ WARNING: Unmapped color detected at [$i][$j]: $color');
+            return -2; // 使用 -2 標記未知顏色（與空格 -1 區分）
+          }
+          return colorInt;
         },
       ),
     );
@@ -185,7 +194,22 @@ class GamePersistence {
           row.length,
           (j) {
             final colorInt = row[j] as int;
-            return colorInt == -1 ? null : TetrominoColors.intToColor[colorInt];
+            if (colorInt == -1) return null; // 空格
+            if (colorInt == -2) {
+              // 未知顏色標記 - 載入為 null（避免崩潰）
+              debugPrint(
+                  '[GamePersistence] ⚠️ WARNING: Unmapped color index -2 at [$i][$j], loading as null');
+              return null;
+            }
+
+            final color = TetrominoColors.intToColor[colorInt];
+            if (color == null) {
+              // 🚨 無效的顏色索引 - 記錄錯誤並返回 null
+              debugPrint(
+                  '[GamePersistence] ⚠️ WARNING: Invalid color index $colorInt at [$i][$j], loading as null');
+              return null;
+            }
+            return color;
           },
         );
       },

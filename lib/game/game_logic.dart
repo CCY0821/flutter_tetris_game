@@ -28,7 +28,7 @@ class GameLogic {
   /// 執行符文系統的批處理操作
   void executeRuneBatch() {
     debugPrint('[GameLogic] executeRuneBatch called');
-    gameState.runeSystem.executeBatch(gameState.board);
+    gameState.runeSystem.executeBatch(gameState.board, gameState.boardTypes);
   }
 
   /// 符文施法
@@ -77,6 +77,9 @@ class GameLogic {
   void lockTetromino() {
     // ✅ Epoch 守門：拒絕過期世代的操作
     final currentEpoch = gameState.gameEpoch;
+
+    // 🔧 確保 boardTypes 與 board 同步（防止符文系統導致的不同步）
+    gameState.ensureBoardTypesSync();
 
     // 🔥 檢查是否是惡魔方塊（在鎖定前）
     final isDemonBlock = gameState.currentTetromino?.isDemon ?? false;

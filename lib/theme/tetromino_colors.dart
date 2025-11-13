@@ -26,6 +26,18 @@ class TetrominoColors {
   /// Z 型方塊 - 霓虹紅 (洋紅偏紅)
   static const Color Z = Color(0xFFFF0066);
 
+  /// D 型方塊 - 霓虹橙 (熾熱橙光)
+  static const Color D = Color(0xFFFF6600);
+
+  /// U 型方塊 - 霓虹粉紅 (深粉紅電光)
+  static const Color U = Color(0xFFFF1493);
+
+  /// H 型方塊 - 霓虹青檸 (電光黃綠)
+  static const Color H = Color(0xFFCCFF00);
+
+  /// 惡魔方塊 - 金色
+  static const Color demon = Color(0xFFFFD700);
+
   /// 顏色到整數的映射表 (用於序列化)
   static final Map<Color, int> colorToInt = {
     I: 1,
@@ -35,6 +47,10 @@ class TetrominoColors {
     S: 5,
     T: 6,
     Z: 7,
+    D: 8,
+    U: 9,
+    H: 10,
+    demon: 11,
   };
 
   /// 整數到顏色的映射表 (用於反序列化)
@@ -46,5 +62,9 @@ class TetrominoColors {
     5: S,
     6: T,
     7: Z,
+    8: D,
+    9: U,
+    10: H,
+    11: demon,
   };
 }

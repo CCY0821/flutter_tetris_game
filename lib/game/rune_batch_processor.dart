@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/tetromino.dart';
 
 /// 棋盤操作抽象類
 /// 所有對棋盤的修改都通過此類進行批處理
@@ -9,8 +10,8 @@ abstract class BoardOperation {
   /// 操作描述（用於調試）
   String get description;
 
-  /// 執行操作
-  void execute(List<List<Color?>> board);
+  /// 執行操作（同時更新 board 和 boardTypes）
+  void execute(List<List<Color?>> board, List<List<TetrominoType?>> boardTypes);
 
   /// 檢查操作是否有效
   bool isValid(List<List<Color?>> board);
@@ -38,9 +39,12 @@ class ClearCellOperation extends BoardOperation {
   }
 
   @override
-  void execute(List<List<Color?>> board) {
+  void execute(List<List<Color?>> board, List<List<TetrominoType?>> boardTypes) {
     if (isValid(board)) {
       board[row][col] = null;
+      if (row < boardTypes.length && col < boardTypes[row].length) {
+        boardTypes[row][col] = null;
+      }
     }
   }
 }
@@ -62,11 +66,16 @@ class ClearRowOperation extends BoardOperation {
   }
 
   @override
-  void execute(List<List<Color?>> board) {
+  void execute(List<List<Color?>> board, List<List<TetrominoType?>> boardTypes) {
     if (isValid(board)) {
       debugPrint('[BatchProcessor] Executing ClearRowOperation for row $row');
       for (int col = 0; col < board[row].length; col++) {
         board[row][col] = null;
+      }
+      if (row < boardTypes.length) {
+        for (int col = 0; col < boardTypes[row].length; col++) {
+          boardTypes[row][col] = null;
+        }
       }
       debugPrint('[BatchProcessor] Row $row cleared successfully');
     } else {
@@ -93,11 +102,14 @@ class ClearColumnOperation extends BoardOperation {
   }
 
   @override
-  void execute(List<List<Color?>> board) {
+  void execute(List<List<Color?>> board, List<List<TetrominoType?>> boardTypes) {
     if (isValid(board)) {
       for (int row = 0; row < board.length; row++) {
         if (col < board[row].length) {
           board[row][col] = null;
+        }
+        if (row < boardTypes.length && col < boardTypes[row].length) {
+          boardTypes[row][col] = null;
         }
       }
     }
@@ -122,7 +134,7 @@ class ShiftBoardDownOperation extends BoardOperation {
   }
 
   @override
-  void execute(List<List<Color?>> board) {
+  void execute(List<List<Color?>> board, List<List<TetrominoType?>> boardTypes) {
     if (!isValid(board)) return;
 
     final rowCount = board.length;
@@ -132,6 +144,10 @@ class ShiftBoardDownOperation extends BoardOperation {
     for (int row = rowCount - 1; row >= shiftRows; row--) {
       for (int col = 0; col < colCount; col++) {
         board[row][col] = board[row - shiftRows][col];
+        if (row < boardTypes.length && col < boardTypes[row].length &&
+            (row - shiftRows) < boardTypes.length && col < boardTypes[row - shiftRows].length) {
+          boardTypes[row][col] = boardTypes[row - shiftRows][col];
+        }
       }
     }
 
@@ -139,6 +155,9 @@ class ShiftBoardDownOperation extends BoardOperation {
     for (int row = 0; row < shiftRows; row++) {
       for (int col = 0; col < colCount; col++) {
         board[row][col] = null;
+        if (row < boardTypes.length && col < boardTypes[row].length) {
+          boardTypes[row][col] = null;
+        }
       }
     }
   }
@@ -160,7 +179,7 @@ class CompressBoardOperation extends BoardOperation {
   }
 
   @override
-  void execute(List<List<Color?>> board) {
+  void execute(List<List<Color?>> board, List<List<TetrominoType?>> boardTypes) {
     if (!isValid(board)) return;
 
     final rowCount = board.length;
@@ -169,22 +188,34 @@ class CompressBoardOperation extends BoardOperation {
     // 對每一列進行壓縮
     for (int col = 0; col < colCount; col++) {
       final columnBlocks = <Color?>[];
+      final columnTypes = <TetrominoType?>[];
 
-      // 收集該列中所有非空的方塊
+      // 收集該列中所有非空的方塊及其類型
       for (int row = rowCount - 1; row >= 0; row--) {
         if (board[row][col] != null) {
           columnBlocks.add(board[row][col]);
+          if (row < boardTypes.length && col < boardTypes[row].length) {
+            columnTypes.add(boardTypes[row][col]);
+          } else {
+            columnTypes.add(null);
+          }
         }
       }
 
       // 清空該列
       for (int row = 0; row < rowCount; row++) {
         board[row][col] = null;
+        if (row < boardTypes.length && col < boardTypes[row].length) {
+          boardTypes[row][col] = null;
+        }
       }
 
       // 將方塊從底部開始填回
       for (int i = 0; i < columnBlocks.length; i++) {
         board[rowCount - 1 - i][col] = columnBlocks[i];
+        if ((rowCount - 1 - i) < boardTypes.length && col < boardTypes[rowCount - 1 - i].length) {
+          boardTypes[rowCount - 1 - i][col] = columnTypes[i];
+        }
       }
     }
   }
@@ -208,7 +239,7 @@ class RemoveTopRowsOperation extends BoardOperation {
   }
 
   @override
-  void execute(List<List<Color?>> board) {
+  void execute(List<List<Color?>> board, List<List<TetrominoType?>> boardTypes) {
     if (!isValid(board)) return;
 
     final rowCount = board.length;
@@ -218,6 +249,10 @@ class RemoveTopRowsOperation extends BoardOperation {
     for (int row = 0; row < rowCount - rowsToRemove; row++) {
       for (int col = 0; col < colCount; col++) {
         board[row][col] = board[row + rowsToRemove][col];
+        if (row < boardTypes.length && col < boardTypes[row].length &&
+            (row + rowsToRemove) < boardTypes.length && col < boardTypes[row + rowsToRemove].length) {
+          boardTypes[row][col] = boardTypes[row + rowsToRemove][col];
+        }
       }
     }
 
@@ -225,6 +260,9 @@ class RemoveTopRowsOperation extends BoardOperation {
     for (int row = rowCount - rowsToRemove; row < rowCount; row++) {
       for (int col = 0; col < colCount; col++) {
         board[row][col] = null;
+        if (row < boardTypes.length && col < boardTypes[row].length) {
+          boardTypes[row][col] = null;
+        }
       }
     }
   }
@@ -263,7 +301,7 @@ class RuneBatchProcessor {
 
   /// 執行所有批處理操作
   /// 重要：確保法術清行與自然清行分流
-  void execute(List<List<Color?>> board) {
+  void execute(List<List<Color?>> board, List<List<TetrominoType?>> boardTypes) {
     if (_operations.isEmpty || _isProcessing) {
       return;
     }
@@ -284,7 +322,7 @@ class RuneBatchProcessor {
       // 先執行法術操作（不計分不產能）
       for (final operation in spellOperations) {
         if (operation.isValid(board)) {
-          operation.execute(board);
+          operation.execute(board, boardTypes);
           debugPrint(
               'RuneBatchProcessor: Executed spell operation - ${operation.description}');
         } else {
@@ -296,7 +334,7 @@ class RuneBatchProcessor {
       // 再執行自然操作（計分產能）
       for (final operation in naturalOperations) {
         if (operation.isValid(board)) {
-          operation.execute(board);
+          operation.execute(board, boardTypes);
           debugPrint(
               'RuneBatchProcessor: Executed natural operation - ${operation.description}');
         } else {
