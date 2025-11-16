@@ -316,8 +316,8 @@ class GameLogic {
     lockTetromino();
     spawnTetromino();
 
-    // 播放硬降音效
-    gameState.audioService.playSoundEffect('hard_drop');
+    // 播放硬降音效（使用 piece_drop 音效）
+    gameState.audioService.playSoundEffect('piece_drop');
   }
 
   /// SRS 旋轉系統 - 順時針旋轉
