@@ -53,6 +53,9 @@ dependencies:
   # Path provider for file logging
   path_provider: ^2.1.1
 
+  # Google Fonts for startup animation
+  google_fonts: ^6.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

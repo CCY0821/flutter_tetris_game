@@ -7,6 +7,7 @@ import 'theme/game_theme.dart';
 import 'core/constants.dart';
 import 'core/dual_logger.dart';
 import 'widgets/scanline_overlay.dart';
+import 'widgets/startup_animation_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -155,7 +156,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               // 🖥️ 全畫面掃描線疊層
               const ScanlineOverlay(),
 
-              // ✨ 全螢幕法術動畫疊加層（最上層）
+              // ✨ 全螢幕法術動畫疊加層
               Positioned.fill(
                 child: SpellAnimationOverlay(
                   controller: _spellAnimationController,
@@ -164,6 +165,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   fit: BoxFit.cover, // 填滿螢幕
                 ),
               ),
+
+              // 🎬 啟動動畫遮罩層（最上層，2秒後自動消失）
+              const StartupAnimationOverlay(),
             ],
           ),
         ),
